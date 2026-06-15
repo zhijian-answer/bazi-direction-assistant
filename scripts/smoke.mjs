@@ -196,6 +196,11 @@ async function main() {
   assert(coverCard.response.headers.get("content-type")?.includes("image/svg+xml"), "cover card content type is not svg");
   assert(typeof coverCard.data === "string" && coverCard.data.includes("<svg"), "cover card svg missing");
 
+  const dailyCard = await request(`/api/share-card?profileId=${encodeURIComponent(profile.data.profile.id)}&type=daily`);
+  assert(dailyCard.response.ok, `daily card failed: ${dailyCard.response.status} ${dailyCard.text}`);
+  assert(dailyCard.response.headers.get("content-type")?.includes("image/svg+xml"), "daily card content type is not svg");
+  assert(typeof dailyCard.data === "string" && dailyCard.data.includes("今日方向"), "daily card svg missing title");
+
   const wuxingCard = await request(`/api/share-card?profileId=${encodeURIComponent(profile.data.profile.id)}&type=wuxing`);
   assert(wuxingCard.response.ok, `wuxing card failed: ${wuxingCard.response.status} ${wuxingCard.text}`);
   assert(wuxingCard.response.headers.get("content-type")?.includes("image/svg+xml"), "wuxing card content type is not svg");
@@ -269,7 +274,7 @@ async function main() {
         forecastTitle: forecast.data.forecast.title,
         myDataExport: myExport.data.scope,
         accountDeleted: true,
-        shareCards: ["cover", "wuxing"],
+        shareCards: ["daily", "cover", "wuxing"],
         questionId: question.data.question.id,
         remainingToday: question.data.remainingToday,
       },

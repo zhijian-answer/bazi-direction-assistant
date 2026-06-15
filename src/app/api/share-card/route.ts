@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { buildShareCardSvg, type ShareCardType } from "@/lib/share-card";
 import { readDb } from "@/lib/store";
 
-const allowedTypes = new Set<ShareCardType>(["cover", "wuxing"]);
+const allowedTypes = new Set<ShareCardType>(["cover", "wuxing", "daily"]);
 
 export async function GET(request: Request) {
   const user = await getCurrentUser();

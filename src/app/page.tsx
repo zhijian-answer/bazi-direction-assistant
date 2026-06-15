@@ -1463,6 +1463,7 @@ function ExplorePanel({
 }) {
   const coverUrl = profile ? `/api/share-card?profileId=${encodeURIComponent(profile.id)}&type=cover` : "";
   const wuxingUrl = profile ? `/api/share-card?profileId=${encodeURIComponent(profile.id)}&type=wuxing` : "";
+  const dailyUrl = profile ? `/api/share-card?profileId=${encodeURIComponent(profile.id)}&type=daily` : "";
 
   return (
     <section className="space-y-4">
@@ -1518,14 +1519,15 @@ function ExplorePanel({
               图片生成
             </div>
             <h3 className="mt-2 text-xl font-semibold">分享卡与报告封面</h3>
-            <p className="mt-2 text-sm leading-7 text-[#68645d]">先提供不消耗外部额度的图片模板，后续可以继续接入 AI 生成个人画像、流年海报和社交分享图。</p>
+            <p className="mt-2 text-sm leading-7 text-[#68645d]">先提供不消耗外部额度的图片模板，用户可以保存每日方向，也可以分享报告封面和五行能量图。</p>
           </div>
         </div>
 
         {!profile ? (
           <div className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-5 text-sm text-[#68645d]">创建命盘后即可生成图片。</div>
         ) : (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-3">
+            <ShareCardPreview title="今日方向卡" body="适合每天保存或分享，包含今日主题、适合做、暂缓做和一个小行动。" url={dailyUrl} />
             <ShareCardPreview title="报告封面" body="适合保存为个人报告封面，包含四柱、出生信息和能量提示。" url={coverUrl} />
             <ShareCardPreview title="五行能量图" body="适合社交分享或快速查看五行分布，突出日主和五行计数。" url={wuxingUrl} />
           </div>
