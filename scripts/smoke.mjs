@@ -166,6 +166,9 @@ async function main() {
   assert(checkins.response.ok, `checkins read failed: ${checkins.response.status} ${checkins.text}`);
   assert(checkins.data?.today?.id === checkin.data.checkin.id, "today checkin missing");
   assert(checkins.data?.checkins?.length >= 1, "checkins list missing");
+  assert(checkins.data?.stats?.checkedToday === true, "checkin stats should mark today checked");
+  assert(checkins.data?.stats?.currentStreak >= 1, "checkin current streak missing");
+  assert(checkins.data?.stats?.last7Days?.length === 7, "checkin last 7 days missing");
 
   const actionCard = await request(`/api/action-card?profileId=${encodeURIComponent(profile.data.profile.id)}`);
   assert(actionCard.response.ok, `action card failed: ${actionCard.response.status} ${actionCard.text}`);
@@ -260,6 +263,7 @@ async function main() {
         profileId: profile.data.profile.id,
         dailyTheme: daily.data.guidance.theme,
         checkinId: checkin.data.checkin.id,
+        checkinStreak: checkins.data.stats.currentStreak,
         actionCard: actionCard.data.card.title,
         reportTitle: report.data.report.title,
         forecastTitle: forecast.data.forecast.title,

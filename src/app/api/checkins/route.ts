@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { buildActionCheckinStats } from "@/lib/checkin-stats";
 import { appLimits, trimToLimit } from "@/lib/limits";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { newId, readDb, upsertActionCheckin } from "@/lib/store";
@@ -28,6 +29,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     checkins: checkins.slice(0, 30),
     today: checkins.find((checkin) => checkin.date === todayText()) || null,
+    stats: buildActionCheckinStats(checkins),
   });
 }
 

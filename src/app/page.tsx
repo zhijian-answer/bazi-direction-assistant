@@ -24,6 +24,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { ActionCard, ActionCheckin, BirthProfile, BirthReport, DailyGuidance, GuidanceQuestion, PublicUser, YearForecast } from "@/lib/types";
+import { buildActionCheckinStats } from "@/lib/checkin-stats";
 
 type AppState = {
   user: PublicUser | null;
@@ -938,6 +939,7 @@ function ActionCheckinCard({
   const profileCheckins = checkins
     .filter((checkin) => checkin.profileId === profile.id)
     .sort((a, b) => b.date.localeCompare(a.date) || b.updatedAt.localeCompare(a.updatedAt));
+  const stats = buildActionCheckinStats(profileCheckins);
   const today = new Date().toISOString().slice(0, 10);
   const todayCheckin = profileCheckins.find((checkin) => checkin.date === today);
   const defaultAction = todayCheckin?.action || guidance?.actionSteps?.[1] || "完成一个 15 分钟内能推进现实的小行动";
@@ -954,6 +956,33 @@ function ActionCheckinCard({
           <p className="mt-1 text-sm leading-6 text-[#68645d]">不用追求完美，只记录今天真实完成的一小步。</p>
         </div>
         {todayCheckin && <span className="rounded-full bg-[#eef1ec] px-3 py-1 text-xs text-[#2d6b6f]">今日已打卡</span>}
+      </div>
+
+      <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_2fr]">
+        <div className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-4">
+          <div className="text-xs text-[#756f67]">连续行动</div>
+          <div className="mt-1 flex items-end gap-1">
+            <span className="text-3xl font-semibold">{stats.currentStreak}</span>
+            <span className="pb-1 text-sm text-[#68645d]">天</span>
+          </div>
+          <div className="mt-1 text-xs leading-5 text-[#68645d]">
+            {stats.checkedToday ? "今天已经完成记录" : stats.currentStreak > 0 ? "今天补上就能延续节奏" : "从今天的一小步开始"}
+          </div>
+        </div>
+        <div className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="text-xs text-[#756f67]">最近 7 天</div>
+            <div className="text-xs text-[#68645d]">累计 {stats.total} 次</div>
+          </div>
+          <div className="grid grid-cols-7 gap-2">
+            {stats.last7Days.map((day) => (
+              <div key={day.date} className="text-center">
+                <div className={`mx-auto h-7 w-7 rounded-full border ${day.checked ? "border-[#2d6b6f] bg-[#2d6b6f]" : "border-[#d8d3c6] bg-white"}`} />
+                <div className="mt-1 text-[10px] leading-4 text-[#756f67]">{day.date.slice(5)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       <form key={todayCheckin?.updatedAt || profile.id} onSubmit={onSubmit} className="grid gap-3 lg:grid-cols-[1fr_1fr_auto]">
@@ -1015,12 +1044,17 @@ function DailyList({ title, items, tone }: { title: string; items: string[]; ton
 }
 
 function QuickMetrics({ state, selectedProfile }: { state: AppState; selectedProfile?: BirthProfile }) {
+  const selectedCheckins = selectedProfile
+    ? state.checkins.filter((checkin) => checkin.profileId === selectedProfile.id)
+    : state.checkins;
+  const checkinStats = buildActionCheckinStats(selectedCheckins);
+
   return (
     <section className="grid gap-3 sm:grid-cols-3">
       {[
         ["已建档案", state.profiles.length, "最多 3 个命盘档案"],
         ["今日可问", state.remainingToday, "免费次数每日刷新"],
-        ["行动打卡", state.checkins.length, selectedProfile ? `${selectedProfile.name} 的行动记录` : "创建档案后开始"],
+        ["连续打卡", checkinStats.currentStreak, selectedProfile ? `${selectedProfile.name} 的行动节奏` : "创建档案后开始"],
       ].map(([label, value, detail]) => (
         <div key={label} className="rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm">
           <div className="text-xs text-[#756f67]">{label}</div>

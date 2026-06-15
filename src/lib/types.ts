@@ -124,6 +124,17 @@ export type ActionCheckin = {
   updatedAt: string;
 };
 
+export type ActionCheckinStats = {
+  total: number;
+  currentStreak: number;
+  checkedToday: boolean;
+  lastCheckinDate: string | null;
+  last7Days: Array<{
+    date: string;
+    checked: boolean;
+  }>;
+};
+
 export type DailyGuidance = {
   profileId: string;
   date: string;
