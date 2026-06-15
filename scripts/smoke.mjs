@@ -103,6 +103,49 @@ async function main() {
   assert(profile.response.ok, `profile failed: ${profile.response.status} ${profile.text}`);
   assert(profile.data?.profile?.chart?.pillars?.day, "profile chart missing day pillar");
 
+  const extraProfile = await request("/api/profiles", {
+    method: "POST",
+    body: JSON.stringify({
+      name: "Smoke Extra Profile",
+      gender: "female",
+      calendarType: "solar",
+      birthDate: "1992-08-18",
+      birthTime: "10:30",
+      birthPlace: "Beijing",
+      timeUnknown: false,
+    }),
+  });
+  assert(extraProfile.response.ok, `extra profile failed: ${extraProfile.response.status} ${extraProfile.text}`);
+  assert(extraProfile.data?.profile?.id, "extra profile id missing");
+
+  const extraCheckin = await request("/api/checkins", {
+    method: "POST",
+    body: JSON.stringify({
+      profileId: extraProfile.data.profile.id,
+      action: "删除档案前的测试打卡",
+      note: "这个记录应随档案删除",
+    }),
+  });
+  assert(extraCheckin.response.ok, `extra checkin failed: ${extraCheckin.response.status} ${extraCheckin.text}`);
+
+  const extraQuestion = await request("/api/questions", {
+    method: "POST",
+    body: JSON.stringify({
+      profileId: extraProfile.data.profile.id,
+      category: "direction",
+      question: "这个额外档案适合先做什么？",
+    }),
+  });
+  assert(extraQuestion.response.ok, `extra question failed: ${extraQuestion.response.status} ${extraQuestion.text}`);
+
+  const deleteExtraProfile = await request(`/api/profiles?profileId=${encodeURIComponent(extraProfile.data.profile.id)}`, {
+    method: "DELETE",
+  });
+  assert(deleteExtraProfile.response.ok, `delete extra profile failed: ${deleteExtraProfile.response.status} ${deleteExtraProfile.text}`);
+  assert(deleteExtraProfile.data?.deleted?.profiles === 1, "delete extra profile did not remove profile");
+  assert(deleteExtraProfile.data?.deleted?.questions >= 1, "delete extra profile did not remove questions");
+  assert(deleteExtraProfile.data?.deleted?.checkins >= 1, "delete extra profile did not remove checkins");
+
   const daily = await request(`/api/daily?profileId=${encodeURIComponent(profile.data.profile.id)}`);
   assert(daily.response.ok, `daily guidance failed: ${daily.response.status} ${daily.text}`);
   assert(daily.data?.guidance?.theme, "daily guidance theme missing");
@@ -171,6 +214,9 @@ async function main() {
   assert(me.data?.profiles?.length >= 1, "profile did not persist");
   assert(me.data?.questions?.length >= 1, "question did not persist");
   assert(me.data?.checkins?.length >= 1, "checkin did not persist");
+  assert(!me.data.profiles.some((item) => item.id === extraProfile.data.profile.id), "deleted extra profile still visible");
+  assert(!me.data.questions.some((item) => item.profileId === extraProfile.data.profile.id), "deleted extra profile questions still visible");
+  assert(!me.data.checkins.some((item) => item.profileId === extraProfile.data.profile.id), "deleted extra profile checkins still visible");
 
   const myExport = await request("/api/me/export");
   assert(myExport.response.ok, `my data export failed: ${myExport.response.status} ${myExport.text}`);

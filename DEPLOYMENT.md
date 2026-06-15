@@ -174,6 +174,7 @@ SMOKE_BASE_URL=http://127.0.0.1:3000 npm run smoke
 - `/manifest.webmanifest` 和应用图标
 - 注册与 session cookie
 - 创建命盘
+- 删除错误命盘档案，并清理关联提问和打卡
 - 今日方向
 - 每日行动打卡
 - 低谷行动卡

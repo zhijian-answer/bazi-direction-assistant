@@ -400,6 +400,36 @@ export default function Home() {
     }
   }
 
+  async function deleteProfile(profile: BirthProfile) {
+    const confirmation = window.prompt(`这会删除“${profile.name}”和关联的提问、打卡记录。请输入“删除档案”确认。`);
+    if (confirmation !== "删除档案") {
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/profiles?profileId=${encodeURIComponent(profile.id)}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "删除命盘失败");
+      }
+      const remainingProfiles = state.profiles.filter((item) => item.id !== profile.id);
+      setSelectedProfileId(remainingProfiles[0]?.id || "");
+      setDailyGuidance(null);
+      setBirthReport(null);
+      setYearForecast(null);
+      setActionCard(null);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "删除命盘失败");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function logout() {
     await postJson("/api/auth/logout");
     setState(emptyState);
@@ -572,6 +602,8 @@ export default function Home() {
               selectedProfile={selectedProfile}
               selectedProfileId={selectedProfileId}
               onSelect={setSelectedProfileId}
+              busy={busy}
+              onDelete={deleteProfile}
             />
           )}
 
@@ -702,11 +734,15 @@ function ProfileSummary({
   selectedProfile,
   selectedProfileId,
   onSelect,
+  busy,
+  onDelete,
 }: {
   profiles: BirthProfile[];
   selectedProfile?: BirthProfile;
   selectedProfileId: string;
   onSelect: (id: string) => void;
+  busy: boolean;
+  onDelete: (profile: BirthProfile) => void;
 }) {
   if (!selectedProfile) {
     return null;
@@ -739,6 +775,16 @@ function ProfileSummary({
           日主 {selectedProfile.chart.dayMaster.stem}
           {selectedProfile.chart.dayMaster.elementLabel}，分析会围绕现实选择和行动节奏给出参考。
         </p>
+        <button
+          type="button"
+          data-action="delete-profile"
+          disabled={busy}
+          onClick={() => onDelete(selectedProfile)}
+          className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-[#d8a99d] bg-white px-3 py-2 text-sm font-medium text-[#9c2f1b] hover:bg-[#fff5f2] disabled:opacity-60"
+        >
+          <Trash2 className="h-4 w-4" />
+          删除当前档案
+        </button>
       </div>
     </section>
   );

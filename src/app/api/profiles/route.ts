@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { buildBaziChart } from "@/lib/bazi";
 import { appLimits, trimToLimit } from "@/lib/limits";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
-import { addProfileWithLimit, newId, readDb } from "@/lib/store";
+import { addProfileWithLimit, deleteProfileData, newId, readDb } from "@/lib/store";
 import type { BirthProfile, CalendarType, Gender } from "@/lib/types";
 
 export async function GET() {
@@ -67,6 +67,37 @@ export async function POST(request: Request) {
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "保存命盘失败" },
+      { status: 400 },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "请先登录" }, { status: 401 });
+    }
+    const rateLimit = checkRateLimit(
+      request,
+      `profile:delete:${user.id}`,
+      appLimits.rateLimitProfileWrite,
+    );
+    if (!rateLimit.ok) {
+      return rateLimitResponse(rateLimit.resetAt);
+    }
+
+    const url = new URL(request.url);
+    const profileId = url.searchParams.get("profileId") || "";
+    if (!profileId) {
+      return NextResponse.json({ error: "缺少命盘档案 ID" }, { status: 400 });
+    }
+
+    const deleted = await deleteProfileData({ userId: user.id, profileId });
+    return NextResponse.json({ ok: true, deleted });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "删除命盘失败" },
       { status: 400 },
     );
   }

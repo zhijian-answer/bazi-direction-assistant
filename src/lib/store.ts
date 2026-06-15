@@ -185,6 +185,37 @@ export async function addProfileWithLimit(profile: BirthProfile, maxProfilesPerU
   });
 }
 
+export async function deleteProfileData(input: { userId: string; profileId: string }) {
+  return mutateDb((db) => {
+    const profile = db.profiles.find(
+      (item) => item.id === input.profileId && item.userId === input.userId,
+    );
+    if (!profile) {
+      throw new Error("命盘档案不存在");
+    }
+
+    const deleted = {
+      profiles: 1,
+      questions: db.questions.filter(
+        (question) => question.userId === input.userId && question.profileId === input.profileId,
+      ).length,
+      checkins: db.checkins.filter(
+        (checkin) => checkin.userId === input.userId && checkin.profileId === input.profileId,
+      ).length,
+    };
+
+    db.profiles = db.profiles.filter((item) => item.id !== input.profileId);
+    db.questions = db.questions.filter(
+      (question) => !(question.userId === input.userId && question.profileId === input.profileId),
+    );
+    db.checkins = db.checkins.filter(
+      (checkin) => !(checkin.userId === input.userId && checkin.profileId === input.profileId),
+    );
+
+    return deleted;
+  });
+}
+
 export async function addQuestion(question: GuidanceQuestion) {
   await mutateDb((db) => {
     db.questions.push(question);
