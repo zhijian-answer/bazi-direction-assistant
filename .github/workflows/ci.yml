@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint and build
+        run: npm run check
+
+      - name: Start app
+        run: |
+          npm run start > /tmp/bazi-direction-assistant.log 2>&1 &
+          echo $! > /tmp/bazi-direction-assistant.pid
+
+      - name: Wait for health check
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/api/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/bazi-direction-assistant.log
+          exit 1
+
+      - name: Run smoke test
+        env:
+          SMOKE_BASE_URL: http://127.0.0.1:3000
+          AI_FORCE_LOCAL: "true"
+        run: npm run smoke
