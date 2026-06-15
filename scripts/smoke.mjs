@@ -1,0 +1,186 @@
+const baseUrl = (process.env.SMOKE_BASE_URL || "http://localhost:3000").replace(/\/+$/, "");
+const password = process.env.SMOKE_PASSWORD || "password123";
+const email = process.env.SMOKE_EMAIL || `smoke-${Date.now()}-${Math.floor(Math.random() * 10000)}@example.com`;
+const smokeNow = new Date();
+const smokeYear = smokeNow.getFullYear();
+const smokeMonth = smokeNow.getMonth() + 1;
+
+const cookieJar = new Map();
+
+function updateCookies(response) {
+  const setCookie = response.headers.get("set-cookie");
+  if (!setCookie) {
+    return;
+  }
+  for (const cookie of setCookie.split(/,(?=[^;]+?=)/)) {
+    const [pair] = cookie.split(";");
+    const [name, value] = pair.split("=");
+    if (name && value) {
+      cookieJar.set(name.trim(), value.trim());
+    }
+  }
+}
+
+function cookieHeader() {
+  return [...cookieJar.entries()].map(([name, value]) => `${name}=${value}`).join("; ");
+}
+
+async function request(path, options = {}) {
+  const headers = new Headers(options.headers || {});
+  if (options.body && !headers.has("content-type")) {
+    headers.set("content-type", "application/json");
+  }
+  const cookies = cookieHeader();
+  if (cookies) {
+    headers.set("cookie", cookies);
+  }
+  const response = await fetch(`${baseUrl}${path}`, {
+    ...options,
+    headers,
+  });
+  updateCookies(response);
+  const text = await response.text();
+  let data = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+  }
+  return { response, data, text };
+}
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+async function main() {
+  const health = await request("/api/health");
+  assert(health.response.ok, `health failed: ${health.response.status}`);
+  assert(health.data?.status === "ok", "health status is not ok");
+  assert(health.data?.app_id === "bazi-direction-assistant", "unexpected app id");
+
+  const register = await request("/api/auth/register", {
+    method: "POST",
+    body: JSON.stringify({
+      name: "Smoke User",
+      email,
+      password,
+    }),
+  });
+  assert(register.response.ok, `register failed: ${register.response.status} ${register.text}`);
+  assert(cookieJar.has("bazi_session"), "register did not set session cookie");
+
+  const profile = await request("/api/profiles", {
+    method: "POST",
+    body: JSON.stringify({
+      name: "Smoke Profile",
+      gender: "male",
+      calendarType: "solar",
+      birthDate: "1990-05-20",
+      birthTime: "09:00",
+      birthPlace: "Shanghai",
+      timeUnknown: false,
+    }),
+  });
+  assert(profile.response.ok, `profile failed: ${profile.response.status} ${profile.text}`);
+  assert(profile.data?.profile?.chart?.pillars?.day, "profile chart missing day pillar");
+
+  const daily = await request(`/api/daily?profileId=${encodeURIComponent(profile.data.profile.id)}`);
+  assert(daily.response.ok, `daily guidance failed: ${daily.response.status} ${daily.text}`);
+  assert(daily.data?.guidance?.theme, "daily guidance theme missing");
+  assert(daily.data?.guidance?.suitable?.length >= 1, "daily guidance suitable list missing");
+
+  const actionCard = await request(`/api/action-card?profileId=${encodeURIComponent(profile.data.profile.id)}`);
+  assert(actionCard.response.ok, `action card failed: ${actionCard.response.status} ${actionCard.text}`);
+  assert(actionCard.data?.card?.supportNote, "action card support note missing");
+  assert(actionCard.data?.card?.groundingSteps?.length >= 3, "action card grounding steps missing");
+  assert(actionCard.data?.card?.tinyActions?.length >= 3, "action card tiny actions missing");
+  assert(actionCard.data?.card?.disclaimer, "action card disclaimer missing");
+
+  const report = await request(`/api/reports?profileId=${encodeURIComponent(profile.data.profile.id)}`);
+  assert(report.response.ok, `report failed: ${report.response.status} ${report.text}`);
+  assert(report.data?.report?.title, "report title missing");
+  assert(report.data?.report?.sections?.length >= 3, "report sections missing");
+  assert(report.data?.report?.actionPlan?.length >= 3, "report action plan missing");
+
+  const forecast = await request(`/api/forecast?profileId=${encodeURIComponent(profile.data.profile.id)}&year=${smokeYear}&month=${smokeMonth}`);
+  assert(forecast.response.ok, `forecast failed: ${forecast.response.status} ${forecast.text}`);
+  assert(forecast.data?.forecast?.title, "forecast title missing");
+  assert(forecast.data?.forecast?.year === smokeYear, "forecast year mismatch");
+  assert(forecast.data?.forecast?.currentMonth?.theme, "forecast current month missing");
+  assert(forecast.data?.forecast?.currentMonth?.month === smokeMonth, "forecast current month mismatch");
+  assert(forecast.data?.forecast?.months?.length === 12, "forecast months missing");
+
+  const coverCard = await request(`/api/share-card?profileId=${encodeURIComponent(profile.data.profile.id)}&type=cover`);
+  assert(coverCard.response.ok, `cover card failed: ${coverCard.response.status} ${coverCard.text}`);
+  assert(coverCard.response.headers.get("content-type")?.includes("image/svg+xml"), "cover card content type is not svg");
+  assert(typeof coverCard.data === "string" && coverCard.data.includes("<svg"), "cover card svg missing");
+
+  const wuxingCard = await request(`/api/share-card?profileId=${encodeURIComponent(profile.data.profile.id)}&type=wuxing`);
+  assert(wuxingCard.response.ok, `wuxing card failed: ${wuxingCard.response.status} ${wuxingCard.text}`);
+  assert(wuxingCard.response.headers.get("content-type")?.includes("image/svg+xml"), "wuxing card content type is not svg");
+  assert(typeof wuxingCard.data === "string" && wuxingCard.data.includes("五行能量图"), "wuxing card svg missing title");
+
+  const question = await request("/api/questions", {
+    method: "POST",
+    body: JSON.stringify({
+      profileId: profile.data.profile.id,
+      category: "direction",
+      question: "我现在迷茫，应该先做哪三件事？",
+    }),
+  });
+  assert(question.response.ok, `question failed: ${question.response.status} ${question.text}`);
+  assert(question.data?.question?.answer, "question answer missing");
+
+  const me = await request("/api/me");
+  assert(me.response.ok, `me failed: ${me.response.status}`);
+  assert(me.data?.profiles?.length >= 1, "profile did not persist");
+  assert(me.data?.questions?.length >= 1, "question did not persist");
+
+  const myExport = await request("/api/me/export");
+  assert(myExport.response.ok, `my data export failed: ${myExport.response.status} ${myExport.text}`);
+  assert(myExport.response.headers.get("content-type")?.includes("application/json"), "my data export is not json");
+  assert(myExport.response.headers.get("content-disposition")?.includes("bazi-my-data"), "my data export filename missing");
+  assert(myExport.data?.scope === "current-user", "my data export scope mismatch");
+  assert(myExport.data?.user?.email === email, "my data export user mismatch");
+  assert(myExport.data?.profiles?.length >= 1, "my data export profiles missing");
+  assert(myExport.data?.questions?.length >= 1, "my data export questions missing");
+  assert(myExport.data?.generated?.[0]?.report?.title, "my data export report missing");
+  assert(!myExport.text.includes("passwordHash"), "my data export leaked passwordHash field");
+  assert(!myExport.text.includes("salt"), "my data export leaked salt field");
+  assert(!myExport.text.includes("token"), "my data export leaked token field");
+
+  const exportAttempt = await request("/api/admin/export");
+  assert(exportAttempt.response.status === 403, `non-admin export should be 403, got ${exportAttempt.response.status}`);
+
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        baseUrl,
+        email,
+        aiMode: health.data.ai_mode,
+        profileId: profile.data.profile.id,
+        dailyTheme: daily.data.guidance.theme,
+        actionCard: actionCard.data.card.title,
+        reportTitle: report.data.report.title,
+        forecastTitle: forecast.data.forecast.title,
+        myDataExport: myExport.data.scope,
+        shareCards: ["cover", "wuxing"],
+        questionId: question.data.question.id,
+        remainingToday: question.data.remainingToday,
+      },
+      null,
+      2,
+    ),
+  );
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

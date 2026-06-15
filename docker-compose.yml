@@ -1,0 +1,39 @@
+services:
+  bazi-direction-assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bazi-direction-assistant
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      APP_DATA_DIR: /app/data
+      APP_VERSION: "0.1.0"
+      APP_URL: "${APP_URL:-http://localhost:3000}"
+      NEXT_PUBLIC_SITE_URL: "${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      OPENAI_MODEL: "${OPENAI_MODEL:-gpt-4.1-mini}"
+      OPENAI_TIMEOUT_MS: "${OPENAI_TIMEOUT_MS:-20000}"
+      AI_FORCE_LOCAL: "${AI_FORCE_LOCAL:-false}"
+      AI_FALLBACK_ON_ERROR: "${AI_FALLBACK_ON_ERROR:-true}"
+      DAILY_QUESTION_LIMIT: "${DAILY_QUESTION_LIMIT:-5}"
+      MAX_PROFILES_PER_USER: "${MAX_PROFILES_PER_USER:-3}"
+      MAX_QUESTION_CHARS: "${MAX_QUESTION_CHARS:-500}"
+      MAX_PROFILE_NAME_CHARS: "${MAX_PROFILE_NAME_CHARS:-40}"
+      MAX_BIRTH_PLACE_CHARS: "${MAX_BIRTH_PLACE_CHARS:-80}"
+      RATE_LIMIT_WINDOW_MS: "${RATE_LIMIT_WINDOW_MS:-60000}"
+      RATE_LIMIT_REGISTER: "${RATE_LIMIT_REGISTER:-10}"
+      RATE_LIMIT_LOGIN: "${RATE_LIMIT_LOGIN:-20}"
+      RATE_LIMIT_PROFILE_WRITE: "${RATE_LIMIT_PROFILE_WRITE:-20}"
+      RATE_LIMIT_QUESTION_WRITE: "${RATE_LIMIT_QUESTION_WRITE:-30}"
+      ADMIN_EMAILS: "${ADMIN_EMAILS:-}"
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health | grep -q '\"status\":\"ok\"'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
