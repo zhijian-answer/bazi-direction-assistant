@@ -10,6 +10,7 @@ export async function GET() {
       user: null,
       profiles: [],
       questions: [],
+      checkins: [],
       remainingToday: 0,
       isAdmin: false,
     });
@@ -19,12 +20,16 @@ export async function GET() {
   const questions = db.questions
     .filter((question) => question.userId === user.id)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const checkins = db.checkins
+    .filter((checkin) => checkin.userId === user.id)
+    .sort((a, b) => b.date.localeCompare(a.date) || b.updatedAt.localeCompare(a.updatedAt));
   const usedToday = questionsToday(db.questions, user.id).length;
   return NextResponse.json({
     user,
     isAdmin: isAdminUser(user),
     profiles,
     questions,
+    checkins,
     remainingToday: Math.max(0, user.dailyQuestionLimit - usedToday),
   });
 }

@@ -108,6 +108,22 @@ async function main() {
   assert(daily.data?.guidance?.theme, "daily guidance theme missing");
   assert(daily.data?.guidance?.suitable?.length >= 1, "daily guidance suitable list missing");
 
+  const checkin = await request("/api/checkins", {
+    method: "POST",
+    body: JSON.stringify({
+      profileId: profile.data.profile.id,
+      action: "完成一个 15 分钟行动",
+      note: "烟测记录：今天先做一小步",
+    }),
+  });
+  assert(checkin.response.ok, `checkin failed: ${checkin.response.status} ${checkin.text}`);
+  assert(checkin.data?.checkin?.action, "checkin action missing");
+
+  const checkins = await request(`/api/checkins?profileId=${encodeURIComponent(profile.data.profile.id)}`);
+  assert(checkins.response.ok, `checkins read failed: ${checkins.response.status} ${checkins.text}`);
+  assert(checkins.data?.today?.id === checkin.data.checkin.id, "today checkin missing");
+  assert(checkins.data?.checkins?.length >= 1, "checkins list missing");
+
   const actionCard = await request(`/api/action-card?profileId=${encodeURIComponent(profile.data.profile.id)}`);
   assert(actionCard.response.ok, `action card failed: ${actionCard.response.status} ${actionCard.text}`);
   assert(actionCard.data?.card?.supportNote, "action card support note missing");
@@ -154,6 +170,7 @@ async function main() {
   assert(me.response.ok, `me failed: ${me.response.status}`);
   assert(me.data?.profiles?.length >= 1, "profile did not persist");
   assert(me.data?.questions?.length >= 1, "question did not persist");
+  assert(me.data?.checkins?.length >= 1, "checkin did not persist");
 
   const myExport = await request("/api/me/export");
   assert(myExport.response.ok, `my data export failed: ${myExport.response.status} ${myExport.text}`);
@@ -163,6 +180,7 @@ async function main() {
   assert(myExport.data?.user?.email === email, "my data export user mismatch");
   assert(myExport.data?.profiles?.length >= 1, "my data export profiles missing");
   assert(myExport.data?.questions?.length >= 1, "my data export questions missing");
+  assert(myExport.data?.checkins?.length >= 1, "my data export checkins missing");
   assert(myExport.data?.generated?.[0]?.report?.title, "my data export report missing");
   assert(!myExport.text.includes("passwordHash"), "my data export leaked passwordHash field");
   assert(!myExport.text.includes("salt"), "my data export leaked salt field");
@@ -176,12 +194,14 @@ async function main() {
   assert(deleteMe.data?.deleted?.users === 1, "delete me did not remove user");
   assert(deleteMe.data?.deleted?.profiles >= 1, "delete me did not remove profiles");
   assert(deleteMe.data?.deleted?.questions >= 1, "delete me did not remove questions");
+  assert(deleteMe.data?.deleted?.checkins >= 1, "delete me did not remove checkins");
 
   const meAfterDelete = await request("/api/me");
   assert(meAfterDelete.response.ok, `me after delete failed: ${meAfterDelete.response.status}`);
   assert(meAfterDelete.data?.user === null, "deleted account still has a session");
   assert(meAfterDelete.data?.profiles?.length === 0, "deleted account profiles still visible");
   assert(meAfterDelete.data?.questions?.length === 0, "deleted account questions still visible");
+  assert(meAfterDelete.data?.checkins?.length === 0, "deleted account checkins still visible");
 
   console.log(
     JSON.stringify(
@@ -193,6 +213,7 @@ async function main() {
         pwa: manifest.data.display,
         profileId: profile.data.profile.id,
         dailyTheme: daily.data.guidance.theme,
+        checkinId: checkin.data.checkin.id,
         actionCard: actionCard.data.card.title,
         reportTitle: report.data.report.title,
         forecastTitle: forecast.data.forecast.title,

@@ -21,6 +21,7 @@ export async function GET() {
     users: db.users.length,
     profiles: db.profiles.length,
     questions: db.questions.length,
+    checkins: db.checkins.length,
     todayQuestions: todayQuestions.length,
     localQuestions,
     openaiQuestions,

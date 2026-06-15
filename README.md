@@ -8,11 +8,12 @@
 - 创建出生档案：出生年月日、时间、地点、性别、农历/阳历
 - 使用 `lunar-javascript` 生成四柱、五行、十神、纳音和日主
 - 登录后根据命盘生成“今日方向卡”：适合做、暂缓做、三步行动
+- 保存每日行动打卡：记录今天实际完成的一小步，支持更新和历史查看
 - 根据命盘生成“低谷行动卡”：稳定步骤、15 分钟小行动、复盘问题
 - 根据命盘生成完整报告数据：自我底色、五行能量、事业学习、关系沟通、近期行动计划
 - 根据命盘生成流年/月度方向：年度关键词、当前月建议、12 个月节奏
 - 根据命盘生成 SVG 图片：报告封面、五行能量图，可预览和下载
-- 用户可导出或删除自己的命盘、报告、流年、行动卡和提问历史
+- 用户可导出或删除自己的命盘、报告、流年、行动卡、每日打卡和提问历史
 - 支持 PWA manifest 和手机桌面图标，方便添加到手机桌面
 - 每个用户每日免费提问限制，默认 5 次
 - 无 `OPENAI_API_KEY` 时使用本地规则引擎回答
@@ -52,6 +53,8 @@ AI_FALLBACK_ON_ERROR=true
 DAILY_QUESTION_LIMIT=5
 MAX_PROFILES_PER_USER=3
 MAX_QUESTION_CHARS=500
+MAX_CHECKIN_ACTION_CHARS=160
+MAX_CHECKIN_NOTE_CHARS=240
 MAX_PROFILE_NAME_CHARS=40
 MAX_BIRTH_PLACE_CHARS=80
 RATE_LIMIT_WINDOW_MS=60000
@@ -59,6 +62,7 @@ RATE_LIMIT_REGISTER=10
 RATE_LIMIT_LOGIN=20
 RATE_LIMIT_PROFILE_WRITE=20
 RATE_LIMIT_QUESTION_WRITE=30
+RATE_LIMIT_CHECKIN_WRITE=40
 APP_DATA_DIR=./data
 ADMIN_EMAILS=
 APP_URL=http://localhost:3000
@@ -96,7 +100,7 @@ npm run smoke
 SMOKE_BASE_URL=https://你的域名 npm run smoke
 ```
 
-烟测会验证健康检查、PWA manifest、注册、创建命盘、今日方向、低谷行动卡、命盘报告、流年/月度方向、分享图片、提问、读取用户数据、个人数据导出、账号数据删除，以及普通用户不能访问管理员导出。
+烟测会验证健康检查、PWA manifest、注册、创建命盘、今日方向、每日行动打卡、低谷行动卡、命盘报告、流年/月度方向、分享图片、提问、读取用户数据、个人数据导出、账号数据删除，以及普通用户不能访问管理员导出。
 
 ## 产品边界
 

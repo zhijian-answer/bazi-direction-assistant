@@ -3,6 +3,7 @@ import path from "node:path";
 import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from "node:crypto";
 import { appLimits, trimToLimit } from "./limits";
 import type {
+  ActionCheckin,
   AppDb,
   BirthProfile,
   GuidanceQuestion,
@@ -16,6 +17,7 @@ const emptyDb: AppDb = {
   sessions: [],
   profiles: [],
   questions: [],
+  checkins: [],
 };
 
 let writeQueue = Promise.resolve();
@@ -139,12 +141,14 @@ export async function deleteUserData(userId: string) {
       sessions: db.sessions.filter((session) => session.userId === userId).length,
       profiles: db.profiles.filter((profile) => profile.userId === userId).length,
       questions: db.questions.filter((question) => question.userId === userId).length,
+      checkins: db.checkins.filter((checkin) => checkin.userId === userId).length,
     };
 
     db.users = db.users.filter((user) => user.id !== userId);
     db.sessions = db.sessions.filter((session) => session.userId !== userId);
     db.profiles = db.profiles.filter((profile) => profile.userId !== userId);
     db.questions = db.questions.filter((question) => question.userId !== userId);
+    db.checkins = db.checkins.filter((checkin) => checkin.userId !== userId);
 
     return deleted;
   });
@@ -194,6 +198,32 @@ export async function addQuestionWithDailyLimit(question: GuidanceQuestion, dail
       throw new Error("今天的免费提问次数已用完，明天再来。");
     }
     db.questions.push(question);
+  });
+}
+
+export async function upsertActionCheckin(checkin: ActionCheckin) {
+  return mutateDb((db) => {
+    const existingIndex = db.checkins.findIndex(
+      (item) =>
+        item.userId === checkin.userId &&
+        item.profileId === checkin.profileId &&
+        item.date === checkin.date,
+    );
+
+    if (existingIndex >= 0) {
+      const existing = db.checkins[existingIndex];
+      const updated: ActionCheckin = {
+        ...existing,
+        action: checkin.action,
+        note: checkin.note,
+        updatedAt: checkin.updatedAt,
+      };
+      db.checkins[existingIndex] = updated;
+      return updated;
+    }
+
+    db.checkins.push(checkin);
+    return checkin;
   });
 }
 

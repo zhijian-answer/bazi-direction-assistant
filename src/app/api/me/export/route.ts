@@ -18,6 +18,9 @@ export async function GET() {
   const questions = db.questions
     .filter((question) => question.userId === user.id)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const checkins = db.checkins
+    .filter((checkin) => checkin.userId === user.id)
+    .sort((a, b) => b.date.localeCompare(a.date) || b.updatedAt.localeCompare(a.updatedAt));
 
   const payload = {
     exportedAt: now.toISOString(),
@@ -26,6 +29,7 @@ export async function GET() {
     user,
     profiles,
     questions,
+    checkins,
     generated: profiles.map((profile) => ({
       profileId: profile.id,
       dailyGuidance: buildDailyGuidance(profile, now),
@@ -36,7 +40,7 @@ export async function GET() {
     notes: [
       "此文件只包含当前登录用户的数据。",
       "导出内容不包含密码相关字段、登录凭证或其他用户资料。",
-      "报告、流年和行动卡为导出时根据命盘即时生成的参考内容。",
+      "报告、流年和行动卡为导出时根据命盘即时生成的参考内容，打卡记录为用户主动保存的行动记录。",
     ],
   };
 

@@ -6,6 +6,7 @@ import {
   BookOpenText,
   CalendarDays,
   ChartNoAxesColumn,
+  ClipboardCheck,
   Compass,
   FileText,
   GalleryHorizontalEnd,
@@ -22,12 +23,13 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import type { ActionCard, BirthProfile, BirthReport, DailyGuidance, GuidanceQuestion, PublicUser, YearForecast } from "@/lib/types";
+import type { ActionCard, ActionCheckin, BirthProfile, BirthReport, DailyGuidance, GuidanceQuestion, PublicUser, YearForecast } from "@/lib/types";
 
 type AppState = {
   user: PublicUser | null;
   profiles: BirthProfile[];
   questions: GuidanceQuestion[];
+  checkins: ActionCheckin[];
   remainingToday: number;
   isAdmin: boolean;
 };
@@ -39,6 +41,7 @@ type AdminStatsData = {
   users: number;
   profiles: number;
   questions: number;
+  checkins: number;
   todayQuestions: number;
   localQuestions: number;
   openaiQuestions: number;
@@ -56,6 +59,7 @@ const emptyState: AppState = {
   user: null,
   profiles: [],
   questions: [],
+  checkins: [],
   remainingToday: 0,
   isAdmin: false,
 };
@@ -370,6 +374,32 @@ export default function Home() {
     }
   }
 
+  async function handleCheckin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    if (!selectedProfile) {
+      setError("请先创建命盘档案");
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+    const form = new FormData(formElement);
+    try {
+      await postJson<{ checkin: ActionCheckin }>("/api/checkins", {
+        profileId: selectedProfile.id,
+        action: form.get("action"),
+        note: form.get("note"),
+      });
+      formElement.reset();
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "保存打卡失败");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function logout() {
     await postJson("/api/auth/logout");
     setState(emptyState);
@@ -557,6 +587,14 @@ export default function Home() {
             hasProfile={Boolean(selectedProfile)}
             onAsk={() => switchPanel("ask")}
             onReport={() => switchPanel("report")}
+          />
+
+          <ActionCheckinCard
+            guidance={dailyGuidance}
+            profile={selectedProfile}
+            checkins={state.checkins}
+            busy={busy}
+            onSubmit={handleCheckin}
           />
 
           <QuickMetrics state={state} selectedProfile={selectedProfile} />
@@ -834,6 +872,85 @@ function DailyGuidanceCard({
   );
 }
 
+function ActionCheckinCard({
+  guidance,
+  profile,
+  checkins,
+  busy,
+  onSubmit,
+}: {
+  guidance: DailyGuidance | null;
+  profile?: BirthProfile;
+  checkins: ActionCheckin[];
+  busy: boolean;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  if (!profile) {
+    return null;
+  }
+
+  const profileCheckins = checkins
+    .filter((checkin) => checkin.profileId === profile.id)
+    .sort((a, b) => b.date.localeCompare(a.date) || b.updatedAt.localeCompare(a.updatedAt));
+  const today = new Date().toISOString().slice(0, 10);
+  const todayCheckin = profileCheckins.find((checkin) => checkin.date === today);
+  const defaultAction = todayCheckin?.action || guidance?.actionSteps?.[1] || "完成一个 15 分钟内能推进现实的小行动";
+
+  return (
+    <section className="rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm sm:p-5">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-sm text-[#2d6b6f]">
+            <ClipboardCheck className="h-4 w-4" />
+            今日行动打卡
+          </div>
+          <h2 className="mt-2 text-xl font-semibold">{todayCheckin ? "今天已经迈出一步" : "把方向变成一个小行动"}</h2>
+          <p className="mt-1 text-sm leading-6 text-[#68645d]">不用追求完美，只记录今天真实完成的一小步。</p>
+        </div>
+        {todayCheckin && <span className="rounded-full bg-[#eef1ec] px-3 py-1 text-xs text-[#2d6b6f]">今日已打卡</span>}
+      </div>
+
+      <form key={todayCheckin?.updatedAt || profile.id} onSubmit={onSubmit} className="grid gap-3 lg:grid-cols-[1fr_1fr_auto]">
+        <label className="block text-sm">
+          今天完成了什么
+          <input
+            name="action"
+            required
+            maxLength={160}
+            defaultValue={defaultAction}
+            className="mt-2 w-full rounded-md border border-[#d8d3c6] px-3 py-3 outline-none focus:border-[#a5533c]"
+          />
+        </label>
+        <label className="block text-sm">
+          简短记录
+          <input
+            name="note"
+            maxLength={240}
+            defaultValue={todayCheckin?.note || ""}
+            className="mt-2 w-full rounded-md border border-[#d8d3c6] px-3 py-3 outline-none focus:border-[#a5533c]"
+            placeholder="例如：做完后心里更稳了一点"
+          />
+        </label>
+        <button type="submit" disabled={busy} className="min-h-11 self-end rounded-md bg-[#23231f] px-4 py-3 text-sm font-medium text-white disabled:opacity-60">
+          {todayCheckin ? "更新打卡" : "完成打卡"}
+        </button>
+      </form>
+
+      {profileCheckins.length > 0 && (
+        <div className="mt-4 grid gap-2 md:grid-cols-3">
+          {profileCheckins.slice(0, 3).map((checkin) => (
+            <article key={checkin.id} className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-3">
+              <div className="text-xs text-[#a5533c]">{checkin.date}</div>
+              <div className="mt-1 text-sm font-medium leading-6">{checkin.action}</div>
+              {checkin.note && <p className="mt-1 text-xs leading-5 text-[#68645d]">{checkin.note}</p>}
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function DailyList({ title, items, tone }: { title: string; items: string[]; tone: "good" | "warn" | "action" }) {
   const dotClass = tone === "good" ? "bg-[#2d6b6f]" : tone === "warn" ? "bg-[#a5533c]" : "bg-[#596b41]";
   return (
@@ -857,7 +974,7 @@ function QuickMetrics({ state, selectedProfile }: { state: AppState; selectedPro
       {[
         ["已建档案", state.profiles.length, "最多 3 个命盘档案"],
         ["今日可问", state.remainingToday, "免费次数每日刷新"],
-        ["历史记录", state.questions.length, selectedProfile ? `${selectedProfile.name} 可继续追问` : "创建档案后开始"],
+        ["行动打卡", state.checkins.length, selectedProfile ? `${selectedProfile.name} 的行动记录` : "创建档案后开始"],
       ].map(([label, value, detail]) => (
         <div key={label} className="rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm">
           <div className="text-xs text-[#756f67]">{label}</div>
@@ -1406,11 +1523,12 @@ function AdminStats() {
 
   return (
     <section className="space-y-4">
-      <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-7">
         {[
           ["用户", stats.users],
           ["命盘", stats.profiles],
           ["总提问", stats.questions],
+          ["打卡", stats.checkins],
           ["今日提问", stats.todayQuestions],
           ["OpenAI", stats.openaiQuestions],
           ["估算Token", stats.estimatedTokens],

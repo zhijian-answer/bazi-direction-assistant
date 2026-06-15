@@ -113,6 +113,17 @@ export type GuidanceQuestion = {
   };
 };
 
+export type ActionCheckin = {
+  id: string;
+  userId: string;
+  profileId: string;
+  date: string;
+  action: string;
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type DailyGuidance = {
   profileId: string;
   date: string;
@@ -191,4 +202,5 @@ export type AppDb = {
   sessions: Session[];
   profiles: BirthProfile[];
   questions: GuidanceQuestion[];
+  checkins: ActionCheckin[];
 };
