@@ -178,6 +178,7 @@ SMOKE_BASE_URL=http://127.0.0.1:3000 npm run smoke
 - 提问
 - `/api/me` 持久化读取
 - `/api/me/export` 个人数据导出
+- `DELETE /api/me` 账号和个人数据删除
 - 普通用户访问 `/api/admin/export` 返回 `403`
 
 ## 管理员备份
@@ -223,6 +224,7 @@ RATE_LIMIT_QUESTION_WRITE=30
 - 普通用户不能访问 `/api/admin/stats`
 - 普通用户不能访问 `/api/admin/export`
 - 普通用户可以访问 `/api/me/export` 导出自己的数据
+- 普通用户可以通过 `DELETE /api/me` 删除自己的账号和数据
 - 管理员邮箱在 `ADMIN_EMAILS` 中
 - `/privacy`、`/terms`、`/about` 可以打开
 - 反向代理配置 HTTPS

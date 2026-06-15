@@ -132,6 +132,24 @@ export async function deleteSession(token: string) {
   });
 }
 
+export async function deleteUserData(userId: string) {
+  return mutateDb((db) => {
+    const deleted = {
+      users: db.users.filter((user) => user.id === userId).length,
+      sessions: db.sessions.filter((session) => session.userId === userId).length,
+      profiles: db.profiles.filter((profile) => profile.userId === userId).length,
+      questions: db.questions.filter((question) => question.userId === userId).length,
+    };
+
+    db.users = db.users.filter((user) => user.id !== userId);
+    db.sessions = db.sessions.filter((session) => session.userId !== userId);
+    db.profiles = db.profiles.filter((profile) => profile.userId !== userId);
+    db.questions = db.questions.filter((question) => question.userId !== userId);
+
+    return deleted;
+  });
+}
+
 export async function findUserBySession(token?: string) {
   if (!token) {
     return null;

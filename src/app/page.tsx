@@ -14,6 +14,7 @@ import {
   LogOut,
   MessageCircleQuestion,
   Moon,
+  Trash2,
   ShieldCheck,
   Sparkles,
   SunMedium,
@@ -379,6 +380,34 @@ export default function Home() {
     setActionCard(null);
   }
 
+  async function deleteAccount() {
+    const confirmation = window.prompt("这会永久删除账号、命盘档案和提问历史。请输入“删除”确认。");
+    if (confirmation !== "删除") {
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+    try {
+      const response = await fetch("/api/me", { method: "DELETE" });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "删除失败");
+      }
+      setState(emptyState);
+      setSelectedProfileId("");
+      setDailyGuidance(null);
+      setBirthReport(null);
+      setYearForecast(null);
+      setActionCard(null);
+      setActivePanel("ask");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "删除失败");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#f6f7f2] text-[#23231f]">
@@ -570,7 +599,7 @@ export default function Home() {
 
             {activePanel === "history" && <HistoryPanel questions={state.questions} />}
 
-            {activePanel === "explore" && <ExplorePanel profile={selectedProfile} />}
+            {activePanel === "explore" && <ExplorePanel profile={selectedProfile} busy={busy} onDeleteAccount={deleteAccount} />}
 
             {activePanel === "admin" && <AdminStats />}
           </div>
@@ -1226,7 +1255,15 @@ function HistoryPanel({ questions }: { questions: GuidanceQuestion[] }) {
   );
 }
 
-function ExplorePanel({ profile }: { profile?: BirthProfile }) {
+function ExplorePanel({
+  profile,
+  busy,
+  onDeleteAccount,
+}: {
+  profile?: BirthProfile;
+  busy: boolean;
+  onDeleteAccount: () => void;
+}) {
   const coverUrl = profile ? `/api/share-card?profileId=${encodeURIComponent(profile.id)}&type=cover` : "";
   const wuxingUrl = profile ? `/api/share-card?profileId=${encodeURIComponent(profile.id)}&type=wuxing` : "";
 
@@ -1243,25 +1280,37 @@ function ExplorePanel({ profile }: { profile?: BirthProfile }) {
         </p>
       </div>
       <section className="rounded-lg border border-[#d8d3c6] bg-[#fbfbf8] p-5 shadow-sm">
-        <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+        <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
             <div className="flex items-center gap-2 text-sm text-[#2d6b6f]">
               <ShieldCheck className="h-4 w-4" />
               隐私与数据
             </div>
-            <h3 className="mt-2 text-xl font-semibold">导出我的数据</h3>
+            <h3 className="mt-2 text-xl font-semibold">导出或删除我的数据</h3>
             <p className="mt-2 text-sm leading-7 text-[#68645d]">
-              可以随时下载自己保存的命盘、提问历史和已生成的报告内容。导出文件不包含密码、登录凭证或其他用户资料。
+              可以随时下载自己保存的命盘、提问历史和已生成的报告内容；也可以永久删除账号和个人数据。导出文件不包含密码、登录凭证或其他用户资料。
             </p>
           </div>
-          <a
-            href="/api/me/export"
-            download
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#23231f] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#34342f]"
-          >
-            <FileText className="h-4 w-4" />
-            导出 JSON
-          </a>
+          <div className="grid gap-2 sm:grid-cols-2 lg:min-w-[260px] lg:grid-cols-1">
+            <a
+              href="/api/me/export"
+              download
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#23231f] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#34342f]"
+            >
+              <FileText className="h-4 w-4" />
+              导出 JSON
+            </a>
+            <button
+              type="button"
+              data-action="delete-account"
+              disabled={busy}
+              onClick={onDeleteAccount}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-[#d8a99d] bg-white px-4 py-2 text-sm font-medium text-[#9c2f1b] hover:bg-[#fff5f2] disabled:opacity-60"
+            >
+              <Trash2 className="h-4 w-4" />
+              删除账号数据
+            </button>
+          </div>
         </div>
       </section>
       <section className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, sessionCookieName } from "@/lib/auth";
 import { isAdminUser } from "@/lib/admin";
-import { questionsToday, readDb } from "@/lib/store";
+import { deleteUserData, questionsToday, readDb } from "@/lib/store";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -27,4 +27,22 @@ export async function GET() {
     questions,
     remainingToday: Math.max(0, user.dailyQuestionLimit - usedToday),
   });
+}
+
+export async function DELETE() {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "请先登录" }, { status: 401 });
+  }
+
+  const deleted = await deleteUserData(user.id);
+  const response = NextResponse.json({ ok: true, deleted });
+  response.cookies.set(sessionCookieName, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    expires: new Date(0),
+  });
+  return response;
 }

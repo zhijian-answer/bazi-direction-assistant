@@ -157,6 +157,18 @@ async function main() {
   const exportAttempt = await request("/api/admin/export");
   assert(exportAttempt.response.status === 403, `non-admin export should be 403, got ${exportAttempt.response.status}`);
 
+  const deleteMe = await request("/api/me", { method: "DELETE" });
+  assert(deleteMe.response.ok, `delete me failed: ${deleteMe.response.status} ${deleteMe.text}`);
+  assert(deleteMe.data?.deleted?.users === 1, "delete me did not remove user");
+  assert(deleteMe.data?.deleted?.profiles >= 1, "delete me did not remove profiles");
+  assert(deleteMe.data?.deleted?.questions >= 1, "delete me did not remove questions");
+
+  const meAfterDelete = await request("/api/me");
+  assert(meAfterDelete.response.ok, `me after delete failed: ${meAfterDelete.response.status}`);
+  assert(meAfterDelete.data?.user === null, "deleted account still has a session");
+  assert(meAfterDelete.data?.profiles?.length === 0, "deleted account profiles still visible");
+  assert(meAfterDelete.data?.questions?.length === 0, "deleted account questions still visible");
+
   console.log(
     JSON.stringify(
       {
@@ -170,6 +182,7 @@ async function main() {
         reportTitle: report.data.report.title,
         forecastTitle: forecast.data.forecast.title,
         myDataExport: myExport.data.scope,
+        accountDeleted: true,
         shareCards: ["cover", "wuxing"],
         questionId: question.data.question.id,
         remainingToday: question.data.remainingToday,
