@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">八字方向助手</title>
+  <desc id="desc">A safe-area mobile icon for the bazi direction assistant.</desc>
+  <rect width="512" height="512" fill="#23231f"/>
+  <circle cx="256" cy="256" r="190" fill="#f6f7f2"/>
+  <circle cx="256" cy="256" r="160" fill="#23231f"/>
+  <circle cx="256" cy="256" r="112" fill="none" stroke="#d8d3c6" stroke-width="12"/>
+  <path d="M256 112 294 234 400 256 294 278 256 400 218 278 112 256 218 234Z" fill="#a5533c"/>
+  <circle cx="256" cy="256" r="38" fill="#f6f7f2"/>
+  <circle cx="256" cy="256" r="14" fill="#2d6b6f"/>
+</svg>

@@ -32,10 +32,8 @@ bazi-direction-assistant
 - `/api/health` 健康检查
 - `npm run smoke` 核心流程烟测
 
-## 当前本地提交
+## 查看当前本地提交
 
-```text
-096fd1c Add GitHub push helper
-1238445 Add GitHub CI workflow
-bf16afa Build free bazi direction assistant
+```powershell
+git log --oneline -5
 ```

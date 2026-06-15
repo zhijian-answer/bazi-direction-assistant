@@ -63,6 +63,20 @@ async function main() {
   assert(health.data?.status === "ok", "health status is not ok");
   assert(health.data?.app_id === "bazi-direction-assistant", "unexpected app id");
 
+  const manifest = await request("/manifest.webmanifest");
+  assert(manifest.response.ok, `manifest failed: ${manifest.response.status}`);
+  assert(manifest.data?.name === "八字方向助手", "manifest name mismatch");
+  assert(manifest.data?.display === "standalone", "manifest display should be standalone");
+  assert(manifest.data?.icons?.length >= 2, "manifest icons missing");
+
+  const appIcon = await request("/app-icon.svg");
+  assert(appIcon.response.ok, `app icon failed: ${appIcon.response.status}`);
+  assert(typeof appIcon.data === "string" && appIcon.data.includes("<svg"), "app icon svg missing");
+
+  const maskableIcon = await request("/maskable-icon.svg");
+  assert(maskableIcon.response.ok, `maskable icon failed: ${maskableIcon.response.status}`);
+  assert(typeof maskableIcon.data === "string" && maskableIcon.data.includes("<svg"), "maskable icon svg missing");
+
   const register = await request("/api/auth/register", {
     method: "POST",
     body: JSON.stringify({
@@ -176,6 +190,7 @@ async function main() {
         baseUrl,
         email,
         aiMode: health.data.ai_mode,
+        pwa: manifest.data.display,
         profileId: profile.data.profile.id,
         dailyTheme: daily.data.guidance.theme,
         actionCard: actionCard.data.card.title,

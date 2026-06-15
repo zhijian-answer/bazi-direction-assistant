@@ -168,6 +168,7 @@ SMOKE_BASE_URL=http://127.0.0.1:3000 npm run smoke
 烟测会创建一个临时测试账号，并验证：
 
 - `/api/health`
+- `/manifest.webmanifest` 和应用图标
 - 注册与 session cookie
 - 创建命盘
 - 今日方向
@@ -221,6 +222,7 @@ RATE_LIMIT_QUESTION_WRITE=30
 - `npm run check` 通过
 - `SMOKE_BASE_URL=https://你的域名 npm run smoke` 通过
 - `/api/health` 返回 `status: ok`
+- `/manifest.webmanifest` 可以打开，手机浏览器能识别站点图标
 - 普通用户不能访问 `/api/admin/stats`
 - 普通用户不能访问 `/api/admin/export`
 - 普通用户可以访问 `/api/me/export` 导出自己的数据

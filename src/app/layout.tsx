@@ -13,8 +13,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  applicationName: "八字方向助手",
   title: "八字方向助手",
   description: "免费的四柱八字人生方向参考工具",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/app-icon.svg",
+    apple: "/app-icon.svg",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "方向助手",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "theme-color": "#23231f",
+  },
 };
 
 export default function RootLayout({
