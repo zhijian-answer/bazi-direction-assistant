@@ -28,6 +28,8 @@ RATE_LIMIT_PROFILE_WRITE=20
 RATE_LIMIT_QUESTION_WRITE=30
 RATE_LIMIT_CHECKIN_WRITE=40
 APP_DATA_DIR=./data
+BACKUP_DIR=./data/backups
+BACKUP_RETENTION=30
 ```
 
 如果要启用真实 AI 回答：
@@ -189,6 +191,28 @@ SMOKE_BASE_URL=http://127.0.0.1:3000 npm run smoke
 
 ## 管理员备份
 
+服务器上建议同时保留两种备份方式：系统级自动备份和管理员手动导出。
+
+本地 JSON 数据文件备份：
+
+```bash
+npm run backup
+```
+
+生产服务器示例：
+
+```bash
+APP_DATA_DIR=/opt/bazi-direction-assistant/data BACKUP_DIR=/opt/bazi-direction-assistant/data/backups BACKUP_RETENTION=30 npm run backup
+```
+
+cron 每天凌晨 3 点执行示例：
+
+```bash
+0 3 * * * cd /opt/bazi-direction-assistant/current && APP_DATA_DIR=/opt/bazi-direction-assistant/data BACKUP_DIR=/opt/bazi-direction-assistant/data/backups BACKUP_RETENTION=30 npm run backup >> /opt/bazi-direction-assistant/data/backup.log 2>&1
+```
+
+Docker 部署时，备份文件默认会写入挂载目录 `./data/backups`。
+
 管理员账号登录后可访问：
 
 ```bash
@@ -235,6 +259,7 @@ RATE_LIMIT_CHECKIN_WRITE=40
 - 普通用户不能访问 `/api/admin/export`
 - 普通用户可以访问 `/api/me/export` 导出自己的数据
 - 普通用户可以通过 `DELETE /api/me` 删除自己的账号和数据
+- `npm run backup` 可以生成数据备份文件
 - 管理员邮箱在 `ADMIN_EMAILS` 中
 - `/privacy`、`/terms`、`/about` 可以打开
 - 反向代理配置 HTTPS

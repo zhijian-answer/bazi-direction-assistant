@@ -15,6 +15,7 @@
 - 根据命盘生成 SVG 图片：今日方向卡、报告封面、五行能量图，可预览和下载
 - 用户可导出或删除自己的命盘、报告、流年、行动卡、每日打卡和提问历史
 - 支持 PWA manifest 和手机桌面图标，方便添加到手机桌面
+- 提供本地 JSON 数据备份脚本，方便免费运营早期做灾备
 - 每个用户每日免费提问限制，默认 5 次
 - 无 `OPENAI_API_KEY` 时使用本地规则引擎回答
 - 配置 `OPENAI_API_KEY` 后自动改用 OpenAI Responses API
@@ -64,6 +65,8 @@ RATE_LIMIT_PROFILE_WRITE=20
 RATE_LIMIT_QUESTION_WRITE=30
 RATE_LIMIT_CHECKIN_WRITE=40
 APP_DATA_DIR=./data
+BACKUP_DIR=./data/backups
+BACKUP_RETENTION=30
 ADMIN_EMAILS=
 APP_URL=http://localhost:3000
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
@@ -77,6 +80,7 @@ APP_VERSION=0.1.0
 - `AI_FALLBACK_ON_ERROR=true` 会在 OpenAI 失败时自动降级到本地规则回答。
 - `ADMIN_EMAILS` 用英文逗号分隔，例如 `admin@example.com,owner@example.com`。只有这些邮箱注册/登录后才能看到统计后台。
 - `APP_DATA_DIR` 是本地 JSON 数据目录。正式公开运营前建议迁移到数据库，或者至少做好定时备份。
+- `BACKUP_DIR` 是 `npm run backup` 写入备份文件的位置，`BACKUP_RETENTION` 是保留的备份份数。
 - `MAX_*` 系列用于限制免费站成本和滥用。
 - `RATE_LIMIT_*` 系列用于限制短时间内重复调用接口，防止注册、登录、提问被脚本刷爆。
 

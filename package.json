@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "check": "npm run lint && npm run build",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "backup": "node scripts/backup-data.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.17.0",
