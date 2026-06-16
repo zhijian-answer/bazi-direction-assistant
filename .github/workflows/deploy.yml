@@ -1,0 +1,57 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: bazi-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Pull and restart production
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify build before deploy
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install and build
+        run: |
+          npm ci
+          npm run check
+
+      - name: Start ssh agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Trust production host
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${{ secrets.DEPLOY_SSH_PORT || '22' }}" "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Run server pull deploy
+        run: |
+          ssh \
+            -o IPQoS=none \
+            -o BatchMode=yes \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=3 \
+            -p "${{ secrets.DEPLOY_SSH_PORT || '22' }}" \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "curl -fsSL https://raw.githubusercontent.com/zhijian-answer/bazi-direction-assistant/main/deploy/server-deploy.sh | bash"
+
+      - name: Public health check
+        run: |
+          curl --retry 8 --retry-delay 8 --retry-all-errors -fsS https://zzj-superstaff.duckdns.org/api/health
