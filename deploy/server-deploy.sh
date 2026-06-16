@@ -2,8 +2,7 @@
 set -Eeuo pipefail
 
 rm -f /tmp/bazi-deploy.log /tmp/bazi-deploy.done /tmp/bazi-deploy.failed
-exec > >(tee -a /tmp/bazi-deploy.log) 2>&1
-trap 'echo FAILED > /tmp/bazi-deploy.failed' ERR
+trap 'echo FAILED > /tmp/bazi-deploy.failed; echo "== failed $(date) =="' ERR
 
 APP=/opt/bazi-direction-assistant
 REPO=https://github.com/zhijian-answer/bazi-direction-assistant.git
