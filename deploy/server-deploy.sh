@@ -15,6 +15,7 @@ rm -f /opt/bazi-direction-assistant-*.tar.gz /opt/bazi-direction-assistant-*.tar
 mkdir -p "$APP/data/backups"
 
 if [ -d "$APP/current/.git" ]; then
+  git config --global --add safe.directory "$APP/current"
   git -C "$APP/current" fetch origin main
   git -C "$APP/current" reset --hard origin/main
 else
