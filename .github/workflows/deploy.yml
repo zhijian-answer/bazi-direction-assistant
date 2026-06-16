@@ -50,7 +50,7 @@ jobs:
             -o ServerAliveCountMax=3 \
             -p "${{ secrets.DEPLOY_SSH_PORT || '22' }}" \
             "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
-            "curl -fsSL https://raw.githubusercontent.com/zhijian-answer/bazi-direction-assistant/main/deploy/server-ssh-stabilize.sh | bash && curl -fsSL https://raw.githubusercontent.com/zhijian-answer/bazi-direction-assistant/main/deploy/server-deploy.sh | bash"
+            "curl -fsSL https://raw.githubusercontent.com/zhijian-answer/bazi-direction-assistant/${{ github.sha }}/deploy/server-ssh-stabilize.sh | bash && curl -fsSL https://raw.githubusercontent.com/zhijian-answer/bazi-direction-assistant/${{ github.sha }}/deploy/server-deploy.sh | bash"
 
       - name: Public health check
         run: |
