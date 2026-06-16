@@ -41,6 +41,17 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p "${{ secrets.DEPLOY_SSH_PORT || '22' }}" "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
 
+      - name: Stabilize server ssh
+        run: |
+          ssh \
+            -o IPQoS=none \
+            -o BatchMode=yes \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=3 \
+            -p "${{ secrets.DEPLOY_SSH_PORT || '22' }}" \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "curl -fsSL https://raw.githubusercontent.com/zhijian-answer/bazi-direction-assistant/main/deploy/server-ssh-stabilize.sh | bash"
+
       - name: Run server pull deploy
         run: |
           ssh \
