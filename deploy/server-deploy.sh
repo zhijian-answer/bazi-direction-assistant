@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-exec > /tmp/bazi-deploy.log 2>&1
+rm -f /tmp/bazi-deploy.log /tmp/bazi-deploy.done /tmp/bazi-deploy.failed
+exec > >(tee -a /tmp/bazi-deploy.log) 2>&1
 trap 'echo FAILED > /tmp/bazi-deploy.failed' ERR
-rm -f /tmp/bazi-deploy.done /tmp/bazi-deploy.failed
 
 APP=/opt/bazi-direction-assistant
 REPO=https://github.com/zhijian-answer/bazi-direction-assistant.git
