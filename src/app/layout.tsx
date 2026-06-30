@@ -1,21 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  applicationName: "八字方向助手",
-  title: "八字方向助手",
-  description: "免费的四柱八字人生方向参考工具",
+  applicationName: "八字命盘助手",
+  title: "八字命盘助手｜四柱、五行、大运流年在线排盘",
+  description: "免费的中文八字排盘工具，提供四柱八字、五行、十神、地支关系、大运流年的结构化参考。",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/app-icon.svg",
@@ -23,7 +12,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "方向助手",
+    title: "八字命盘助手",
     statusBarStyle: "black-translucent",
   },
   formatDetection: {
@@ -31,7 +20,7 @@ export const metadata: Metadata = {
   },
   other: {
     "mobile-web-app-capable": "yes",
-    "theme-color": "#23231f",
+    "theme-color": "#26231f",
   },
 };
 
@@ -41,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN" className={`${geistSans.variable} ${geistMono.variable} h-full`}>
+    <html lang="zh-CN" className="h-full">
       <body className="min-h-full flex flex-col antialiased">{children}</body>
     </html>
   );

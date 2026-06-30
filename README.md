@@ -1,12 +1,26 @@
-# 八字方向助手
+# 八字命盘助手
 
 免费的四柱八字人生方向参考网站 MVP。用户注册后可以创建出生档案，系统根据四柱八字给出“适合做什么、不适合做什么、下一步行动建议”的温和参考。
+
+## 页面组件
+
+- `HeroSection`：品牌首屏和工具入口。
+- `BirthForm`：阳历/农历、闰月、未知时辰、出生地、时区和浏览器记忆。
+- `ResultSection`：命盘结果总览、复制结果和分享文案。
+- `PillarTable`：四柱、十神、藏干、藏干十神和纳音。
+- `FiveElementsCard`：含藏干权重的五行比例和双引擎核对状态。
+- `LuckCycleTable`：大运和近年流年。
+- `DisclaimerFooter`：使用边界、隐私和法律页面入口。
+
+设计与文案规范见 [ProductDesignSystem.md](./docs/ProductDesignSystem.md) 和 [ChineseCopyGuide.md](./docs/ChineseCopyGuide.md)。
 
 ## 当前能力
 
 - 注册、登录、退出
 - 创建和删除出生档案：出生年月日、时间、地点、性别、农历/阳历
 - 使用 `lunar-javascript` 生成四柱、五行、十神、纳音和日主
+- 使用 `lunar-javascript` 生成藏干、藏干十神、大运和近年流年
+- 使用 MIT 的 `bazi-calculator-by-alvamind` 对公历命盘做辅助核对，并提供含藏干权重的五行比例
 - 登录后根据命盘生成“今日方向卡”：适合做、暂缓做、三步行动
 - 保存每日行动打卡：记录今天实际完成的一小步，支持连续天数、最近 7 天节奏和历史查看
 - 根据命盘生成“低谷行动卡”：稳定步骤、15 分钟小行动、复盘问题
@@ -32,6 +46,12 @@ npm run dev
 ```
 
 打开 `http://localhost:3000`。
+
+首次安装会执行 `scripts/prepare-alvamind.mjs`，修复上游 npm 包缺少 `dist` 运行文件的问题。第三方组件说明见 [ThirdPartyNotices.md](./docs/ThirdPartyNotices.md)。
+
+## 排盘算法接口
+
+真实排盘入口是 `src/lib/bazi.ts` 中的 `buildBaziChart(input)`。页面和报告只依赖统一的 `BaziChart`，后续可以继续增加真太阳时、更多时区换算、神煞和专业强弱判断，而不需要重写页面组件。
 
 完整部署说明见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
 

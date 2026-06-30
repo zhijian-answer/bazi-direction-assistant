@@ -5,6 +5,29 @@ export type ElementKey = "wood" | "fire" | "earth" | "metal" | "water";
 
 export type ElementBalance = Record<ElementKey, number>;
 
+export type ChartPosition = "year" | "month" | "day" | "time";
+
+export type EarthlyRelation = {
+  type: "六合" | "三合" | "半合" | "冲" | "刑" | "害" | "破";
+  branches: string;
+  positions: ChartPosition[];
+  note: string;
+};
+
+export type LuckCycle = {
+  ganZhi: string;
+  startAge: number;
+  endAge: number;
+  startYear: number;
+  endYear: number;
+};
+
+export type AnnualLuck = {
+  year: number;
+  age: number;
+  ganZhi: string;
+};
+
 export type BaziChart = {
   solarText: string;
   lunarText: string;
@@ -40,6 +63,18 @@ export type BaziChart = {
     month: string;
     day: string;
     time: string;
+  };
+  hiddenStems?: Record<ChartPosition, string[]>;
+  hiddenTenGods?: Record<ChartPosition, string[]>;
+  relations?: EarthlyRelation[];
+  luckCycles?: LuckCycle[];
+  annualLuck?: AnnualLuck[];
+  engine?: {
+    primary: "lunar-javascript";
+    validator?: "bazi-calculator-by-alvamind";
+    validationStatus?: "matched" | "different" | "unavailable";
+    matchedPillars?: number;
+    weightedBalance?: ElementBalance;
   };
   nayin: {
     year: string;
@@ -79,9 +114,11 @@ export type BirthProfile = {
   name: string;
   gender: Gender;
   calendarType: CalendarType;
+  isLeapMonth?: boolean;
   birthDate: string;
   birthTime: string;
   birthPlace: string;
+  timezone?: string;
   timeUnknown: boolean;
   createdAt: string;
   chart: BaziChart;

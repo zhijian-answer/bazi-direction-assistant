@@ -5,7 +5,6 @@ import {
   BarChart3,
   BookOpenText,
   CalendarDays,
-  ChartNoAxesColumn,
   ClipboardCheck,
   Compass,
   FileText,
@@ -19,12 +18,15 @@ import {
   ShieldCheck,
   Sparkles,
   SunMedium,
-  UserRound,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { ActionCard, ActionCheckin, BirthProfile, BirthReport, DailyGuidance, GuidanceQuestion, PublicUser, YearForecast } from "@/lib/types";
 import { buildActionCheckinStats } from "@/lib/checkin-stats";
+import { BirthForm } from "@/components/bazi/BirthForm";
+import { ResultSection } from "@/components/bazi/ResultSection";
+import { DisclaimerFooter } from "@/components/site/DisclaimerFooter";
+import { HeroSection } from "@/components/site/HeroSection";
 
 type AppState = {
   user: PublicUser | null;
@@ -345,6 +347,8 @@ export default function Home() {
         birthTime: form.get("birthTime"),
         birthPlace: form.get("birthPlace"),
         timeUnknown: form.get("timeUnknown") === "on",
+        isLeapMonth: form.get("isLeapMonth") === "on",
+        timezone: form.get("timezone"),
       });
       await refresh();
       setSelectedProfileId(data.profile.id);
@@ -474,7 +478,7 @@ export default function Home() {
       <main className="flex min-h-screen items-center justify-center bg-[#f6f7f2] text-[#23231f]">
         <div className="flex items-center gap-3 rounded-lg border border-[#d8d3c6] bg-white px-4 py-3 text-sm shadow-sm">
           <Sparkles className="h-5 w-5 animate-pulse text-[#a5533c]" />
-          正在准备你的方向助手
+          正在准备命盘工具
         </div>
       </main>
     );
@@ -482,36 +486,38 @@ export default function Home() {
 
   if (!state.user) {
     return (
-      <main className="min-h-screen bg-[#f6f7f2] text-[#23231f]">
-        <section className="mx-auto grid min-h-screen max-w-6xl gap-8 px-4 py-6 sm:px-6 md:grid-cols-[1fr_420px] md:items-center md:py-10">
-          <div className="space-y-7">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#d8d3c6] bg-white px-3 py-2 text-sm text-[#6d5846]">
-              <Compass className="h-4 w-4 text-[#a5533c]" />
-              免费四柱八字人生方向助手
-            </div>
-            <div className="space-y-5">
-              <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-[#23231f] sm:text-5xl md:text-6xl">
-                迷茫的时候，先找到下一步能做什么。
-              </h1>
-              <p className="max-w-2xl text-base leading-8 text-[#68645d] sm:text-lg">
-                注册后免费创建命盘档案，围绕事业、关系、学习、行动时机提出问题。系统会结合四柱八字给出温和、可执行的参考建议。
-              </p>
-            </div>
-            <div className="grid max-w-3xl gap-3 sm:grid-cols-3">
-              {[
-                ["文化参考", "不做恐吓式预测"],
-                ["行动建议", "适合与不适合都说清"],
-                ["长期免费", "先靠流量与广告维持"],
-              ].map(([title, body]) => (
-                <div key={title} className="rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm">
-                  <div className="text-sm font-semibold">{title}</div>
-                  <div className="mt-2 text-sm leading-6 text-[#68645d]">{body}</div>
-                </div>
-              ))}
-            </div>
+      <main className="min-h-screen bg-[var(--rice)] text-[var(--ink)]">
+        <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[rgba(255,253,248,0.94)] backdrop-blur">
+          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
+            <a href="#top" className="flex items-center gap-3 font-semibold">
+              <span className="grid h-9 w-9 place-items-center rounded-md bg-[var(--ink)] text-sm font-display text-white">命</span>
+              八字命盘助手
+            </a>
+            <nav className="hidden items-center gap-7 text-sm text-[var(--muted)] md:flex">
+              <a href="#tool" className="hover:text-[var(--cinnabar)]">命盘工具</a>
+              <a href="#learn" className="hover:text-[var(--cinnabar)]">五行分析</a>
+              <a href="#learn" className="hover:text-[var(--cinnabar)]">大运流年</a>
+              <a href="/about" className="hover:text-[var(--cinnabar)]">关于</a>
+            </nav>
+            <a href="#tool" className="btn-primary min-h-9 px-4">免费使用</a>
           </div>
+        </header>
+        <div id="top"><HeroSection /></div>
 
-          <form onSubmit={handleAuth} className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">
+        <section id="tool" className="scroll-mt-20 border-b border-[var(--line)] bg-[var(--paper)]">
+          <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1fr_400px] md:items-center lg:px-10 lg:py-20">
+            <div>
+              <div className="section-kicker">免费注册后使用</div>
+              <h2 className="mt-3 font-display text-3xl sm:text-4xl">保存命盘，随时回来查看</h2>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--muted)]">注册会员不收取费用。一个账号可以保存 3 个命盘档案，并使用命盘报告、流年方向、行动建议和历史记录。</p>
+              <div className="mt-7 grid gap-px overflow-hidden rounded-md border border-[var(--line)] bg-[var(--line)] sm:grid-cols-3">
+                {[["完整排盘", "四柱、藏干与十神"], ["时间节奏", "大运与近年流年"], ["现实行动", "提问与每日建议"]].map(([title, body]) => (
+                  <div key={title} className="bg-[var(--rice)] p-4"><div className="text-sm font-semibold">{title}</div><div className="mt-2 text-xs leading-5 text-[var(--muted)]">{body}</div></div>
+                ))}
+              </div>
+            </div>
+
+          <form onSubmit={handleAuth} className="panel p-5 sm:p-6">
             <div className="mb-5 grid grid-cols-2 gap-2 rounded-lg bg-[#eef1ec] p-1">
               <button
                 type="button"
@@ -545,8 +551,8 @@ export default function Home() {
               </label>
             </div>
             {error && <p className="mt-4 rounded-md border border-[#e4b4a9] bg-[#fff5f2] px-3 py-2 text-sm text-[#9c2f1b]">{error}</p>}
-            <button type="submit" disabled={busy} className="mt-5 w-full rounded-md bg-[#23231f] px-4 py-3 text-white disabled:opacity-60">
-              {busy ? "处理中..." : mode === "register" ? "免费开始" : "进入网站"}
+            <button type="submit" disabled={busy} className="btn-primary mt-5 min-h-12 w-full px-4">
+              {busy ? "正在处理…" : mode === "register" ? "免费注册" : "登录并继续"}
             </button>
             <div className="mt-4 flex flex-wrap gap-3 text-xs text-[#756f67]">
               <a href="/about" className="hover:text-[#a5533c]">
@@ -560,7 +566,12 @@ export default function Home() {
               </a>
             </div>
           </form>
+          </div>
         </section>
+        <section id="learn" className="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
+          <div className="max-w-2xl"><div className="section-kicker">怎么看这份命盘</div><h2 className="mt-3 font-display text-3xl">先看结构，再看行动</h2><p className="mt-4 text-sm leading-7 text-[var(--muted)]">四柱用于描述出生时点的干支结构；五行、十神、地支关系和大运流年是不同观察角度。它们适合用来整理自我认识，不适合代替现实证据和专业判断。</p></div>
+        </section>
+        <DisclaimerFooter />
       </main>
     );
   }
@@ -574,7 +585,7 @@ export default function Home() {
               <Compass className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <div className="truncate font-semibold">八字方向助手</div>
+              <div className="truncate font-semibold">八字命盘助手</div>
               <div className="text-xs text-[#756f67]">免费使用 · 今日剩余 {state.remainingToday} 次</div>
             </div>
           </div>
@@ -593,9 +604,9 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-7xl gap-4 px-4 py-4 sm:px-5 lg:grid-cols-[360px_1fr] lg:gap-5">
+      <section id="tool" className="mx-auto grid max-w-7xl gap-4 px-4 py-4 sm:px-5 lg:grid-cols-[380px_1fr] lg:gap-5">
         <aside className="space-y-4 lg:sticky lg:top-[76px] lg:self-start">
-          <ProfileFormCard busy={busy} state={state} onSubmit={handleProfile} />
+          <BirthForm busy={busy} defaultName={state.user.name} profileCount={state.profiles.length} onSubmit={handleProfile} />
 
           {state.profiles.length > 0 && (
             <ProfileSummary
@@ -614,25 +625,28 @@ export default function Home() {
         <section className="min-w-0 space-y-4">
           <DesktopNav navItems={navItems} activePanel={activePanel} onChange={switchPanel} />
 
-          <DailyGuidanceCard
-            guidance={dailyGuidance}
-            loading={Boolean(selectedProfile && dailyGuidance?.profileId !== selectedProfile.id)}
-            hasProfile={Boolean(selectedProfile)}
-            onAsk={() => switchPanel("ask")}
-            onReport={() => switchPanel("report")}
-          />
+          {activePanel === "ask" && (
+            <>
+              <DailyGuidanceCard
+                guidance={dailyGuidance}
+                loading={Boolean(selectedProfile && dailyGuidance?.profileId !== selectedProfile.id)}
+                hasProfile={Boolean(selectedProfile)}
+                onAsk={() => switchPanel("ask")}
+                onReport={() => switchPanel("report")}
+              />
 
-          <ActionCheckinCard
-            guidance={dailyGuidance}
-            profile={selectedProfile}
-            checkins={state.checkins}
-            busy={busy}
-            onSubmit={handleCheckin}
-          />
+              <ActionCheckinCard
+                guidance={dailyGuidance}
+                profile={selectedProfile}
+                checkins={state.checkins}
+                busy={busy}
+                onSubmit={handleCheckin}
+              />
 
-          <QuickMetrics state={state} selectedProfile={selectedProfile} />
-
-          <AdSlot placement="top" />
+              <QuickMetrics state={state} selectedProfile={selectedProfile} />
+              <AdSlot placement="top" />
+            </>
+          )}
 
           <div ref={panelRef} className="scroll-mt-4 space-y-4 lg:scroll-mt-24">
             {error && <p className="rounded-md border border-[#e4b4a9] bg-[#fff5f2] px-3 py-2 text-sm text-[#9c2f1b]">{error}</p>}
@@ -677,56 +691,9 @@ export default function Home() {
         </section>
       </section>
 
+      <DisclaimerFooter />
       <MobileNav navItems={navItems} activePanel={activePanel} onChange={switchPanel} />
     </main>
-  );
-}
-
-function ProfileFormCard({
-  busy,
-  state,
-  onSubmit,
-}: {
-  busy: boolean;
-  state: AppState;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-}) {
-  return (
-    <section className="rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 font-semibold">
-          <UserRound className="h-4 w-4 text-[#a5533c]" />
-          命盘档案
-        </div>
-        <span className="rounded-full bg-[#eef1ec] px-2.5 py-1 text-xs text-[#5f665e]">{state.profiles.length}/3</span>
-      </div>
-      <form onSubmit={onSubmit} className="space-y-3">
-        <input name="name" defaultValue={state.user?.name} className="w-full rounded-md border border-[#d8d3c6] px-3 py-2 text-sm outline-none focus:border-[#a5533c]" placeholder="档案名称" />
-        <div className="grid grid-cols-2 gap-2">
-          <select name="gender" className="rounded-md border border-[#d8d3c6] px-3 py-2 text-sm">
-            <option value="male">男</option>
-            <option value="female">女</option>
-            <option value="other">其他/不填</option>
-          </select>
-          <select name="calendarType" className="rounded-md border border-[#d8d3c6] px-3 py-2 text-sm">
-            <option value="solar">阳历</option>
-            <option value="lunar">农历</option>
-          </select>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <input name="birthDate" type="date" required className="min-w-0 rounded-md border border-[#d8d3c6] px-3 py-2 text-sm" />
-          <input name="birthTime" type="time" defaultValue="12:00" className="min-w-0 rounded-md border border-[#d8d3c6] px-3 py-2 text-sm" />
-        </div>
-        <input name="birthPlace" required className="w-full rounded-md border border-[#d8d3c6] px-3 py-2 text-sm outline-none focus:border-[#a5533c]" placeholder="出生地点，例如：上海" />
-        <label className="flex items-start gap-2 text-sm leading-6 text-[#68645d]">
-          <input name="timeUnknown" type="checkbox" className="mt-1" />
-          不知道具体时间，先按中午 12:00 参考
-        </label>
-        <button type="submit" disabled={busy} className="w-full rounded-md bg-[#a5533c] px-3 py-2.5 text-sm font-medium text-white disabled:opacity-60">
-          保存并排盘
-        </button>
-      </form>
-    </section>
   );
 }
 
@@ -1209,90 +1176,7 @@ function ReportPanel({
     );
   }
 
-  return (
-    <section className="space-y-4">
-      <div className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">
-        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 text-sm text-[#a5533c]">
-              <BookOpenText className="h-4 w-4" />
-              命盘报告摘要
-            </div>
-            <h2 className="mt-2 text-2xl font-semibold">{report.title}</h2>
-            <p className="mt-1 text-sm text-[#68645d]">
-              {profile.chart.solarText} · {profile.birthPlace} · {profile.timeUnknown ? "时间未知参考盘" : "出生时间已填写"}
-            </p>
-          </div>
-          <button onClick={onAsk} className="rounded-md border border-[#d8d3c6] px-3 py-2 text-sm hover:border-[#a5533c]">
-            基于报告提问
-          </button>
-        </div>
-
-        <p className="mb-4 max-w-3xl text-sm leading-7 text-[#5f5b54]">{report.summary}</p>
-
-        <div className="grid gap-3 md:grid-cols-4">
-          {Object.entries(profile.chart.pillars).map(([key, value]) => (
-            <div key={key} className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-4 text-center">
-              <div className="text-xs text-[#756f67]">{pillarNames[key] || key}</div>
-              <div className="mt-2 text-2xl font-semibold">{value}</div>
-              <div className="mt-1 text-xs text-[#68645d]">{profile.chart.nayin[key as keyof typeof profile.chart.nayin]}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-4 grid gap-2 md:grid-cols-3">
-          {report.highlights.map((item) => (
-            <div key={item} className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-3 text-sm leading-6 text-[#5f5b54]">
-              {item}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
-        <section className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center gap-2 font-semibold">
-            <ChartNoAxesColumn className="h-4 w-4 text-[#2d6b6f]" />
-            五行结构
-          </div>
-          <WuxingBars balance={profile.chart.wuxing.balance} />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <ReportNote title="结构说明" body={report.wuxing.balanceText} />
-            <ReportList title="补足建议" items={report.wuxing.suggestions} />
-          </div>
-        </section>
-
-        <section className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center gap-2 font-semibold">
-            <Compass className="h-4 w-4 text-[#a5533c]" />
-            行动计划
-          </div>
-          <ReportList title="从今天开始" items={report.actionPlan} compact />
-        </section>
-      </div>
-
-      <section className="grid gap-3 md:grid-cols-2">
-        {report.sections.map((section) => (
-          <article key={section.id} className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">
-            <h3 className="font-semibold">{section.title}</h3>
-            <p className="mt-2 text-sm leading-7 text-[#5f5b54]">{section.body}</p>
-            <ul className="mt-3 space-y-2 text-sm leading-6 text-[#5f5b54]">
-              {section.bullets.map((item) => (
-                <li key={item} className="flex gap-2">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#2d6b6f]" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-        ))}
-      </section>
-
-      <section className="rounded-lg border border-[#d8d3c6] bg-[#fbfbf8] p-4 text-xs leading-6 text-[#756f67]">
-        {report.disclaimers.join(" ")}
-      </section>
-    </section>
-  );
+  return <ResultSection profile={profile} report={report} onAsk={onAsk} />;
 }
 
 function WuxingBars({ balance, compact = false }: { balance: Record<string, number>; compact?: boolean }) {
@@ -1317,31 +1201,6 @@ function WuxingBars({ balance, compact = false }: { balance: Record<string, numb
           </div>
         ),
       )}
-    </div>
-  );
-}
-
-function ReportNote({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm">
-      <div className="font-semibold">{title}</div>
-      <p className="mt-2 text-sm leading-7 text-[#5f5b54]">{body}</p>
-    </div>
-  );
-}
-
-function ReportList({ title, items, compact = false }: { title: string; items: string[]; compact?: boolean }) {
-  return (
-    <div className={compact ? "" : "rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm"}>
-      <div className="font-semibold">{title}</div>
-      <ul className="mt-3 space-y-2 text-sm leading-6 text-[#5f5b54]">
-        {items.map((item) => (
-          <li key={item} className="flex gap-2">
-            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#a5533c]" />
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

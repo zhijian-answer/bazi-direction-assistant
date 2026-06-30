@@ -65,7 +65,7 @@ async function main() {
 
   const manifest = await request("/manifest.webmanifest");
   assert(manifest.response.ok, `manifest failed: ${manifest.response.status}`);
-  assert(manifest.data?.name === "八字方向助手", "manifest name mismatch");
+  assert(manifest.data?.name === "八字命盘助手", "manifest name mismatch");
   assert(manifest.data?.display === "standalone", "manifest display should be standalone");
   assert(manifest.data?.icons?.length >= 2, "manifest icons missing");
 
@@ -97,11 +97,17 @@ async function main() {
       birthDate: "1990-05-20",
       birthTime: "09:00",
       birthPlace: "Shanghai",
+      timezone: "Asia/Shanghai",
       timeUnknown: false,
     }),
   });
   assert(profile.response.ok, `profile failed: ${profile.response.status} ${profile.text}`);
   assert(profile.data?.profile?.chart?.pillars?.day, "profile chart missing day pillar");
+  assert(profile.data?.profile?.chart?.hiddenStems?.day?.length >= 1, "profile chart missing hidden stems");
+  assert(profile.data?.profile?.chart?.luckCycles?.length >= 1, "profile chart missing luck cycles");
+  assert(profile.data?.profile?.chart?.annualLuck?.length >= 1, "profile chart missing annual luck");
+  assert(profile.data?.profile?.chart?.engine?.validator === "bazi-calculator-by-alvamind", "secondary engine missing");
+  assert(profile.data?.profile?.chart?.engine?.weightedBalance?.wood >= 0, "weighted five-element balance missing");
 
   const extraProfile = await request("/api/profiles", {
     method: "POST",

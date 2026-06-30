@@ -38,6 +38,8 @@ export async function POST(request: Request) {
     const name = trimToLimit(String(body.name || user.name || "我的命盘"), appLimits.maxProfileNameChars);
     const birthPlace = trimToLimit(String(body.birthPlace || ""), appLimits.maxBirthPlaceChars);
     const calendarType = (body.calendarType === "lunar" ? "lunar" : "solar") as CalendarType;
+    const isLeapMonth = calendarType === "lunar" && Boolean(body.isLeapMonth);
+    const timezone = String(body.timezone || "Asia/Shanghai");
     const gender = (["male", "female", "other"].includes(body.gender)
       ? body.gender
       : "other") as Gender;
@@ -50,9 +52,11 @@ export async function POST(request: Request) {
       name,
       gender,
       calendarType,
+      isLeapMonth,
       birthDate,
       birthTime,
       birthPlace,
+      timezone,
       timeUnknown: Boolean(body.timeUnknown),
       createdAt: new Date().toISOString(),
       chart: buildBaziChart({
@@ -60,6 +64,8 @@ export async function POST(request: Request) {
         birthDate,
         birthTime,
         timeUnknown: Boolean(body.timeUnknown),
+        isLeapMonth,
+        gender,
       }),
     };
     await addProfileWithLimit(profile, appLimits.maxProfilesPerUser);

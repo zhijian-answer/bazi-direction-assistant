@@ -24,6 +24,37 @@ declare module "lunar-javascript" {
     getMonthNaYin(): string;
     getDayNaYin(): string;
     getTimeNaYin(): string;
+    getYearHideGan(): string[];
+    getMonthHideGan(): string[];
+    getDayHideGan(): string[];
+    getTimeHideGan(): string[];
+    getYearShiShenZhi(): string[];
+    getMonthShiShenZhi(): string[];
+    getDayShiShenZhi(): string[];
+    getTimeShiShenZhi(): string[];
+    getYun(gender: number, sect?: number): YunLike;
+  };
+
+  type LiuNianLike = {
+    getYear(): number;
+    getAge(): number;
+    getGanZhi(): string;
+  };
+
+  type DaYunLike = {
+    getGanZhi(): string;
+    getStartYear(): number;
+    getEndYear(): number;
+    getStartAge(): number;
+    getEndAge(): number;
+    getLiuNian(count?: number): LiuNianLike[];
+  };
+
+  type YunLike = {
+    getStartYear(): number;
+    getStartMonth(): number;
+    getStartDay(): number;
+    getDaYun(count?: number): DaYunLike[];
   };
 
   type SolarLike = {

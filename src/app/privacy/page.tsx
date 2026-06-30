@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "隐私说明 - 八字方向助手",
-  description: "八字方向助手的数据使用和隐私说明。",
+  title: "隐私说明 - 八字命盘助手",
+  description: "八字命盘助手的数据使用和隐私说明。",
 };
 
 export default function PrivacyPage() {

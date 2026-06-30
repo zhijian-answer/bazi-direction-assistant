@@ -72,7 +72,7 @@ function coverCard(profile: BirthProfile) {
     <rect width="720" height="960" fill="#f6f7f2"/>
     <rect x="40" y="40" width="640" height="880" rx="28" fill="#ffffff" stroke="#d8d3c6"/>
     <rect x="40" y="40" width="640" height="260" rx="28" fill="#233338"/>
-    <text x="82" y="112" class="eyebrow">八字方向助手 · 报告封面</text>
+    <text x="82" y="112" class="eyebrow">八字命盘助手 · 报告封面</text>
     <text x="82" y="172" class="title">${escapeXml(profile.name)}</text>
     <text x="82" y="222" class="subtitle">${escapeXml(profile.chart.solarText)} · ${escapeXml(profile.birthPlace)}</text>
     ${textBlock(report.summary, 82, 358, 24, 3, "body")}
@@ -111,7 +111,7 @@ function wuxingCard(profile: BirthProfile) {
     <rect x="82" y="258" width="556" height="500" rx="20" fill="#fbfbf8" stroke="#e4ded2"/>
     ${bars}
     <text x="82" y="820" class="body">${escapeXml(`适合围绕${profile.chart.dayMaster.elementLabel}的节奏，先把现实中的下一步做清楚。`)}</text>
-    <text x="82" y="884" class="tiny">八字方向助手 · 免费文化参考</text>
+    <text x="82" y="884" class="tiny">八字命盘助手 · 免费文化参考</text>
   `;
 }
 
@@ -136,7 +136,7 @@ function dailyCard(profile: BirthProfile) {
     <rect width="720" height="960" fill="#f6f7f2"/>
     <rect x="40" y="40" width="640" height="880" rx="28" fill="#ffffff" stroke="#d8d3c6"/>
     <rect x="40" y="40" width="640" height="260" rx="28" fill="#233338"/>
-    <text x="82" y="112" class="eyebrow">八字方向助手 · 今日方向</text>
+    <text x="82" y="112" class="eyebrow">八字命盘助手 · 今日方向</text>
     <text x="82" y="172" class="title">${escapeXml(guidance.theme)}</text>
     <text x="82" y="222" class="subtitle">${escapeXml(guidance.date)} · ${escapeXml(profile.name)} · ${escapeXml(guidance.focusElementLabel)}</text>
     <circle cx="594" cy="156" r="44" fill="${color}"/>

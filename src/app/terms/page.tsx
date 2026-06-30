@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "使用边界 - 八字方向助手",
-  description: "八字方向助手的文化娱乐、自我探索和参考解读边界。",
+  title: "使用边界 - 八字命盘助手",
+  description: "八字命盘助手的传统文化研究、娱乐参考和自我探索边界。",
 };
 
 export default function TermsPage() {

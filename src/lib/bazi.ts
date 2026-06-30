@@ -1,5 +1,14 @@
 import { Lunar, Solar } from "lunar-javascript";
-import type { BaziChart, CalendarType, ElementBalance, ElementKey } from "./types";
+import { BaziCalculator } from "bazi-calculator-by-alvamind";
+import type {
+  BaziChart,
+  CalendarType,
+  ChartPosition,
+  EarthlyRelation,
+  ElementBalance,
+  ElementKey,
+  Gender,
+} from "./types";
 
 const stemElement: Record<string, ElementKey> = {
   甲: "wood",
@@ -70,18 +79,150 @@ function rankElements(balance: ElementBalance, direction: "max" | "min") {
   return (Object.keys(balance) as ElementKey[]).filter((key) => balance[key] === target);
 }
 
+const positionLabels: Record<ChartPosition, string> = {
+  year: "年支",
+  month: "月支",
+  day: "日支",
+  time: "时支",
+};
+
+const pairRelations: Array<{
+  type: EarthlyRelation["type"];
+  pairs: string[];
+  note: string;
+}> = [
+  { type: "六合", pairs: ["子丑", "寅亥", "卯戌", "辰酉", "巳申", "午未"], note: "两支相合，传统上用来观察协作与牵引。" },
+  { type: "冲", pairs: ["子午", "丑未", "寅申", "卯酉", "辰戌", "巳亥"], note: "两支相冲，适合关注变化、拉扯与调整。" },
+  { type: "害", pairs: ["子未", "丑午", "寅巳", "卯辰", "申亥", "酉戌"], note: "两支相害，适合留意沟通误差与隐性消耗。" },
+  { type: "破", pairs: ["子酉", "卯午", "辰丑", "未戌", "寅亥", "巳申"], note: "两支相破，适合留意计划被打断或关系松动。" },
+  { type: "刑", pairs: ["子卯"], note: "两支相刑，适合留意压力、规则与行为惯性。" },
+];
+
+const harmonyGroups = [
+  { branches: "申子辰", element: "水" },
+  { branches: "亥卯未", element: "木" },
+  { branches: "寅午戌", element: "火" },
+  { branches: "巳酉丑", element: "金" },
+];
+
+const punishmentGroups = ["寅巳申", "丑未戌"];
+const selfPunishments = ["辰", "午", "酉", "亥"];
+
+function getEarthlyRelations(branches: Record<ChartPosition, string>): EarthlyRelation[] {
+  const entries = Object.entries(branches) as Array<[ChartPosition, string]>;
+  const relations: EarthlyRelation[] = [];
+
+  for (let left = 0; left < entries.length; left += 1) {
+    for (let right = left + 1; right < entries.length; right += 1) {
+      const [leftPosition, leftBranch] = entries[left];
+      const [rightPosition, rightBranch] = entries[right];
+      const pair = `${leftBranch}${rightBranch}`;
+      const reversePair = `${rightBranch}${leftBranch}`;
+      pairRelations.forEach((relation) => {
+        if (relation.pairs.includes(pair) || relation.pairs.includes(reversePair)) {
+          relations.push({
+            type: relation.type,
+            branches: pair,
+            positions: [leftPosition, rightPosition],
+            note: `${positionLabels[leftPosition]}与${positionLabels[rightPosition]}：${relation.note}`,
+          });
+        }
+      });
+      if (leftBranch === rightBranch && selfPunishments.includes(leftBranch)) {
+        relations.push({
+          type: "刑",
+          branches: pair,
+          positions: [leftPosition, rightPosition],
+          note: `${positionLabels[leftPosition]}与${positionLabels[rightPosition]}构成自刑，宜留意反复和内在压力。`,
+        });
+      }
+    }
+  }
+
+  harmonyGroups.forEach((group) => {
+    const matches = entries.filter(([, branch]) => group.branches.includes(branch));
+    const uniqueBranches = [...new Set(matches.map(([, branch]) => branch))];
+    if (uniqueBranches.length >= 2) {
+      relations.push({
+        type: uniqueBranches.length === 3 ? "三合" : "半合",
+        branches: uniqueBranches.join(""),
+        positions: matches.map(([position]) => position),
+        note: `${uniqueBranches.join("、")}形成${uniqueBranches.length === 3 ? "三合" : "半合"}${group.element}局，作为结构倾向参考。`,
+      });
+    }
+  });
+
+  punishmentGroups.forEach((group) => {
+    const matches = entries.filter(([, branch]) => group.includes(branch));
+    const uniqueBranches = [...new Set(matches.map(([, branch]) => branch))];
+    if (uniqueBranches.length >= 2) {
+      relations.push({
+        type: "刑",
+        branches: uniqueBranches.join(""),
+        positions: matches.map(([position]) => position),
+        note: `${uniqueBranches.join("、")}构成刑势，适合关注压力下的反应模式。`,
+      });
+    }
+  });
+
+  return relations;
+}
+
+function getAlvamindValidation(input: {
+  calendarType: CalendarType;
+  solarDate: string;
+  hour: number;
+  gender: Gender;
+  pillars: Record<ChartPosition, string>;
+}) {
+  const { year, month, day } = splitDate(input.solarDate);
+  if (year < 1930 || year > 2048) {
+    return { primary: "lunar-javascript" as const, validationStatus: "unavailable" as const };
+  }
+
+  try {
+    const calculator = new BaziCalculator(year, month, day, input.hour, input.gender === "female" ? "female" : "male");
+    const comparison = calculator.calculatePillars();
+    const matchedPillars = (Object.keys(input.pillars) as ChartPosition[]).filter(
+      (position) => comparison[position].chinese === input.pillars[position],
+    ).length;
+    const weighted = calculator.calculateBasicAnalysis().fiveFactors;
+    return {
+      primary: "lunar-javascript" as const,
+      validator: "bazi-calculator-by-alvamind" as const,
+      validationStatus: matchedPillars === 4 ? ("matched" as const) : ("different" as const),
+      matchedPillars,
+      weightedBalance: {
+        wood: weighted.WOOD,
+        fire: weighted.FIRE,
+        earth: weighted.EARTH,
+        metal: weighted.METAL,
+        water: weighted.WATER,
+      },
+    };
+  } catch {
+    return {
+      primary: "lunar-javascript" as const,
+      validator: "bazi-calculator-by-alvamind" as const,
+      validationStatus: "unavailable" as const,
+    };
+  }
+}
+
 export function buildBaziChart(input: {
   calendarType: CalendarType;
   birthDate: string;
   birthTime: string;
   timeUnknown?: boolean;
+  isLeapMonth?: boolean;
+  gender?: Gender;
 }): BaziChart {
   const { year, month, day } = splitDate(input.birthDate);
   const { hour, minute } = splitTime(input.timeUnknown ? "12:00" : input.birthTime);
 
   const lunar =
     input.calendarType === "lunar"
-      ? Lunar.fromYmdHms(year, month, day, hour, minute, 0)
+      ? Lunar.fromYmdHms(year, input.isLeapMonth ? -month : month, day, hour, minute, 0)
       : Solar.fromYmdHms(year, month, day, hour, minute, 0).getLunar();
 
   const solar = lunar.getSolar();
@@ -116,16 +257,47 @@ export function buildBaziChart(input: {
   });
 
   const dayElement = stemElement[stems.day];
+  const hiddenStems = {
+    year: eightChar.getYearHideGan(),
+    month: eightChar.getMonthHideGan(),
+    day: eightChar.getDayHideGan(),
+    time: eightChar.getTimeHideGan(),
+  };
+  const hiddenTenGods = {
+    year: eightChar.getYearShiShenZhi(),
+    month: eightChar.getMonthShiShenZhi(),
+    day: eightChar.getDayShiShenZhi(),
+    time: eightChar.getTimeShiShenZhi(),
+  };
+  const yun = eightChar.getYun(input.gender === "female" ? 0 : 1, 2);
+  const allLuckCycles = yun.getDaYun(9);
+  const luckCycles = allLuckCycles
+    .filter((cycle) => cycle.getGanZhi())
+    .slice(0, 8)
+    .map((cycle) => ({
+      ganZhi: cycle.getGanZhi(),
+      startAge: cycle.getStartAge(),
+      endAge: cycle.getEndAge(),
+      startYear: cycle.getStartYear(),
+      endYear: cycle.getEndYear(),
+    }));
+  const currentYear = new Date().getFullYear();
+  const annualLuck = allLuckCycles
+    .flatMap((cycle) => cycle.getLiuNian())
+    .filter((yearItem) => yearItem.getYear() >= currentYear - 2 && yearItem.getYear() <= currentYear + 4)
+    .map((yearItem) => ({ year: yearItem.getYear(), age: yearItem.getAge(), ganZhi: yearItem.getGanZhi() }));
+
+  const pillars = {
+    year: eightChar.getYear(),
+    month: eightChar.getMonth(),
+    day: eightChar.getDay(),
+    time: eightChar.getTime(),
+  };
 
   return {
     solarText: solar.toYmdHms(),
     lunarText: lunar.toString(),
-    pillars: {
-      year: eightChar.getYear(),
-      month: eightChar.getMonth(),
-      day: eightChar.getDay(),
-      time: eightChar.getTime(),
-    },
+    pillars,
     stems,
     branches,
     wuxing: {
@@ -143,6 +315,18 @@ export function buildBaziChart(input: {
       day: eightChar.getDayShiShenGan(),
       time: eightChar.getTimeShiShenGan(),
     },
+    hiddenStems,
+    hiddenTenGods,
+    relations: getEarthlyRelations(branches),
+    luckCycles,
+    annualLuck,
+    engine: getAlvamindValidation({
+      calendarType: input.calendarType,
+      solarDate: solar.toYmdHms().slice(0, 10),
+      hour,
+      gender: input.gender || "other",
+      pillars,
+    }),
     nayin: {
       year: eightChar.getYearNaYin(),
       month: eightChar.getMonthNaYin(),
