@@ -65,7 +65,7 @@ async function main() {
 
   const manifest = await request("/manifest.webmanifest");
   assert(manifest.response.ok, `manifest failed: ${manifest.response.status}`);
-  assert(manifest.data?.name === "八字命盘助手", "manifest name mismatch");
+  assert(manifest.data?.name === "玄枢", "manifest name mismatch");
   assert(manifest.data?.display === "standalone", "manifest display should be standalone");
   assert(manifest.data?.icons?.length >= 2, "manifest icons missing");
 

@@ -2,7 +2,7 @@ import { LockKeyhole, ShieldCheck } from "lucide-react";
 
 export function DisclaimerFooter() {
   return (
-    <footer className="border-t border-[var(--line)] bg-[var(--ink)] text-white/75">
+    <footer className="border-t border-[var(--line)] bg-[#050a0e] text-white/75">
       <div className="mx-auto grid max-w-7xl gap-6 px-5 py-9 sm:px-8 md:grid-cols-2 lg:px-10">
         <div className="flex gap-3">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--gold)]" />
@@ -21,7 +21,7 @@ export function DisclaimerFooter() {
       </div>
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-5 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
-          <span>八字命盘助手 · 免费使用</span>
+          <span>玄枢 · 东方命理数据实验室</span>
           <nav className="flex gap-5">
             <a href="/about" className="hover:text-white">关于我们</a>
             <a href="/privacy" className="hover:text-white">隐私说明</a>

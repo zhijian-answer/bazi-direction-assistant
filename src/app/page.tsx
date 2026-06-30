@@ -6,7 +6,6 @@ import {
   BookOpenText,
   CalendarDays,
   ClipboardCheck,
-  Compass,
   FileText,
   GalleryHorizontalEnd,
   History,
@@ -14,6 +13,7 @@ import {
   LogOut,
   MessageCircleQuestion,
   Moon,
+  Orbit,
   Trash2,
   ShieldCheck,
   Sparkles,
@@ -475,10 +475,10 @@ export default function Home() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f6f7f2] text-[#23231f]">
-        <div className="flex items-center gap-3 rounded-lg border border-[#d8d3c6] bg-white px-4 py-3 text-sm shadow-sm">
-          <Sparkles className="h-5 w-5 animate-pulse text-[#a5533c]" />
-          正在准备命盘工具
+      <main className="xuanshu-app flex min-h-screen items-center justify-center bg-[var(--rice)] text-[var(--ink)]">
+        <div className="flex items-center gap-3 rounded-lg border border-[#34322e] bg-[#0d1318] px-4 py-3 text-sm shadow-sm">
+          <Sparkles className="h-5 w-5 animate-pulse text-[#bd4c3e]" />
+          玄枢正在校准命盘仪
         </div>
       </main>
     );
@@ -486,25 +486,28 @@ export default function Home() {
 
   if (!state.user) {
     return (
-      <main className="min-h-screen bg-[var(--rice)] text-[var(--ink)]">
-        <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[rgba(255,253,248,0.94)] backdrop-blur">
-          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
-            <a href="#top" className="flex items-center gap-3 font-semibold">
-              <span className="grid h-9 w-9 place-items-center rounded-md bg-[var(--ink)] text-sm font-display text-white">命</span>
-              八字命盘助手
+      <main className="xuanshu-public min-h-screen bg-[var(--rice)] text-[var(--ink)]">
+        <header className="xuanshu-header">
+          <div className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-14">
+            <a href="#top" className="xuanshu-brand" aria-label="玄枢首页">
+              <Orbit className="h-10 w-10" strokeWidth={1.25} />
+              <span className="font-display text-2xl">玄枢</span>
+              <i />
+              <small>东方命理数据实验室</small>
             </a>
-            <nav className="hidden items-center gap-7 text-sm text-[var(--muted)] md:flex">
-              <a href="#tool" className="hover:text-[var(--cinnabar)]">命盘工具</a>
-              <a href="#learn" className="hover:text-[var(--cinnabar)]">五行分析</a>
-              <a href="#learn" className="hover:text-[var(--cinnabar)]">大运流年</a>
-              <a href="/about" className="hover:text-[var(--cinnabar)]">关于</a>
+            <nav className="hidden items-center gap-8 text-sm lg:flex">
+              <a href="#tool">命盘工具</a>
+              <a href="#learn">五行分析</a>
+              <a href="#learn">十神关系</a>
+              <a href="#learn">大运流年</a>
+              <a href="/about">关于我们</a>
             </nav>
-            <a href="#tool" className="btn-primary min-h-9 px-4">免费使用</a>
+            <a href="#tool" className="xuanshu-header-cta">免费使用</a>
           </div>
         </header>
         <div id="top"><HeroSection /></div>
 
-        <section id="tool" className="scroll-mt-20 border-b border-[var(--line)] bg-[var(--paper)]">
+        <section id="tool" className="xuanshu-tool-band scroll-mt-20 border-b border-[var(--line)] bg-[var(--paper)]">
           <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1fr_400px] md:items-center lg:px-10 lg:py-20">
             <div>
               <div className="section-kicker">免费注册后使用</div>
@@ -518,18 +521,18 @@ export default function Home() {
             </div>
 
           <form onSubmit={handleAuth} className="panel p-5 sm:p-6">
-            <div className="mb-5 grid grid-cols-2 gap-2 rounded-lg bg-[#eef1ec] p-1">
+            <div className="mb-5 grid grid-cols-2 gap-2 rounded-lg bg-[#151e22] p-1">
               <button
                 type="button"
                 onClick={() => setMode("register")}
-                className={`rounded-md px-3 py-2 text-sm ${mode === "register" ? "bg-[#a5533c] text-white shadow-sm" : "text-[#5f5b54]"}`}
+                className={`rounded-md px-3 py-2 text-sm ${mode === "register" ? "bg-[#bd4c3e] text-white shadow-sm" : "text-[#b7b1a7]"}`}
               >
                 注册
               </button>
               <button
                 type="button"
                 onClick={() => setMode("login")}
-                className={`rounded-md px-3 py-2 text-sm ${mode === "login" ? "bg-[#a5533c] text-white shadow-sm" : "text-[#5f5b54]"}`}
+                className={`rounded-md px-3 py-2 text-sm ${mode === "login" ? "bg-[#bd4c3e] text-white shadow-sm" : "text-[#b7b1a7]"}`}
               >
                 登录
               </button>
@@ -538,38 +541,52 @@ export default function Home() {
               {mode === "register" && (
                 <label className="block text-sm">
                   昵称
-                  <input name="name" className="mt-2 w-full rounded-md border border-[#d8d3c6] px-3 py-3 outline-none focus:border-[#a5533c]" placeholder="你的昵称" />
+                  <input name="name" className="mt-2 w-full rounded-md border border-[#34322e] px-3 py-3 outline-none focus:border-[#bd4c3e]" placeholder="你的昵称" />
                 </label>
               )}
               <label className="block text-sm">
                 邮箱
-                <input name="email" type="email" required className="mt-2 w-full rounded-md border border-[#d8d3c6] px-3 py-3 outline-none focus:border-[#a5533c]" placeholder="you@example.com" />
+                <input name="email" type="email" required className="mt-2 w-full rounded-md border border-[#34322e] px-3 py-3 outline-none focus:border-[#bd4c3e]" placeholder="you@example.com" />
               </label>
               <label className="block text-sm">
                 密码
-                <input name="password" type="password" required className="mt-2 w-full rounded-md border border-[#d8d3c6] px-3 py-3 outline-none focus:border-[#a5533c]" placeholder="至少 6 位" />
+                <input name="password" type="password" required className="mt-2 w-full rounded-md border border-[#34322e] px-3 py-3 outline-none focus:border-[#bd4c3e]" placeholder="至少 6 位" />
               </label>
             </div>
-            {error && <p className="mt-4 rounded-md border border-[#e4b4a9] bg-[#fff5f2] px-3 py-2 text-sm text-[#9c2f1b]">{error}</p>}
+            {error && <p className="mt-4 rounded-md border border-[#693c35] bg-[#261411] px-3 py-2 text-sm text-[#df7766]">{error}</p>}
             <button type="submit" disabled={busy} className="btn-primary mt-5 min-h-12 w-full px-4">
               {busy ? "正在处理…" : mode === "register" ? "免费注册" : "登录并继续"}
             </button>
-            <div className="mt-4 flex flex-wrap gap-3 text-xs text-[#756f67]">
-              <a href="/about" className="hover:text-[#a5533c]">
+            <div className="mt-4 flex flex-wrap gap-3 text-xs text-[#8e8980]">
+              <a href="/about" className="hover:text-[#bd4c3e]">
                 关于
               </a>
-              <a href="/privacy" className="hover:text-[#a5533c]">
+              <a href="/privacy" className="hover:text-[#bd4c3e]">
                 隐私说明
               </a>
-              <a href="/terms" className="hover:text-[#a5533c]">
+              <a href="/terms" className="hover:text-[#bd4c3e]">
                 使用边界
               </a>
             </div>
           </form>
           </div>
         </section>
-        <section id="learn" className="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
-          <div className="max-w-2xl"><div className="section-kicker">怎么看这份命盘</div><h2 className="mt-3 font-display text-3xl">先看结构，再看行动</h2><p className="mt-4 text-sm leading-7 text-[var(--muted)]">四柱用于描述出生时点的干支结构；五行、十神、地支关系和大运流年是不同观察角度。它们适合用来整理自我认识，不适合代替现实证据和专业判断。</p></div>
+        <section id="learn" className="xuanshu-learn mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
+          <div className="max-w-2xl"><div className="section-kicker">命盘观察框架</div><h2 className="mt-3 font-display text-3xl">先看结构，再看行动</h2><p className="mt-4 text-sm leading-7 text-[var(--muted)]">把传统命理拆成可阅读的数据层：出生时点形成基础结构，五行与十神描述倾向，大运流年提示节奏，最终落到可以验证的小行动。</p></div>
+          <div className="xuanshu-method-grid mt-10">
+            {[
+              ["01", "四柱结构", "年、月、日、时四个坐标，建立命盘的基础数据。"],
+              ["02", "五行强弱", "用可视化比例观察能量分布，不用模糊的吉凶标签。"],
+              ["03", "十神关系", "从表达、资源、行动与关系四个维度理解自身模式。"],
+              ["04", "大运流年", "观察阶段节奏，给当下决策增加一个自我复盘角度。"],
+            ].map(([index, title, body]) => (
+              <article key={index}>
+                <span>{index}</span>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </article>
+            ))}
+          </div>
         </section>
         <DisclaimerFooter />
       </main>
@@ -577,26 +594,26 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f6f7f2] pb-20 text-[#23231f] lg:pb-0">
-      <header className="z-20 border-b border-[#d8d3c6] bg-white/95 backdrop-blur lg:sticky lg:top-0">
+    <main className="xuanshu-app min-h-screen bg-[var(--rice)] pb-20 text-[var(--ink)] lg:pb-0">
+      <header className="z-20 border-b border-[#34322e] bg-[#090e12]/95 backdrop-blur lg:sticky lg:top-0">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#23231f] text-white">
-              <Compass className="h-5 w-5" />
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#151c21] text-[#c7a46a]">
+              <Orbit className="h-6 w-6" strokeWidth={1.4} />
             </div>
             <div className="min-w-0">
-              <div className="truncate font-semibold">八字命盘助手</div>
-              <div className="text-xs text-[#756f67]">免费使用 · 今日剩余 {state.remainingToday} 次</div>
+              <div className="truncate font-semibold">玄枢</div>
+              <div className="text-xs text-[#8e8980]">免费使用 · 今日剩余 {state.remainingToday} 次</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <a href="/terms" className="hidden rounded-md px-2 py-2 text-xs text-[#756f67] hover:bg-[#f0eee8] hover:text-[#a5533c] sm:inline">
+            <a href="/terms" className="hidden rounded-md px-2 py-2 text-xs text-[#8e8980] hover:bg-[#151c21] hover:text-[#bd4c3e] sm:inline">
               使用边界
             </a>
-            <a href="/privacy" className="hidden rounded-md px-2 py-2 text-xs text-[#756f67] hover:bg-[#f0eee8] hover:text-[#a5533c] sm:inline">
+            <a href="/privacy" className="hidden rounded-md px-2 py-2 text-xs text-[#8e8980] hover:bg-[#151c21] hover:text-[#bd4c3e] sm:inline">
               隐私
             </a>
-            <button onClick={logout} className="flex items-center gap-2 rounded-md border border-[#d8d3c6] px-3 py-2 text-sm">
+            <button onClick={logout} className="flex items-center gap-2 rounded-md border border-[#34322e] px-3 py-2 text-sm">
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">退出</span>
             </button>
@@ -649,7 +666,7 @@ export default function Home() {
           )}
 
           <div ref={panelRef} className="scroll-mt-4 space-y-4 lg:scroll-mt-24">
-            {error && <p className="rounded-md border border-[#e4b4a9] bg-[#fff5f2] px-3 py-2 text-sm text-[#9c2f1b]">{error}</p>}
+            {error && <p className="rounded-md border border-[#693c35] bg-[#261411] px-3 py-2 text-sm text-[#df7766]">{error}</p>}
 
             {activePanel === "ask" && (
               <AskPanel
@@ -717,12 +734,12 @@ function ProfileSummary({
   }
 
   return (
-    <section className="rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm">
+    <section className="rounded-lg border border-[#34322e] bg-[#0d1318] p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2 font-semibold">
-        <Moon className="h-4 w-4 text-[#2d6b6f]" />
+        <Moon className="h-4 w-4 text-[#5d9290]" />
         已保存档案
       </div>
-      <select value={selectedProfileId || selectedProfile.id} onChange={(event) => onSelect(event.target.value)} className="w-full rounded-md border border-[#d8d3c6] px-3 py-2 text-sm">
+      <select value={selectedProfileId || selectedProfile.id} onChange={(event) => onSelect(event.target.value)} className="w-full rounded-md border border-[#34322e] px-3 py-2 text-sm">
         {profiles.map((profile) => (
           <option key={profile.id} value={profile.id}>
             {profile.name} · {profile.chart.pillars.day}日
@@ -732,14 +749,14 @@ function ProfileSummary({
       <div className="mt-4 space-y-3 text-sm">
         <div className="grid grid-cols-4 gap-2 text-center">
           {Object.entries(selectedProfile.chart.pillars).map(([key, value]) => (
-            <div key={key} className="rounded-md border border-[#e4ded2] py-2">
-              <div className="text-xs text-[#756f67]">{pillarNames[key] || key}</div>
+            <div key={key} className="rounded-md border border-[#292d30] py-2">
+              <div className="text-xs text-[#8e8980]">{pillarNames[key] || key}</div>
               <div className="mt-1 font-semibold">{value}</div>
             </div>
           ))}
         </div>
         <WuxingBars balance={selectedProfile.chart.wuxing.balance} compact />
-        <p className="leading-6 text-[#68645d]">
+        <p className="leading-6 text-[#aaa59b]">
           日主 {selectedProfile.chart.dayMaster.stem}
           {selectedProfile.chart.dayMaster.elementLabel}，分析会围绕现实选择和行动节奏给出参考。
         </p>
@@ -748,7 +765,7 @@ function ProfileSummary({
           data-action="delete-profile"
           disabled={busy}
           onClick={() => onDelete(selectedProfile)}
-          className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-[#d8a99d] bg-white px-3 py-2 text-sm font-medium text-[#9c2f1b] hover:bg-[#fff5f2] disabled:opacity-60"
+          className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-[#693c35] bg-[#0d1318] px-3 py-2 text-sm font-medium text-[#df7766] hover:bg-[#261411] disabled:opacity-60"
         >
           <Trash2 className="h-4 w-4" />
           删除当前档案
@@ -775,7 +792,7 @@ function DesktopNav({
           data-panel-id={id}
           onClick={() => onChange(id as PanelId)}
           className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm ${
-            activePanel === id ? "border-[#23231f] bg-[#23231f] text-white" : "border-[#d8d3c6] bg-white hover:border-[#a5533c]"
+            activePanel === id ? "border-[#bd4c3e] bg-[#241512] text-white" : "border-[#34322e] bg-[#0d1318] hover:border-[#bd4c3e]"
           }`}
         >
           <Icon className="h-4 w-4" />
@@ -799,7 +816,7 @@ function MobileNav({
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 grid border-t border-[#d8d3c6] bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 shadow-[0_-8px_24px_rgba(34,34,31,0.08)] backdrop-blur lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 grid border-t border-[#34322e] bg-[#090e12]/95 px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 shadow-[0_-8px_24px_rgba(34,34,31,0.08)] backdrop-blur lg:hidden"
       style={{ gridTemplateColumns: `repeat(${visibleItems.length}, minmax(0, 1fr))` }}
     >
       {visibleItems.map(([id, Icon, label]) => (
@@ -808,7 +825,7 @@ function MobileNav({
           data-panel-id={id}
           onClick={() => onChange(id as PanelId)}
           className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-md text-xs ${
-            activePanel === id ? "bg-[#23231f] text-white" : "text-[#68645d]"
+            activePanel === id ? "bg-[#151c21] text-white" : "text-[#aaa59b]"
           }`}
         >
           <Icon className="h-4 w-4" />
@@ -834,12 +851,12 @@ function DailyGuidanceCard({
 }) {
   if (!hasProfile) {
     return (
-      <section className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-[#34322e] bg-[#0d1318] p-5 shadow-sm">
         <div className="flex items-start gap-3">
-          <SunMedium className="mt-1 h-5 w-5 text-[#a5533c]" />
+          <SunMedium className="mt-1 h-5 w-5 text-[#bd4c3e]" />
           <div>
             <h2 className="text-lg font-semibold">今日方向</h2>
-            <p className="mt-1 text-sm leading-6 text-[#68645d]">先创建一个命盘档案，就能看到每天的行动提醒。</p>
+            <p className="mt-1 text-sm leading-6 text-[#aaa59b]">先创建一个命盘档案，就能看到每天的行动提醒。</p>
           </div>
         </div>
       </section>
@@ -848,29 +865,29 @@ function DailyGuidanceCard({
 
   if (loading || !guidance) {
     return (
-      <section className="rounded-lg border border-[#d8d3c6] bg-white p-5 text-sm text-[#68645d] shadow-sm">
+      <section className="rounded-lg border border-[#34322e] bg-[#0d1318] p-5 text-sm text-[#aaa59b] shadow-sm">
         正在读取今日方向...
       </section>
     );
   }
 
   return (
-    <section className="overflow-hidden rounded-lg border border-[#d8d3c6] bg-white shadow-sm">
-      <div className="border-b border-[#e5e0d5] bg-[#233338] px-5 py-5 text-white">
+    <section className="overflow-hidden rounded-lg border border-[#34322e] bg-[#0d1318] shadow-sm">
+      <div className="border-b border-[#2e3235] bg-[#0d1a20] px-5 py-5 text-white">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm text-[#d5b8a8]">
+            <div className="flex items-center gap-2 text-sm text-[#d1ad73]">
               <SunMedium className="h-4 w-4" />
               今日方向 · {guidance.date} · {guidance.focusElementLabel}
             </div>
             <h2 className="text-2xl font-semibold sm:text-3xl">{guidance.theme}</h2>
-            <p className="max-w-3xl text-sm leading-7 text-[#eef3ef]">{guidance.summary}</p>
+            <p className="max-w-3xl text-sm leading-7 text-[#d8e0dc]">{guidance.summary}</p>
           </div>
           <div className="flex gap-2">
             <button onClick={onAsk} className="rounded-md border border-white/25 px-3 py-2 text-sm hover:bg-white/10">
               去提问
             </button>
-            <button onClick={onReport} className="rounded-md bg-white px-3 py-2 text-sm text-[#233338]">
+            <button onClick={onReport} className="rounded-md bg-[#0d1318] px-3 py-2 text-sm text-[#0d1a20]">
               看报告
             </button>
           </div>
@@ -912,40 +929,40 @@ function ActionCheckinCard({
   const defaultAction = todayCheckin?.action || guidance?.actionSteps?.[1] || "完成一个 15 分钟内能推进现实的小行动";
 
   return (
-    <section className="rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm sm:p-5">
+    <section className="rounded-lg border border-[#34322e] bg-[#0d1318] p-4 shadow-sm sm:p-5">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-sm text-[#2d6b6f]">
+          <div className="flex items-center gap-2 text-sm text-[#5d9290]">
             <ClipboardCheck className="h-4 w-4" />
             今日行动打卡
           </div>
           <h2 className="mt-2 text-xl font-semibold">{todayCheckin ? "今天已经迈出一步" : "把方向变成一个小行动"}</h2>
-          <p className="mt-1 text-sm leading-6 text-[#68645d]">不用追求完美，只记录今天真实完成的一小步。</p>
+          <p className="mt-1 text-sm leading-6 text-[#aaa59b]">不用追求完美，只记录今天真实完成的一小步。</p>
         </div>
-        {todayCheckin && <span className="rounded-full bg-[#eef1ec] px-3 py-1 text-xs text-[#2d6b6f]">今日已打卡</span>}
+        {todayCheckin && <span className="rounded-full bg-[#151e22] px-3 py-1 text-xs text-[#5d9290]">今日已打卡</span>}
       </div>
 
       <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_2fr]">
-        <div className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-4">
-          <div className="text-xs text-[#756f67]">连续行动</div>
+        <div className="rounded-lg border border-[#292d30] bg-[#0a1014] p-4">
+          <div className="text-xs text-[#8e8980]">连续行动</div>
           <div className="mt-1 flex items-end gap-1">
             <span className="text-3xl font-semibold">{stats.currentStreak}</span>
-            <span className="pb-1 text-sm text-[#68645d]">天</span>
+            <span className="pb-1 text-sm text-[#aaa59b]">天</span>
           </div>
-          <div className="mt-1 text-xs leading-5 text-[#68645d]">
+          <div className="mt-1 text-xs leading-5 text-[#aaa59b]">
             {stats.checkedToday ? "今天已经完成记录" : stats.currentStreak > 0 ? "今天补上就能延续节奏" : "从今天的一小步开始"}
           </div>
         </div>
-        <div className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-4">
+        <div className="rounded-lg border border-[#292d30] bg-[#0a1014] p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="text-xs text-[#756f67]">最近 7 天</div>
-            <div className="text-xs text-[#68645d]">累计 {stats.total} 次</div>
+            <div className="text-xs text-[#8e8980]">最近 7 天</div>
+            <div className="text-xs text-[#aaa59b]">累计 {stats.total} 次</div>
           </div>
           <div className="grid grid-cols-7 gap-2">
             {stats.last7Days.map((day) => (
               <div key={day.date} className="text-center">
-                <div className={`mx-auto h-7 w-7 rounded-full border ${day.checked ? "border-[#2d6b6f] bg-[#2d6b6f]" : "border-[#d8d3c6] bg-white"}`} />
-                <div className="mt-1 text-[10px] leading-4 text-[#756f67]">{day.date.slice(5)}</div>
+                <div className={`mx-auto h-7 w-7 rounded-full border ${day.checked ? "border-[#5d9290] bg-[#5d9290]" : "border-[#34322e] bg-[#0d1318]"}`} />
+                <div className="mt-1 text-[10px] leading-4 text-[#8e8980]">{day.date.slice(5)}</div>
               </div>
             ))}
           </div>
@@ -960,7 +977,7 @@ function ActionCheckinCard({
             required
             maxLength={160}
             defaultValue={defaultAction}
-            className="mt-2 w-full rounded-md border border-[#d8d3c6] px-3 py-3 outline-none focus:border-[#a5533c]"
+            className="mt-2 w-full rounded-md border border-[#34322e] px-3 py-3 outline-none focus:border-[#bd4c3e]"
           />
         </label>
         <label className="block text-sm">
@@ -969,11 +986,11 @@ function ActionCheckinCard({
             name="note"
             maxLength={240}
             defaultValue={todayCheckin?.note || ""}
-            className="mt-2 w-full rounded-md border border-[#d8d3c6] px-3 py-3 outline-none focus:border-[#a5533c]"
+            className="mt-2 w-full rounded-md border border-[#34322e] px-3 py-3 outline-none focus:border-[#bd4c3e]"
             placeholder="例如：做完后心里更稳了一点"
           />
         </label>
-        <button type="submit" disabled={busy} className="min-h-11 self-end rounded-md bg-[#23231f] px-4 py-3 text-sm font-medium text-white disabled:opacity-60">
+        <button type="submit" disabled={busy} className="min-h-11 self-end rounded-md bg-[#151c21] px-4 py-3 text-sm font-medium text-white disabled:opacity-60">
           {todayCheckin ? "更新打卡" : "完成打卡"}
         </button>
       </form>
@@ -981,10 +998,10 @@ function ActionCheckinCard({
       {profileCheckins.length > 0 && (
         <div className="mt-4 grid gap-2 md:grid-cols-3">
           {profileCheckins.slice(0, 3).map((checkin) => (
-            <article key={checkin.id} className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-3">
-              <div className="text-xs text-[#a5533c]">{checkin.date}</div>
+            <article key={checkin.id} className="rounded-lg border border-[#292d30] bg-[#0a1014] p-3">
+              <div className="text-xs text-[#bd4c3e]">{checkin.date}</div>
               <div className="mt-1 text-sm font-medium leading-6">{checkin.action}</div>
-              {checkin.note && <p className="mt-1 text-xs leading-5 text-[#68645d]">{checkin.note}</p>}
+              {checkin.note && <p className="mt-1 text-xs leading-5 text-[#aaa59b]">{checkin.note}</p>}
             </article>
           ))}
         </div>
@@ -994,11 +1011,11 @@ function ActionCheckinCard({
 }
 
 function DailyList({ title, items, tone }: { title: string; items: string[]; tone: "good" | "warn" | "action" }) {
-  const dotClass = tone === "good" ? "bg-[#2d6b6f]" : tone === "warn" ? "bg-[#a5533c]" : "bg-[#596b41]";
+  const dotClass = tone === "good" ? "bg-[#5d9290]" : tone === "warn" ? "bg-[#bd4c3e]" : "bg-[#596b41]";
   return (
-    <div className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-4">
+    <div className="rounded-lg border border-[#292d30] bg-[#0a1014] p-4">
       <div className="mb-3 text-sm font-semibold">{title}</div>
-      <ul className="space-y-2 text-sm leading-6 text-[#5f5b54]">
+      <ul className="space-y-2 text-sm leading-6 text-[#b7b1a7]">
         {items.map((item) => (
           <li key={item} className="flex gap-2">
             <span className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}`} />
@@ -1023,10 +1040,10 @@ function QuickMetrics({ state, selectedProfile }: { state: AppState; selectedPro
         ["今日可问", state.remainingToday, "免费次数每日刷新"],
         ["连续打卡", checkinStats.currentStreak, selectedProfile ? `${selectedProfile.name} 的行动节奏` : "创建档案后开始"],
       ].map(([label, value, detail]) => (
-        <div key={label} className="rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm">
-          <div className="text-xs text-[#756f67]">{label}</div>
+        <div key={label} className="rounded-lg border border-[#34322e] bg-[#0d1318] p-4 shadow-sm">
+          <div className="text-xs text-[#8e8980]">{label}</div>
           <div className="mt-1 text-2xl font-semibold">{value}</div>
-          <div className="mt-1 text-xs leading-5 text-[#68645d]">{detail}</div>
+          <div className="mt-1 text-xs leading-5 text-[#aaa59b]">{detail}</div>
         </div>
       ))}
     </section>
@@ -1055,13 +1072,13 @@ function AskPanel({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <section className="rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm sm:p-5">
+    <section className="rounded-lg border border-[#34322e] bg-[#0d1318] p-4 shadow-sm sm:p-5">
       <div className="mb-5 flex items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold">今天想问什么</h2>
-          <p className="mt-1 text-sm text-[#68645d]">建议越具体，回答越能落到行动上。</p>
+          <p className="mt-1 text-sm text-[#aaa59b]">建议越具体，回答越能落到行动上。</p>
         </div>
-        <ShieldCheck className="h-6 w-6 shrink-0 text-[#2d6b6f]" />
+        <ShieldCheck className="h-6 w-6 shrink-0 text-[#5d9290]" />
       </div>
       <LowActionCard
         card={actionCard}
@@ -1080,24 +1097,24 @@ function AskPanel({
               onQuestionChange(item.label);
               onCategoryChange(item.category);
             }}
-            className="min-h-16 rounded-md border border-[#d8d3c6] bg-[#fbfbf8] p-3 text-left text-sm leading-6 hover:border-[#a5533c]"
+            className="min-h-16 rounded-md border border-[#34322e] bg-[#0a1014] p-3 text-left text-sm leading-6 hover:border-[#bd4c3e]"
           >
             {item.label}
           </button>
         ))}
       </div>
       <form onSubmit={onSubmit} className="space-y-3">
-        <select value={category} onChange={(event) => onCategoryChange(event.target.value)} className="w-full rounded-md border border-[#d8d3c6] px-3 py-3 text-sm">
+        <select value={category} onChange={(event) => onCategoryChange(event.target.value)} className="w-full rounded-md border border-[#34322e] px-3 py-3 text-sm">
           {Object.entries(categoryLabels).map(([value, label]) => (
             <option key={value} value={value}>
               {label}
             </option>
           ))}
         </select>
-        <textarea value={question} onChange={(event) => onQuestionChange(event.target.value)} className="min-h-36 w-full rounded-md border border-[#d8d3c6] px-3 py-3 leading-7 outline-none focus:border-[#a5533c]" />
+        <textarea value={question} onChange={(event) => onQuestionChange(event.target.value)} className="min-h-36 w-full rounded-md border border-[#34322e] px-3 py-3 leading-7 outline-none focus:border-[#bd4c3e]" />
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-[#756f67]">定位为文化娱乐和自我探索参考，不替代专业建议。</p>
-          <button type="submit" disabled={busy || !selectedProfile || remainingToday <= 0} className="rounded-md bg-[#23231f] px-5 py-3 text-white disabled:opacity-60">
+          <p className="text-xs text-[#8e8980]">定位为文化娱乐和自我探索参考，不替代专业建议。</p>
+          <button type="submit" disabled={busy || !selectedProfile || remainingToday <= 0} className="rounded-md bg-[#151c21] px-5 py-3 text-white disabled:opacity-60">
             {busy ? "正在生成..." : "根据命盘给我建议"}
           </button>
         </div>
@@ -1112,38 +1129,38 @@ function LowActionCard({ card, hasProfile, onUse }: { card: ActionCard | null; h
   }
 
   if (!card) {
-    return <div className="mb-4 rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-4 text-sm text-[#68645d]">正在准备低谷行动卡...</div>;
+    return <div className="mb-4 rounded-lg border border-[#292d30] bg-[#0a1014] p-4 text-sm text-[#aaa59b]">正在准备低谷行动卡...</div>;
   }
 
   return (
-    <div className="mb-4 overflow-hidden rounded-lg border border-[#d8d3c6] bg-[#fbfbf8]">
-      <div className="bg-[#233338] p-4 text-white">
-        <div className="flex items-center gap-2 text-sm text-[#d5b8a8]">
+    <div className="mb-4 overflow-hidden rounded-lg border border-[#34322e] bg-[#0a1014]">
+      <div className="bg-[#0d1a20] p-4 text-white">
+        <div className="flex items-center gap-2 text-sm text-[#d1ad73]">
           <Sparkles className="h-4 w-4" />
           {card.title} · {card.date} · {card.focusElementLabel}
         </div>
-        <p className="mt-2 text-sm leading-7 text-[#eef3ef]">{card.supportNote}</p>
+        <p className="mt-2 text-sm leading-7 text-[#d8e0dc]">{card.supportNote}</p>
       </div>
       <div className="grid gap-3 p-4 lg:grid-cols-3">
         <DailyList title="先稳下来" items={card.groundingSteps} tone="good" />
         <DailyList title="15分钟小行动" items={card.tinyActions} tone="action" />
         <DailyList title="今天先别做" items={card.avoid} tone="warn" />
       </div>
-      <div className="border-t border-[#e4ded2] p-4">
+      <div className="border-t border-[#292d30] p-4">
         <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <div className="text-sm font-semibold">复盘问题</div>
-            <ul className="mt-2 space-y-1 text-sm leading-6 text-[#5f5b54]">
+            <ul className="mt-2 space-y-1 text-sm leading-6 text-[#b7b1a7]">
               {card.reflectionPrompts.map((item) => (
                 <li key={item}>· {item}</li>
               ))}
             </ul>
           </div>
-          <button type="button" onClick={onUse} className="rounded-md bg-[#23231f] px-4 py-2 text-sm text-white">
+          <button type="button" onClick={onUse} className="rounded-md bg-[#151c21] px-4 py-2 text-sm text-white">
             用这张卡提问
           </button>
         </div>
-        <p className="mt-3 text-xs leading-5 text-[#756f67]">{card.disclaimer}</p>
+        <p className="mt-3 text-xs leading-5 text-[#8e8980]">{card.disclaimer}</p>
       </div>
     </div>
   );
@@ -1162,7 +1179,7 @@ function ReportPanel({
 }) {
   if (!profile) {
     return (
-      <section className="rounded-lg border border-[#d8d3c6] bg-white p-8 text-center text-[#68645d] shadow-sm">
+      <section className="rounded-lg border border-[#34322e] bg-[#0d1318] p-8 text-center text-[#aaa59b] shadow-sm">
         创建命盘档案后，这里会显示完整报告摘要。
       </section>
     );
@@ -1170,7 +1187,7 @@ function ReportPanel({
 
   if (loading || !report) {
     return (
-      <section className="rounded-lg border border-[#d8d3c6] bg-white p-8 text-center text-[#68645d] shadow-sm">
+      <section className="rounded-lg border border-[#34322e] bg-[#0d1318] p-8 text-center text-[#aaa59b] shadow-sm">
         正在生成命盘报告...
       </section>
     );
@@ -1185,7 +1202,7 @@ function WuxingBars({ balance, compact = false }: { balance: Record<string, numb
     <div className={compact ? "grid grid-cols-5 gap-1" : "space-y-3"}>
       {Object.entries(balance).map(([key, value]) =>
         compact ? (
-          <div key={key} className="rounded-md bg-[#eef1ec] px-2 py-2 text-center">
+          <div key={key} className="rounded-md bg-[#151e22] px-2 py-2 text-center">
             <div className="text-xs">{elementNames[key]}</div>
             <div className="font-semibold">{value}</div>
           </div>
@@ -1193,10 +1210,10 @@ function WuxingBars({ balance, compact = false }: { balance: Record<string, numb
           <div key={key}>
             <div className="mb-1 flex justify-between text-sm">
               <span className="font-medium">{elementNames[key]}</span>
-              <span className="text-[#756f67]">{elementNotes[key]}</span>
+              <span className="text-[#8e8980]">{elementNotes[key]}</span>
             </div>
-            <div className="h-3 overflow-hidden rounded-full bg-[#eef1ec]">
-              <div className="h-full rounded-full bg-[#2d6b6f]" style={{ width: `${Math.max(8, (value / max) * 100)}%` }} />
+            <div className="h-3 overflow-hidden rounded-full bg-[#151e22]">
+              <div className="h-full rounded-full bg-[#5d9290]" style={{ width: `${Math.max(8, (value / max) * 100)}%` }} />
             </div>
           </div>
         ),
@@ -1216,7 +1233,7 @@ function ForecastPanel({
 }) {
   if (!profile) {
     return (
-      <section className="rounded-lg border border-[#d8d3c6] bg-white p-8 text-center text-[#68645d] shadow-sm">
+      <section className="rounded-lg border border-[#34322e] bg-[#0d1318] p-8 text-center text-[#aaa59b] shadow-sm">
         创建命盘档案后，这里会显示流年与月度方向。
       </section>
     );
@@ -1224,7 +1241,7 @@ function ForecastPanel({
 
   if (loading || !forecast) {
     return (
-      <section className="rounded-lg border border-[#d8d3c6] bg-white p-8 text-center text-[#68645d] shadow-sm">
+      <section className="rounded-lg border border-[#34322e] bg-[#0d1318] p-8 text-center text-[#aaa59b] shadow-sm">
         正在生成流年方向...
       </section>
     );
@@ -1232,54 +1249,54 @@ function ForecastPanel({
 
   return (
     <section className="space-y-4">
-      <div className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">
-        <div className="flex items-center gap-2 text-sm text-[#a5533c]">
+      <div className="rounded-lg border border-[#34322e] bg-[#0d1318] p-5 shadow-sm">
+        <div className="flex items-center gap-2 text-sm text-[#bd4c3e]">
           <CalendarDays className="h-4 w-4" />
           流年与月度方向
         </div>
         <h2 className="mt-2 text-2xl font-semibold">{forecast.title}</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-7 text-[#5f5b54]">{forecast.overview}</p>
+        <p className="mt-2 max-w-3xl text-sm leading-7 text-[#b7b1a7]">{forecast.overview}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {forecast.yearlyKeywords.map((item) => (
-            <span key={item} className="rounded-full border border-[#d8d3c6] bg-[#fbfbf8] px-3 py-1 text-xs text-[#68645d]">
+            <span key={item} className="rounded-full border border-[#34322e] bg-[#0a1014] px-3 py-1 text-xs text-[#aaa59b]">
               {item}
             </span>
           ))}
         </div>
       </div>
 
-      <section className="overflow-hidden rounded-lg border border-[#d8d3c6] bg-white shadow-sm">
-        <div className="border-b border-[#e4ded2] bg-[#233338] p-5 text-white">
-          <div className="text-sm text-[#d5b8a8]">当前月份 · {forecast.currentMonth.focusElementLabel}</div>
+      <section className="overflow-hidden rounded-lg border border-[#34322e] bg-[#0d1318] shadow-sm">
+        <div className="border-b border-[#292d30] bg-[#0d1a20] p-5 text-white">
+          <div className="text-sm text-[#d1ad73]">当前月份 · {forecast.currentMonth.focusElementLabel}</div>
           <h3 className="mt-2 text-2xl font-semibold">{forecast.currentMonth.theme}</h3>
-          <p className="mt-2 max-w-3xl text-sm leading-7 text-[#eef3ef]">{forecast.currentMonth.summary}</p>
+          <p className="mt-2 max-w-3xl text-sm leading-7 text-[#d8e0dc]">{forecast.currentMonth.summary}</p>
         </div>
         <div className="grid gap-3 p-4 md:grid-cols-3">
           <DailyList title="适合推进" items={forecast.currentMonth.suitable} tone="good" />
           <DailyList title="暂缓处理" items={forecast.currentMonth.avoid} tone="warn" />
-          <div className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-4">
+          <div className="rounded-lg border border-[#292d30] bg-[#0a1014] p-4">
             <div className="mb-3 text-sm font-semibold">本月行动</div>
-            <p className="text-sm leading-7 text-[#5f5b54]">{forecast.currentMonth.action}</p>
+            <p className="text-sm leading-7 text-[#b7b1a7]">{forecast.currentMonth.action}</p>
           </div>
         </div>
       </section>
 
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {forecast.months.map((month) => (
-          <article key={month.month} className="rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm">
+          <article key={month.month} className="rounded-lg border border-[#34322e] bg-[#0d1318] p-4 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <h3 className="font-semibold">{month.theme}</h3>
-              <span className="rounded-full bg-[#eef1ec] px-2.5 py-1 text-xs text-[#5f665e]">{month.focusElementLabel}</span>
+              <span className="rounded-full bg-[#151e22] px-2.5 py-1 text-xs text-[#5f665e]">{month.focusElementLabel}</span>
             </div>
-            <p className="mt-2 text-sm leading-7 text-[#5f5b54]">{month.summary}</p>
-            <div className="mt-3 border-t border-[#e4ded2] pt-3 text-sm leading-6 text-[#5f5b54]">
+            <p className="mt-2 text-sm leading-7 text-[#b7b1a7]">{month.summary}</p>
+            <div className="mt-3 border-t border-[#292d30] pt-3 text-sm leading-6 text-[#b7b1a7]">
               {month.action}
             </div>
           </article>
         ))}
       </section>
 
-      <section className="rounded-lg border border-[#d8d3c6] bg-[#fbfbf8] p-4 text-xs leading-6 text-[#756f67]">
+      <section className="rounded-lg border border-[#34322e] bg-[#0a1014] p-4 text-xs leading-6 text-[#8e8980]">
         {forecast.disclaimers.join(" ")}
       </section>
     </section>
@@ -1290,20 +1307,20 @@ function HistoryPanel({ questions }: { questions: GuidanceQuestion[] }) {
   return (
     <section className="space-y-4">
       {questions.length === 0 ? (
-        <div className="rounded-lg border border-[#d8d3c6] bg-white p-8 text-center text-[#68645d] shadow-sm">还没有提问记录。</div>
+        <div className="rounded-lg border border-[#34322e] bg-[#0d1318] p-8 text-center text-[#aaa59b] shadow-sm">还没有提问记录。</div>
       ) : (
         questions.map((item) => (
-          <article key={item.id} className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">
+          <article key={item.id} className="rounded-lg border border-[#34322e] bg-[#0d1318] p-5 shadow-sm">
             <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
               <div>
-                <div className="mb-1 text-xs text-[#a5533c]">{categoryLabels[item.category] || item.category}</div>
+                <div className="mb-1 text-xs text-[#bd4c3e]">{categoryLabels[item.category] || item.category}</div>
                 <h3 className="font-semibold">{item.question}</h3>
               </div>
-              <span className="text-xs text-[#756f67]">
+              <span className="text-xs text-[#8e8980]">
                 {new Date(item.createdAt).toLocaleString()} · {item.usage.source}
               </span>
             </div>
-            <div className="whitespace-pre-wrap text-sm leading-7 text-[#4f4a43]">{item.answer}</div>
+            <div className="whitespace-pre-wrap text-sm leading-7 text-[#cbc4b8]">{item.answer}</div>
           </article>
         ))
       )}
@@ -1326,25 +1343,25 @@ function ExplorePanel({
 
   return (
     <section className="space-y-4">
-      <div className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">
-        <div className="flex items-center gap-2 text-sm text-[#a5533c]">
+      <div className="rounded-lg border border-[#34322e] bg-[#0d1318] p-5 shadow-sm">
+        <div className="flex items-center gap-2 text-sm text-[#bd4c3e]">
           <Layers3 className="h-4 w-4" />
           拓展方向
         </div>
         <h2 className="mt-2 text-2xl font-semibold">后续可以继续长出来的功能</h2>
-        <p className="mt-2 max-w-3xl text-sm leading-7 text-[#68645d]">
+        <p className="mt-2 max-w-3xl text-sm leading-7 text-[#aaa59b]">
           免费站最重要的是让用户每天愿意回来，所以后续功能会围绕“报告可沉淀、每日可行动、内容可分享”来做。
         </p>
       </div>
-      <section className="rounded-lg border border-[#d8d3c6] bg-[#fbfbf8] p-5 shadow-sm">
+      <section className="rounded-lg border border-[#34322e] bg-[#0a1014] p-5 shadow-sm">
         <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <div className="flex items-center gap-2 text-sm text-[#2d6b6f]">
+            <div className="flex items-center gap-2 text-sm text-[#5d9290]">
               <ShieldCheck className="h-4 w-4" />
               隐私与数据
             </div>
             <h3 className="mt-2 text-xl font-semibold">导出或删除我的数据</h3>
-            <p className="mt-2 text-sm leading-7 text-[#68645d]">
+            <p className="mt-2 text-sm leading-7 text-[#aaa59b]">
               可以随时下载自己保存的命盘、提问历史和已生成的报告内容；也可以永久删除账号和个人数据。导出文件不包含密码、登录凭证或其他用户资料。
             </p>
           </div>
@@ -1352,7 +1369,7 @@ function ExplorePanel({
             <a
               href="/api/me/export"
               download
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#23231f] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#34342f]"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#151c21] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#34342f]"
             >
               <FileText className="h-4 w-4" />
               导出 JSON
@@ -1362,7 +1379,7 @@ function ExplorePanel({
               data-action="delete-account"
               disabled={busy}
               onClick={onDeleteAccount}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-[#d8a99d] bg-white px-4 py-2 text-sm font-medium text-[#9c2f1b] hover:bg-[#fff5f2] disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-[#693c35] bg-[#0d1318] px-4 py-2 text-sm font-medium text-[#df7766] hover:bg-[#261411] disabled:opacity-60"
             >
               <Trash2 className="h-4 w-4" />
               删除账号数据
@@ -1370,20 +1387,20 @@ function ExplorePanel({
           </div>
         </div>
       </section>
-      <section className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-[#34322e] bg-[#0d1318] p-5 shadow-sm">
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 text-sm text-[#a5533c]">
+            <div className="flex items-center gap-2 text-sm text-[#bd4c3e]">
               <GalleryHorizontalEnd className="h-4 w-4" />
               图片生成
             </div>
             <h3 className="mt-2 text-xl font-semibold">分享卡与报告封面</h3>
-            <p className="mt-2 text-sm leading-7 text-[#68645d]">先提供不消耗外部额度的图片模板，用户可以保存每日方向，也可以分享报告封面和五行能量图。</p>
+            <p className="mt-2 text-sm leading-7 text-[#aaa59b]">先提供不消耗外部额度的图片模板，用户可以保存每日方向，也可以分享报告封面和五行能量图。</p>
           </div>
         </div>
 
         {!profile ? (
-          <div className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-5 text-sm text-[#68645d]">创建命盘后即可生成图片。</div>
+          <div className="rounded-lg border border-[#292d30] bg-[#0a1014] p-5 text-sm text-[#aaa59b]">创建命盘后即可生成图片。</div>
         ) : (
           <div className="grid gap-4 lg:grid-cols-3">
             <ShareCardPreview title="今日方向卡" body="适合每天保存或分享，包含今日主题、适合做、暂缓做和一个小行动。" url={dailyUrl} />
@@ -1396,15 +1413,15 @@ function ExplorePanel({
         {expansionCards.map((item) => {
           const Icon = item.icon;
           return (
-            <article key={item.title} className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">
+            <article key={item.title} className="rounded-lg border border-[#34322e] bg-[#0d1318] p-5 shadow-sm">
               <div className="mb-4 flex items-center justify-between gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-lg bg-[#eef1ec] text-[#2d6b6f]">
+                <div className="grid h-10 w-10 place-items-center rounded-lg bg-[#151e22] text-[#5d9290]">
                   <Icon className="h-5 w-5" />
                 </div>
-                <span className="rounded-full border border-[#d8d3c6] px-2.5 py-1 text-xs text-[#756f67]">{item.status}</span>
+                <span className="rounded-full border border-[#34322e] px-2.5 py-1 text-xs text-[#8e8980]">{item.status}</span>
               </div>
               <h3 className="font-semibold">{item.title}</h3>
-              <p className="mt-2 text-sm leading-7 text-[#5f5b54]">{item.body}</p>
+              <p className="mt-2 text-sm leading-7 text-[#b7b1a7]">{item.body}</p>
             </article>
           );
         })}
@@ -1415,22 +1432,22 @@ function ExplorePanel({
 
 function ShareCardPreview({ title, body, url }: { title: string; body: string; url: string }) {
   return (
-    <article className="rounded-lg border border-[#e4ded2] bg-[#fbfbf8] p-4">
+    <article className="rounded-lg border border-[#292d30] bg-[#0a1014] p-4">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <h4 className="font-semibold">{title}</h4>
-          <p className="mt-1 text-sm leading-6 text-[#68645d]">{body}</p>
+          <p className="mt-1 text-sm leading-6 text-[#aaa59b]">{body}</p>
         </div>
       </div>
-      <div className="overflow-hidden rounded-lg border border-[#d8d3c6] bg-white">
+      <div className="overflow-hidden rounded-lg border border-[#34322e] bg-[#0d1318]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={url} alt={title} className="aspect-[3/4] w-full object-cover" />
       </div>
       <div className="mt-3 flex flex-wrap gap-2 text-sm">
-        <a href={url} target="_blank" rel="noreferrer" className="rounded-md border border-[#d8d3c6] bg-white px-3 py-2 hover:border-[#a5533c]">
+        <a href={url} target="_blank" rel="noreferrer" className="rounded-md border border-[#34322e] bg-[#0d1318] px-3 py-2 hover:border-[#bd4c3e]">
           打开图片
         </a>
-        <a href={url} download className="rounded-md bg-[#23231f] px-3 py-2 text-white">
+        <a href={url} download className="rounded-md bg-[#151c21] px-3 py-2 text-white">
           下载 SVG
         </a>
       </div>
@@ -1456,10 +1473,10 @@ function AdminStats() {
   }, []);
 
   if (error) {
-    return <div className="rounded-lg border border-[#d8d3c6] bg-white p-5 text-sm text-[#9c2f1b] shadow-sm">{error}</div>;
+    return <div className="rounded-lg border border-[#34322e] bg-[#0d1318] p-5 text-sm text-[#df7766] shadow-sm">{error}</div>;
   }
   if (!stats) {
-    return <div className="rounded-lg border border-[#d8d3c6] bg-white p-5 text-sm text-[#68645d] shadow-sm">加载统计中...</div>;
+    return <div className="rounded-lg border border-[#34322e] bg-[#0d1318] p-5 text-sm text-[#aaa59b] shadow-sm">加载统计中...</div>;
   }
 
   return (
@@ -1474,32 +1491,32 @@ function AdminStats() {
           ["OpenAI", stats.openaiQuestions],
           ["估算Token", stats.estimatedTokens],
         ].map(([label, value]) => (
-          <div key={String(label)} className="rounded-lg border border-[#d8d3c6] bg-white p-4 shadow-sm">
-            <div className="text-xs text-[#756f67]">{String(label)}</div>
+          <div key={String(label)} className="rounded-lg border border-[#34322e] bg-[#0d1318] p-4 shadow-sm">
+            <div className="text-xs text-[#8e8980]">{String(label)}</div>
             <div className="mt-2 text-2xl font-semibold">{String(value)}</div>
           </div>
         ))}
       </div>
-      <div className="rounded-lg border border-[#d8d3c6] bg-white p-5 shadow-sm">
+      <div className="rounded-lg border border-[#34322e] bg-[#0d1318] p-5 shadow-sm">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 font-semibold">
-            <Activity className="h-4 w-4 text-[#2d6b6f]" />
+            <Activity className="h-4 w-4 text-[#5d9290]" />
             最近问题
           </h2>
           <div className="flex flex-wrap gap-2 text-xs">
-            <a className="rounded-md border border-[#d8d3c6] px-3 py-2 hover:border-[#a5533c]" href="/api/admin/export">
+            <a className="rounded-md border border-[#34322e] px-3 py-2 hover:border-[#bd4c3e]" href="/api/admin/export">
               脱敏导出
             </a>
-            <a className="rounded-md border border-[#d8d3c6] px-3 py-2 hover:border-[#a5533c]" href="/api/admin/export?mode=backup&confirm=full">
+            <a className="rounded-md border border-[#34322e] px-3 py-2 hover:border-[#bd4c3e]" href="/api/admin/export?mode=backup&confirm=full">
               完整备份
             </a>
           </div>
         </div>
         <div className="space-y-3">
           {stats.latestQuestions.map((item) => (
-            <div key={item.id} className="rounded-md border border-[#e4ded2] p-3 text-sm">
+            <div key={item.id} className="rounded-md border border-[#292d30] p-3 text-sm">
               <div className="font-medium">{item.question}</div>
-              <div className="mt-1 text-xs text-[#756f67]">
+              <div className="mt-1 text-xs text-[#8e8980]">
                 {item.category} · {item.source} · {new Date(item.createdAt).toLocaleString()}
               </div>
             </div>
@@ -1515,8 +1532,8 @@ function AdSlot({ placement }: { placement: "top" | "side" }) {
     <section
       className={
         placement === "top"
-          ? "rounded-lg border border-dashed border-[#c7c0b4] bg-[#fbfbf8] px-4 py-3 text-sm text-[#756f67]"
-          : "rounded-lg border border-dashed border-[#c7c0b4] bg-[#fbfbf8] p-4 text-sm text-[#756f67]"
+          ? "rounded-lg border border-dashed border-[#4a453d] bg-[#0a1014] px-4 py-3 text-sm text-[#8e8980]"
+          : "rounded-lg border border-dashed border-[#4a453d] bg-[#0a1014] p-4 text-sm text-[#8e8980]"
       }
       aria-label="广告位预留"
     >

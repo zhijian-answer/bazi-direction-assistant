@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  applicationName: "八字命盘助手",
-  title: "八字命盘助手｜四柱、五行、大运流年在线排盘",
+  applicationName: "玄枢",
+  title: "玄枢｜东方命理数据实验室",
   description: "免费的中文八字排盘工具，提供四柱八字、五行、十神、地支关系、大运流年的结构化参考。",
   manifest: "/manifest.webmanifest",
   icons: {
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "八字命盘助手",
+    title: "玄枢",
     statusBarStyle: "black-translucent",
   },
   formatDetection: {

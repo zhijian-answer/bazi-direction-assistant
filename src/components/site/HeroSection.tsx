@@ -1,58 +1,83 @@
-import { ArrowDown, BookOpenText, Compass, ShieldCheck } from "lucide-react";
+"use client";
+
+import { ArrowRight, BookOpenText, CircleGauge, Compass, ShieldCheck } from "lucide-react";
+import Image from "next/image";
+import type { PointerEvent } from "react";
+
+const samplePillars = [
+  ["年柱", "丙午", "天河水"],
+  ["月柱", "癸巳", "长流水"],
+  ["日柱", "己巳", "大林木"],
+  ["时柱", "己巳", "大林木"],
+];
 
 export function HeroSection() {
+  function moveInstrument(event: PointerEvent<HTMLElement>) {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 10;
+    const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 8;
+    event.currentTarget.style.setProperty("--hero-x", `${x}px`);
+    event.currentTarget.style.setProperty("--hero-y", `${y}px`);
+  }
+
+  function resetInstrument(event: PointerEvent<HTMLElement>) {
+    event.currentTarget.style.setProperty("--hero-x", "0px");
+    event.currentTarget.style.setProperty("--hero-y", "0px");
+  }
+
   return (
-    <section className="hero-paper relative isolate flex min-h-[calc(100svh-92px)] items-center overflow-hidden border-b border-[var(--line)]">
-      <div className="bazi-orbit" aria-hidden="true">
-        <div className="orbit-core">命</div>
-        <span className="orbit-mark orbit-mark-1">甲</span>
-        <span className="orbit-mark orbit-mark-2">丙</span>
-        <span className="orbit-mark orbit-mark-3">戊</span>
-        <span className="orbit-mark orbit-mark-4">庚</span>
-        <span className="orbit-mark orbit-mark-5">壬</span>
-        <span className="orbit-mark orbit-mark-6">子</span>
-        <span className="orbit-mark orbit-mark-7">辰</span>
-        <span className="orbit-mark orbit-mark-8">申</span>
+    <section
+      className="xuanshu-hero"
+      onPointerMove={moveInstrument}
+      onPointerLeave={resetInstrument}
+      aria-labelledby="xuanshu-hero-title"
+    >
+      <div className="xuanshu-instrument" aria-hidden="true">
+        <Image src="/xuanshu-hero-reference.png" alt="" fill priority sizes="(max-width: 760px) 120vw, 70vw" />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 lg:px-10">
-        <div className="max-w-3xl">
-          <div className="mb-6 flex items-center gap-3 text-sm text-[var(--cinnabar)]">
-            <span className="h-px w-8 bg-[var(--cinnabar)]" />
-            传统文化的结构化呈现
-          </div>
-          <h1 className="font-display text-5xl leading-[1.08] text-[var(--ink)] sm:text-6xl lg:text-7xl">
-            让命理，
-            <br />
-            被科学看见
-          </h1>
-          <p className="mt-7 max-w-2xl text-base leading-8 text-[var(--muted)] sm:text-lg">
-            以传统八字为基础，通过结构化排盘、五行分析与可视化解读，让复杂的命盘信息更清楚、更容易理解。
-          </p>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-            输入出生信息，即可查看四柱八字、五行分布、十神关系、大运流年。内容仅供传统文化研究与娱乐参考。
-          </p>
+      <div className="xuanshu-hero-content">
+        <div className="xuanshu-kicker"><span />传统文化 · 结构化 · 可视化</div>
+        <h1 id="xuanshu-hero-title" className="xuanshu-title">
+          让命理，
+          <br />
+          被<span>科学</span>看见
+        </h1>
+        <p className="xuanshu-lead">
+          结构化八字排盘、五行强弱分析、十神关系解读与大运流年推演，让复杂命盘以清晰的数据视角呈现。
+        </p>
+        <p className="xuanshu-boundary">服务于传统文化研究与娱乐参考，不替代现实证据与专业判断。</p>
 
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <a href="#tool" className="btn-primary min-h-12 px-7">
-              <Compass className="h-4 w-4" />
-              开始排盘
-              <ArrowDown className="h-4 w-4" />
-            </a>
-            <a href="#learn" className="btn-secondary min-h-12 px-7">
-              <BookOpenText className="h-4 w-4" />
-              了解八字
-            </a>
-          </div>
-
-          <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 border-t border-[var(--line)] pt-5 text-sm text-[var(--muted)]">
-            <span>四柱排盘</span>
-            <span>五行权重</span>
-            <span>十神藏干</span>
-            <span>大运流年</span>
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-[var(--jade)]" />克制解读</span>
-          </div>
+        <div className="xuanshu-actions">
+          <a href="#tool" className="xuanshu-primary">
+            <Compass className="h-4 w-4" />
+            开始排盘
+            <ArrowRight className="h-4 w-4" />
+          </a>
+          <a href="#learn" className="xuanshu-secondary">
+            <BookOpenText className="h-4 w-4" />
+            了解八字
+          </a>
         </div>
+
+        <div className="xuanshu-signals" aria-label="产品能力">
+          <span><CircleGauge className="h-4 w-4" />双引擎核对</span>
+          <span><ShieldCheck className="h-4 w-4" />克制解读</span>
+        </div>
+      </div>
+
+      <div className="xuanshu-data-strip" aria-label="实时命盘示例">
+        <div className="data-live"><i />实时排盘示例</div>
+        <div className="data-date"><small>公历</small><strong>2026-05-20 09:30</strong></div>
+        <div className="data-date data-lunar"><small>农历</small><strong>二〇二六年四月初四 巳时</strong></div>
+        <div className="data-pillars">
+          {samplePillars.map(([name, value, note]) => (
+            <div key={name}><small>{name}</small><strong>{value}</strong><em>{note}</em></div>
+          ))}
+        </div>
+        <div className="data-master"><small>日主</small><strong>己土</strong><em>阴土</em></div>
+        <div className="data-elements"><small>五行统计</small><strong><b>木 2</b><b>火 3</b><b>土 4</b><b>金 1</b><b>水 1</b></strong></div>
+        <a href="#tool" className="data-link">查看完整命盘 <ArrowRight className="h-3.5 w-3.5" /></a>
       </div>
     </section>
   );

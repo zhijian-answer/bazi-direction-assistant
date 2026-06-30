@@ -1,19 +1,19 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "隐私说明 - 八字命盘助手",
-  description: "八字命盘助手的数据使用和隐私说明。",
+  title: "隐私说明 - 玄枢",
+  description: "玄枢的数据使用和隐私说明。",
 };
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-[#f6f3ee] px-5 py-10 text-[#27231d]">
-      <article className="mx-auto max-w-3xl border border-[#d6c8b8] bg-white p-6">
-        <Link href="/" className="text-sm text-[#9c4f35]">
+    <main className="min-h-screen bg-[var(--rice)] px-5 py-10 text-[var(--ink)]">
+      <article className="mx-auto max-w-3xl border border-[var(--line)] bg-[var(--paper)] p-6">
+        <Link href="/" className="text-sm text-[var(--cinnabar)]">
           返回首页
         </Link>
         <h1 className="mt-6 text-3xl font-semibold">隐私说明</h1>
-        <div className="mt-6 space-y-5 text-sm leading-7 text-[#4f473e]">
+        <div className="mt-6 space-y-5 text-sm leading-7 text-[var(--muted)]">
           <p>
             本站会保存用户注册邮箱、出生档案、命盘计算结果、提问记录和系统回答，用于提供历史记录、每日次数限制和基础运营统计。
           </p>
