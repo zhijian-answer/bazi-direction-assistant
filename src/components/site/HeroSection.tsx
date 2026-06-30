@@ -1,83 +1,81 @@
-"use client";
-
-import { ArrowRight, BookOpenText, CircleGauge, Compass, ShieldCheck } from "lucide-react";
+import { ArrowDown, ArrowRight, BarChart3, BookOpenText, Check, Compass, LockKeyhole, Orbit } from "lucide-react";
 import Image from "next/image";
-import type { PointerEvent } from "react";
 
-const samplePillars = [
-  ["年柱", "丙午", "天河水"],
-  ["月柱", "癸巳", "长流水"],
-  ["日柱", "己巳", "大林木"],
-  ["时柱", "己巳", "大林木"],
-];
+const pillars = [
+  ["年柱", "庚午", "路旁土"],
+  ["月柱", "壬午", "杨柳木"],
+  ["日柱", "辛亥", "钗钏金"],
+  ["时柱", "癸巳", "长流水"],
+] as const;
+
+const elements = [
+  ["木", 28, "wood"],
+  ["火", 18, "fire"],
+  ["土", 22, "earth"],
+  ["金", 17, "metal"],
+  ["水", 15, "water"],
+] as const;
 
 export function HeroSection() {
-  function moveInstrument(event: PointerEvent<HTMLElement>) {
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 10;
-    const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 8;
-    event.currentTarget.style.setProperty("--hero-x", `${x}px`);
-    event.currentTarget.style.setProperty("--hero-y", `${y}px`);
-  }
-
-  function resetInstrument(event: PointerEvent<HTMLElement>) {
-    event.currentTarget.style.setProperty("--hero-x", "0px");
-    event.currentTarget.style.setProperty("--hero-y", "0px");
-  }
-
   return (
-    <section
-      className="xuanshu-hero"
-      onPointerMove={moveInstrument}
-      onPointerLeave={resetInstrument}
-      aria-labelledby="xuanshu-hero-title"
-    >
-      <div className="xuanshu-instrument" aria-hidden="true">
-        <Image src="/xuanshu-hero-reference.png" alt="" fill priority sizes="(max-width: 760px) 120vw, 70vw" />
+    <section id="top" className="product-hero" aria-labelledby="product-hero-title">
+      <div className="product-hero-ambient" aria-hidden="true">
+        <Image src="/xuanshu-hero-reference.png" alt="" fill priority sizes="(max-width: 800px) 100vw, 55vw" />
       </div>
 
-      <div className="xuanshu-hero-content">
-        <div className="xuanshu-kicker"><span />传统文化 · 结构化 · 可视化</div>
-        <h1 id="xuanshu-hero-title" className="xuanshu-title">
-          让命理，
-          <br />
-          被<span>科学</span>看见
-        </h1>
-        <p className="xuanshu-lead">
-          结构化八字排盘、五行强弱分析、十神关系解读与大运流年推演，让复杂命盘以清晰的数据视角呈现。
-        </p>
-        <p className="xuanshu-boundary">服务于传统文化研究与娱乐参考，不替代现实证据与专业判断。</p>
-
-        <div className="xuanshu-actions">
-          <a href="#tool" className="xuanshu-primary">
-            <Compass className="h-4 w-4" />
-            开始排盘
-            <ArrowRight className="h-4 w-4" />
-          </a>
-          <a href="#learn" className="xuanshu-secondary">
-            <BookOpenText className="h-4 w-4" />
-            了解八字
-          </a>
+      <div className="product-shell product-hero-layout">
+        <div className="product-hero-copy">
+          <div className="product-hero-kicker"><span />传统文化 · 结构化排盘 · 可视化分析</div>
+          <h1 id="product-hero-title">让命理，<br />被<span>科学</span>看见</h1>
+          <p className="product-hero-subtitle">把复杂的八字命盘，整理成清晰可读的结构化报告。少一点玄乎，多一点看得懂。</p>
+          <p className="product-hero-description">输入出生信息，即可查看四柱八字、五行分布、十神关系、大运流年与行动建议。内容仅供传统文化研究与娱乐参考。</p>
+          <div className="product-hero-actions">
+            <a href="#start" className="product-cta-primary"><Compass aria-hidden="true" />立即开始排盘<ArrowRight aria-hidden="true" /></a>
+            <a href="#chapters" className="product-cta-secondary"><BookOpenText aria-hidden="true" />先看看报告内容<ArrowDown aria-hidden="true" /></a>
+          </div>
+          <div className="product-trust-row" aria-label="使用说明">
+            <span><LockKeyhole aria-hidden="true" />信息不会公开展示</span>
+            <span><BarChart3 aria-hidden="true" />结果清晰可读</span>
+            <span><Check aria-hidden="true" />适合手机截图保存</span>
+          </div>
         </div>
 
-        <div className="xuanshu-signals" aria-label="产品能力">
-          <span><CircleGauge className="h-4 w-4" />双引擎核对</span>
-          <span><ShieldCheck className="h-4 w-4" />克制解读</span>
+        <div className="hero-report-preview" aria-label="命盘报告预览">
+          <div className="hero-report-topbar">
+            <span><Orbit aria-hidden="true" />玄枢命盘报告</span>
+            <em>示例预览</em>
+          </div>
+          <div className="hero-report-summary">
+            <div>
+              <small>命盘总览</small>
+              <strong>辛金日主 · 四柱结构</strong>
+              <p>1990 年 6 月 15 日 09:30 · 成都</p>
+            </div>
+            <span className="hero-day-master"><small>日主</small>辛金</span>
+          </div>
+          <div className="hero-pillars">
+            {pillars.map(([label, value, note]) => (
+              <div key={label}><small>{label}</small><strong>{value}</strong><span>{note}</span></div>
+            ))}
+          </div>
+          <div className="hero-report-lower">
+            <div className="hero-elements">
+              <div className="hero-report-label"><span>五行分布</span><small>综合藏干权重</small></div>
+              {elements.map(([label, value, key]) => (
+                <div className="hero-element-row" key={key}>
+                  <span>{label}</span><i><b className={`is-${key}`} style={{ width: `${value * 2.8}%` }} /></i><em>{value}%</em>
+                </div>
+              ))}
+            </div>
+            <div className="hero-chapter-list">
+              <div className="hero-report-label"><span>报告章节</span><small>8 个核心部分</small></div>
+              {["四柱八字", "十神分析", "地支关系", "大运流年"].map((item, index) => (
+                <div key={item}><span>{String(index + 1).padStart(2, "0")}</span><strong>{item}</strong><Check aria-hidden="true" /></div>
+              ))}
+            </div>
+          </div>
+          <div className="hero-report-footer"><span><i />报告已生成</span><strong>继续阅读完整报告 <ArrowRight aria-hidden="true" /></strong></div>
         </div>
-      </div>
-
-      <div className="xuanshu-data-strip" aria-label="实时命盘示例">
-        <div className="data-live"><i />实时排盘示例</div>
-        <div className="data-date"><small>公历</small><strong>2026-05-20 09:30</strong></div>
-        <div className="data-date data-lunar"><small>农历</small><strong>二〇二六年四月初四 巳时</strong></div>
-        <div className="data-pillars">
-          {samplePillars.map(([name, value, note]) => (
-            <div key={name}><small>{name}</small><strong>{value}</strong><em>{note}</em></div>
-          ))}
-        </div>
-        <div className="data-master"><small>日主</small><strong>己土</strong><em>阴土</em></div>
-        <div className="data-elements"><small>五行统计</small><strong><b>木 2</b><b>火 3</b><b>土 4</b><b>金 1</b><b>水 1</b></strong></div>
-        <a href="#tool" className="data-link">查看完整命盘 <ArrowRight className="h-3.5 w-3.5" /></a>
       </div>
     </section>
   );

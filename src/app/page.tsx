@@ -25,8 +25,8 @@ import type { ActionCard, ActionCheckin, BirthProfile, BirthReport, DailyGuidanc
 import { buildActionCheckinStats } from "@/lib/checkin-stats";
 import { BirthForm } from "@/components/bazi/BirthForm";
 import { ResultSection } from "@/components/bazi/ResultSection";
+import { PublicHome } from "@/components/home/PublicHome";
 import { DisclaimerFooter } from "@/components/site/DisclaimerFooter";
-import { HeroSection } from "@/components/site/HeroSection";
 
 type AppState = {
   user: PublicUser | null;
@@ -110,45 +110,6 @@ const categoryLabels: Record<string, string> = {
   custom: "自由提问",
 };
 
-const expansionCards = [
-  {
-    title: "完整命盘报告",
-    status: "已规划",
-    body: "把日主、五行、行动风格、关系模式和事业建议整理成一份可反复查看的报告。",
-    icon: FileText,
-  },
-  {
-    title: "流年与月度方向",
-    status: "下一阶段",
-    body: "按年份和月份给出节奏提醒，帮助用户做计划，而不是只看一次性结论。",
-    icon: CalendarDays,
-  },
-  {
-    title: "图片生成",
-    status: "可接入",
-    body: "生成命盘图、五行能量图、流年海报、报告封面和社交分享图。",
-    icon: GalleryHorizontalEnd,
-  },
-  {
-    title: "低谷行动卡",
-    status: "已接入",
-    body: "当用户很迷茫时，给出当天能完成的小步骤、提醒语和复盘问题，可一键带入提问。",
-    icon: Sparkles,
-  },
-  {
-    title: "关系沟通建议",
-    status: "可拓展",
-    body: "围绕关系修复、沟通节奏、边界感和主动时机给出参考建议。",
-    icon: MessageCircleQuestion,
-  },
-  {
-    title: "分享与增长",
-    status: "后续",
-    body: "把今日方向和报告摘要做成分享卡，适合自然传播和后续广告变现。",
-    icon: Layers3,
-  },
-];
-
 async function postJson<T>(url: string, body?: unknown): Promise<T> {
   const response = await fetch(url, {
     method: "POST",
@@ -164,7 +125,6 @@ async function postJson<T>(url: string, body?: unknown): Promise<T> {
 
 export default function Home() {
   const [state, setState] = useState<AppState>(emptyState);
-  const [mode, setMode] = useState<"login" | "register">("register");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -299,7 +259,7 @@ export default function Home() {
     ["report", BookOpenText, "报告"],
     ["forecast", CalendarDays, "流年"],
     ["history", History, "历史"],
-    ["explore", Layers3, "拓展"],
+    ["explore", Layers3, "分享"],
   ];
   if (state.isAdmin) {
     navItems.push(["admin", BarChart3, "统计"]);
@@ -314,20 +274,52 @@ export default function Home() {
     });
   }
 
-  async function handleAuth(event: FormEvent<HTMLFormElement>) {
+  async function handlePublicLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError("");
     const form = new FormData(event.currentTarget);
     try {
-      await postJson<{ user: PublicUser }>(`/api/auth/${mode}`, {
-        name: form.get("name"),
+      await postJson<{ user: PublicUser }>("/api/auth/login", {
         email: form.get("email"),
         password: form.get("password"),
       });
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "操作失败");
+      setError(err instanceof Error ? err.message : "登录失败，请检查邮箱和密码");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handlePublicRegister(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    const form = new FormData(event.currentTarget);
+    try {
+      const profileName = String(form.get("profileName") || "我的命盘");
+      await postJson<{ user: PublicUser }>("/api/auth/register", {
+        name: profileName,
+        email: form.get("email"),
+        password: form.get("password"),
+      });
+      const data = await postJson<{ profile: BirthProfile }>("/api/profiles", {
+        name: profileName,
+        gender: form.get("gender"),
+        calendarType: form.get("calendarType"),
+        birthDate: form.get("birthDate"),
+        birthTime: form.get("birthTime") || "12:00",
+        birthPlace: form.get("birthPlace"),
+        timeUnknown: form.get("timeUnknown") === "on",
+        isLeapMonth: form.get("isLeapMonth") === "on",
+        timezone: form.get("timezone"),
+      });
+      await refresh();
+      setSelectedProfileId(data.profile.id);
+      setActivePanel("report");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "请检查填写信息后重新生成");
     } finally {
       setBusy(false);
     }
@@ -478,119 +470,14 @@ export default function Home() {
       <main className="xuanshu-app flex min-h-screen items-center justify-center bg-[var(--rice)] text-[var(--ink)]">
         <div className="flex items-center gap-3 rounded-lg border border-[#34322e] bg-[#0d1318] px-4 py-3 text-sm shadow-sm">
           <Sparkles className="h-5 w-5 animate-pulse text-[#bd4c3e]" />
-          玄枢正在校准命盘仪
+          页面加载中
         </div>
       </main>
     );
   }
 
   if (!state.user) {
-    return (
-      <main className="xuanshu-public min-h-screen bg-[var(--rice)] text-[var(--ink)]">
-        <header className="xuanshu-header">
-          <div className="mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-14">
-            <a href="#top" className="xuanshu-brand" aria-label="玄枢首页">
-              <Orbit className="h-10 w-10" strokeWidth={1.25} />
-              <span className="font-display text-2xl">玄枢</span>
-              <i />
-              <small>东方命理数据实验室</small>
-            </a>
-            <nav className="hidden items-center gap-8 text-sm lg:flex">
-              <a href="#tool">命盘工具</a>
-              <a href="#learn">五行分析</a>
-              <a href="#learn">十神关系</a>
-              <a href="#learn">大运流年</a>
-              <a href="/about">关于我们</a>
-            </nav>
-            <a href="#tool" className="xuanshu-header-cta">免费使用</a>
-          </div>
-        </header>
-        <div id="top"><HeroSection /></div>
-
-        <section id="tool" className="xuanshu-tool-band scroll-mt-20 border-b border-[var(--line)] bg-[var(--paper)]">
-          <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1fr_400px] md:items-center lg:px-10 lg:py-20">
-            <div>
-              <div className="section-kicker">免费注册后使用</div>
-              <h2 className="mt-3 font-display text-3xl sm:text-4xl">保存命盘，随时回来查看</h2>
-              <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--muted)]">注册会员不收取费用。一个账号可以保存 3 个命盘档案，并使用命盘报告、流年方向、行动建议和历史记录。</p>
-              <div className="mt-7 grid gap-px overflow-hidden rounded-md border border-[var(--line)] bg-[var(--line)] sm:grid-cols-3">
-                {[["完整排盘", "四柱、藏干与十神"], ["时间节奏", "大运与近年流年"], ["现实行动", "提问与每日建议"]].map(([title, body]) => (
-                  <div key={title} className="bg-[var(--rice)] p-4"><div className="text-sm font-semibold">{title}</div><div className="mt-2 text-xs leading-5 text-[var(--muted)]">{body}</div></div>
-                ))}
-              </div>
-            </div>
-
-          <form onSubmit={handleAuth} className="panel p-5 sm:p-6">
-            <div className="mb-5 grid grid-cols-2 gap-2 rounded-lg bg-[#151e22] p-1">
-              <button
-                type="button"
-                onClick={() => setMode("register")}
-                className={`rounded-md px-3 py-2 text-sm ${mode === "register" ? "bg-[#bd4c3e] text-white shadow-sm" : "text-[#b7b1a7]"}`}
-              >
-                注册
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("login")}
-                className={`rounded-md px-3 py-2 text-sm ${mode === "login" ? "bg-[#bd4c3e] text-white shadow-sm" : "text-[#b7b1a7]"}`}
-              >
-                登录
-              </button>
-            </div>
-            <div className="space-y-4">
-              {mode === "register" && (
-                <label className="block text-sm">
-                  昵称
-                  <input name="name" className="mt-2 w-full rounded-md border border-[#34322e] px-3 py-3 outline-none focus:border-[#bd4c3e]" placeholder="你的昵称" />
-                </label>
-              )}
-              <label className="block text-sm">
-                邮箱
-                <input name="email" type="email" required className="mt-2 w-full rounded-md border border-[#34322e] px-3 py-3 outline-none focus:border-[#bd4c3e]" placeholder="you@example.com" />
-              </label>
-              <label className="block text-sm">
-                密码
-                <input name="password" type="password" required className="mt-2 w-full rounded-md border border-[#34322e] px-3 py-3 outline-none focus:border-[#bd4c3e]" placeholder="至少 6 位" />
-              </label>
-            </div>
-            {error && <p className="mt-4 rounded-md border border-[#693c35] bg-[#261411] px-3 py-2 text-sm text-[#df7766]">{error}</p>}
-            <button type="submit" disabled={busy} className="btn-primary mt-5 min-h-12 w-full px-4">
-              {busy ? "正在处理…" : mode === "register" ? "免费注册" : "登录并继续"}
-            </button>
-            <div className="mt-4 flex flex-wrap gap-3 text-xs text-[#8e8980]">
-              <a href="/about" className="hover:text-[#bd4c3e]">
-                关于
-              </a>
-              <a href="/privacy" className="hover:text-[#bd4c3e]">
-                隐私说明
-              </a>
-              <a href="/terms" className="hover:text-[#bd4c3e]">
-                使用边界
-              </a>
-            </div>
-          </form>
-          </div>
-        </section>
-        <section id="learn" className="xuanshu-learn mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
-          <div className="max-w-2xl"><div className="section-kicker">命盘观察框架</div><h2 className="mt-3 font-display text-3xl">先看结构，再看行动</h2><p className="mt-4 text-sm leading-7 text-[var(--muted)]">把传统命理拆成可阅读的数据层：出生时点形成基础结构，五行与十神描述倾向，大运流年提示节奏，最终落到可以验证的小行动。</p></div>
-          <div className="xuanshu-method-grid mt-10">
-            {[
-              ["01", "四柱结构", "年、月、日、时四个坐标，建立命盘的基础数据。"],
-              ["02", "五行强弱", "用可视化比例观察能量分布，不用模糊的吉凶标签。"],
-              ["03", "十神关系", "从表达、资源、行动与关系四个维度理解自身模式。"],
-              ["04", "大运流年", "观察阶段节奏，给当下决策增加一个自我复盘角度。"],
-            ].map(([index, title, body]) => (
-              <article key={index}>
-                <span>{index}</span>
-                <h3>{title}</h3>
-                <p>{body}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-        <DisclaimerFooter />
-      </main>
-    );
+    return <PublicHome busy={busy} error={error} onRegister={handlePublicRegister} onLogin={handlePublicLogin} />;
   }
 
   return (
@@ -636,7 +523,6 @@ export default function Home() {
             />
           )}
 
-          <AdSlot placement="side" />
         </aside>
 
         <section className="min-w-0 space-y-4">
@@ -661,7 +547,6 @@ export default function Home() {
               />
 
               <QuickMetrics state={state} selectedProfile={selectedProfile} />
-              <AdSlot placement="top" />
             </>
           )}
 
@@ -1346,11 +1231,11 @@ function ExplorePanel({
       <div className="rounded-lg border border-[#34322e] bg-[#0d1318] p-5 shadow-sm">
         <div className="flex items-center gap-2 text-sm text-[#bd4c3e]">
           <Layers3 className="h-4 w-4" />
-          拓展方向
+          保存与分享
         </div>
-        <h2 className="mt-2 text-2xl font-semibold">后续可以继续长出来的功能</h2>
+        <h2 className="mt-2 text-2xl font-semibold">把报告留在自己手里</h2>
         <p className="mt-2 max-w-3xl text-sm leading-7 text-[#aaa59b]">
-          免费站最重要的是让用户每天愿意回来，所以后续功能会围绕“报告可沉淀、每日可行动、内容可分享”来做。
+          保存报告封面、五行能量图和今日方向卡，也可以随时导出或删除自己的数据。
         </p>
       </div>
       <section className="rounded-lg border border-[#34322e] bg-[#0a1014] p-5 shadow-sm">
@@ -1372,7 +1257,7 @@ function ExplorePanel({
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-[#151c21] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#34342f]"
             >
               <FileText className="h-4 w-4" />
-              导出 JSON
+              下载我的数据
             </a>
             <button
               type="button"
@@ -1392,10 +1277,10 @@ function ExplorePanel({
           <div>
             <div className="flex items-center gap-2 text-sm text-[#bd4c3e]">
               <GalleryHorizontalEnd className="h-4 w-4" />
-              图片生成
+              报告图片
             </div>
             <h3 className="mt-2 text-xl font-semibold">分享卡与报告封面</h3>
-            <p className="mt-2 text-sm leading-7 text-[#aaa59b]">先提供不消耗外部额度的图片模板，用户可以保存每日方向，也可以分享报告封面和五行能量图。</p>
+            <p className="mt-2 text-sm leading-7 text-[#aaa59b]">将每日方向、报告封面和五行分布保存为清晰图片，方便手机查看和分享。</p>
           </div>
         </div>
 
@@ -1409,23 +1294,6 @@ function ExplorePanel({
           </div>
         )}
       </section>
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {expansionCards.map((item) => {
-          const Icon = item.icon;
-          return (
-            <article key={item.title} className="rounded-lg border border-[#34322e] bg-[#0d1318] p-5 shadow-sm">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-lg bg-[#151e22] text-[#5d9290]">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <span className="rounded-full border border-[#34322e] px-2.5 py-1 text-xs text-[#8e8980]">{item.status}</span>
-              </div>
-              <h3 className="font-semibold">{item.title}</h3>
-              <p className="mt-2 text-sm leading-7 text-[#b7b1a7]">{item.body}</p>
-            </article>
-          );
-        })}
-      </div>
     </section>
   );
 }
@@ -1522,24 +1390,6 @@ function AdminStats() {
             </div>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-function AdSlot({ placement }: { placement: "top" | "side" }) {
-  return (
-    <section
-      className={
-        placement === "top"
-          ? "rounded-lg border border-dashed border-[#4a453d] bg-[#0a1014] px-4 py-3 text-sm text-[#8e8980]"
-          : "rounded-lg border border-dashed border-[#4a453d] bg-[#0a1014] p-4 text-sm text-[#8e8980]"
-      }
-      aria-label="广告位预留"
-    >
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-        <span>广告位预留</span>
-        <span className="text-xs">免费运营期可关闭，流量稳定后接入</span>
       </div>
     </section>
   );

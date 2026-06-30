@@ -21,7 +21,7 @@ export function DisclaimerFooter() {
       </div>
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-5 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
-          <span>玄枢 · 东方命理数据实验室</span>
+          <span>玄枢 · 八字排盘与结构化解读</span>
           <nav className="flex gap-5">
             <a href="/about" className="hover:text-white">关于我们</a>
             <a href="/privacy" className="hover:text-white">隐私说明</a>
