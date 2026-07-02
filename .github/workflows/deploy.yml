@@ -1,57 +1,55 @@
-name: Deploy
+name: Inspect server for isolated mobile preview
 
 on:
   push:
     branches:
       - main
+    paths:
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 concurrency:
-  group: bazi-production-deploy
+  group: xuanshu-mobile-preview-inspect
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Pull and restart production
+  inspect:
+    name: Read-only server inspection
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Verify build before deploy
-        uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-          cache: npm
-
-      - name: Install and build
-        run: |
-          npm ci
-          npm run check
-
       - name: Start ssh agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
 
-      - name: Trust production host
+      - name: Trust server host
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -p "${{ secrets.DEPLOY_SSH_PORT || '22' }}" "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Stabilize ssh and run server pull deploy
+      - name: Inspect without changing server
         run: |
           ssh \
             -o IPQoS=none \
             -o BatchMode=yes \
+            -o ConnectTimeout=30 \
             -o ServerAliveInterval=30 \
             -o ServerAliveCountMax=3 \
             -p "${{ secrets.DEPLOY_SSH_PORT || '22' }}" \
             "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
-            "curl -fsSL https://raw.githubusercontent.com/zhijian-answer/bazi-direction-assistant/${{ github.sha }}/deploy/server-ssh-stabilize.sh | bash && curl -fsSL https://raw.githubusercontent.com/zhijian-answer/bazi-direction-assistant/${{ github.sha }}/deploy/server-deploy.sh | bash"
-
-      - name: Public health check
-        run: |
-          curl --retry 8 --retry-delay 8 --retry-all-errors -fsS https://zzj-superstaff.duckdns.org/api/health
+            'set -eu
+             echo "== host =="
+             hostname
+             echo "== enabled nginx files =="
+             find /etc/nginx/sites-enabled /etc/nginx/conf.d -maxdepth 2 -type f -o -type l 2>/dev/null | sort
+             echo "== nginx routing summary =="
+             grep -R -nE "^[[:space:]]*(listen|server_name|location|proxy_pass|include)[[:space:]]" /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null || true
+             echo "== listening tcp ports =="
+             ss -ltnp
+             echo "== relevant services =="
+             systemctl list-units --type=service --all --no-pager | grep -E "superstaff|bazi|hindsight|hermes|nginx" || true
+             echo "== capacity =="
+             free -h
+             df -h /'
