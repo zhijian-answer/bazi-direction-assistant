@@ -1,13 +1,6 @@
 name: Deploy isolated mobile preview
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - ".github/workflows/pages.yml"
-      - "mobile-static/**"
-      - "scripts/prepare-mobile-static.mjs"
   workflow_dispatch:
 
 concurrency:
