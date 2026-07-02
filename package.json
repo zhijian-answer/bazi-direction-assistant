@@ -14,12 +14,15 @@
   },
   "dependencies": {
     "bazi-calculator-by-alvamind": "^1.0.2",
+    "framer-motion": "^12.42.2",
+    "html-to-image": "^1.11.13",
     "lucide-react": "^1.17.0",
     "lunar-javascript": "^1.7.7",
     "next": "16.2.9",
     "openai": "^6.42.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "recharts": "^3.9.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

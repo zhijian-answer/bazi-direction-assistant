@@ -1,24 +1,46 @@
-name: Inspect server for isolated mobile preview
+name: Deploy isolated mobile preview
 
 on:
   push:
     branches:
       - main
-    paths:
-      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 concurrency:
-  group: xuanshu-mobile-preview-inspect
+  group: xuanshu-mobile-preview
   cancel-in-progress: false
 
 jobs:
-  inspect:
-    name: Read-only server inspection
+  deploy:
+    name: Build and deploy mobile preview
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install and verify
+        run: |
+          npm ci
+          npm run lint
+
+      - name: Build isolated standalone package
+        env:
+          NEXT_PUBLIC_ASSET_PREFIX: /xuanshu-assets
+        run: |
+          npm run build
+          mkdir -p .next/standalone/.next
+          cp -R .next/static .next/standalone/.next/static
+          if [ -d public ]; then cp -R public .next/standalone/public; fi
+          tar -C .next/standalone -czf /tmp/xuanshu-mobile-${GITHUB_SHA}.tar.gz .
+
       - name: Start ssh agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -29,7 +51,18 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p "${{ secrets.DEPLOY_SSH_PORT || '22' }}" "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Inspect without changing server
+      - name: Upload standalone package
+        run: |
+          scp \
+            -o IPQoS=none \
+            -o BatchMode=yes \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=3 \
+            -P "${{ secrets.DEPLOY_SSH_PORT || '22' }}" \
+            /tmp/xuanshu-mobile-${GITHUB_SHA}.tar.gz \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/tmp/xuanshu-mobile-${GITHUB_SHA}.tar.gz"
+
+      - name: Install isolated service and routes
         run: |
           ssh \
             -o IPQoS=none \
@@ -39,17 +72,12 @@ jobs:
             -o ServerAliveCountMax=3 \
             -p "${{ secrets.DEPLOY_SSH_PORT || '22' }}" \
             "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
-            'set -eu
-             echo "== host =="
-             hostname
-             echo "== enabled nginx files =="
-             find /etc/nginx/sites-enabled /etc/nginx/conf.d -maxdepth 2 -type f -o -type l 2>/dev/null | sort
-             echo "== nginx routing summary =="
-             grep -R -nE "^[[:space:]]*(listen|server_name|location|proxy_pass|include)[[:space:]]" /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null || true
-             echo "== listening tcp ports =="
-             ss -ltnp
-             echo "== relevant services =="
-             systemctl list-units --type=service --all --no-pager | grep -E "superstaff|bazi|hindsight|hermes|nginx" || true
-             echo "== capacity =="
-             free -h
-             df -h /'
+            "RELEASE_SHA='${GITHUB_SHA}' ARTIFACT='/tmp/xuanshu-mobile-${GITHUB_SHA}.tar.gz' bash -s" \
+            < deploy/server-deploy-mobile-preview.sh
+
+      - name: Public HTTPS checks
+        run: |
+          for path in / /m /m/report/bazi /m/report/zodiac; do
+            curl --retry 8 --retry-delay 5 --retry-all-errors -fsS -o /dev/null "https://zzj-superstaff.duckdns.org${path}"
+          done
+          curl -fsS https://zzj-superstaff.duckdns.org/m | grep -q '/xuanshu-assets/_next/'
