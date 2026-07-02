@@ -17,6 +17,8 @@
 # next.js
 /.next/
 /out/
+/mobile-static/.next/
+/mobile-static/out/
 
 # production
 /build

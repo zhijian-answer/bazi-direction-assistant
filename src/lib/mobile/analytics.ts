@@ -42,7 +42,7 @@ export function finishMobileTiming(key: string) {
 }
 
 export function trackMobileEvent(event: MobileAnalyticsEventName, metadata: EventMetadata = {}, durationMs?: number) {
-  if (typeof window === "undefined" || navigator.doNotTrack === "1") return;
+  if (process.env.NEXT_PUBLIC_DISABLE_MOBILE_ANALYTICS === "true" || typeof window === "undefined" || navigator.doNotTrack === "1") return;
   const payload = {
     event,
     occurredAt: new Date().toISOString(),
