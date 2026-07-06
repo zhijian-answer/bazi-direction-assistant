@@ -6,15 +6,29 @@ import Image from "next/image";
 import type { DailyInsightData } from "@/lib/mobile/types";
 import armillaryImage from "../../../public/mobile/xuanshu-armillary-hero.webp";
 
+function splitCoverTitle(title: string) {
+  const punctuationIndex = title.search(/[，；：]/);
+  if (punctuationIndex > 1 && punctuationIndex < title.length - 2) {
+    const secondLine = title.slice(punctuationIndex + 1);
+    const emphasisLength = secondLine.length >= 7 ? 4 : Math.max(2, Math.ceil(secondLine.length / 3));
+    return {
+      lead: title.slice(0, punctuationIndex + 1),
+      detail: secondLine.slice(0, -emphasisLength),
+      emphasis: secondLine.slice(-emphasisLength),
+    };
+  }
+  return { lead: title, detail: "", emphasis: "" };
+}
+
 export function TodayStatusCard({ insight, dateLabel, onShare }: { insight: DailyInsightData; dateLabel: string; onShare: () => void }) {
-  const coverTitleById: Record<string, { lead: string; emphasis: string }> = {
-    clarify: { lead: "今天不必急着推进，", emphasis: "先把最重要的事说清楚" },
-    respond: { lead: "今天别让想法停在心里，", emphasis: "先把关键的话说出来" },
-    steady: { lead: "今天不必开启太多，", emphasis: "先守住已有节奏" },
-    recover: { lead: "今天不用勉强加速，", emphasis: "先把注意力收回来" },
-    observe: { lead: "今天先别急着定义，", emphasis: "看清对方真正做了什么" },
+  const coverTitleById: Record<string, { lead: string; detail: string; emphasis: string }> = {
+    clarify: { lead: "今天不必急着推进，", detail: "先把最重要的事", emphasis: "说清楚" },
+    respond: { lead: "今天别让想法停在心里，", detail: "先把关键的话", emphasis: "说出来" },
+    steady: { lead: "今天不必开启太多，", detail: "先守住已有", emphasis: "节奏" },
+    recover: { lead: "今天不用勉强加速，", detail: "先把注意力", emphasis: "收回来" },
+    observe: { lead: "今天先别急着定义，", detail: "看清对方真正", emphasis: "做了什么" },
   };
-  const coverTitle = coverTitleById[insight.id] ?? { lead: insight.title, emphasis: "" };
+  const coverTitle = coverTitleById[insight.id] ?? splitCoverTitle(insight.title);
   const tagIcons = [MessageCircleMore, Route, ScanLine];
   const suitable = insight.suitable.split("、").slice(0, 2);
   const avoid = insight.avoid.split("、");
@@ -24,7 +38,7 @@ export function TodayStatusCard({ insight, dateLabel, onShare }: { insight: Dail
       <div className="today-status-card__hero">
         <Image className="today-status-card__instrument" src={armillaryImage} alt="" aria-hidden="true" priority sizes="320px" />
         <header><span><CalendarDays />{dateLabel} · 今日观察</span><em>{insight.keyword}</em></header>
-        <h1>{coverTitle.lead}{coverTitle.emphasis ? <strong>{coverTitle.emphasis}</strong> : null}</h1>
+        <h1><span>{coverTitle.lead}</span>{coverTitle.detail || coverTitle.emphasis ? <span className="today-status-card__title-detail">{coverTitle.detail}<strong>{coverTitle.emphasis}</strong></span> : null}</h1>
         <p>{insight.summary}</p>
         <div className="today-status-tags">
           {insight.tags.map((tag, index) => {
