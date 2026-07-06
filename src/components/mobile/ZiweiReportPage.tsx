@@ -80,7 +80,7 @@ export function ZiweiReportPage() {
             <Image className="ziwei-cover-instrument" src={armillaryImage} alt="" aria-hidden="true" priority sizes="390px" />
             <header><span><CircleDotDashed />玄枢 · 紫微领域观察</span><small>依据真实出生时辰</small></header>
             <p className="ziwei-cover-kicker">人生领域分布</p>
-            <h2>紫微看的是你的人生领域分布。</h2>
+            <h2><span>紫微看的是</span><strong>你的人生领域分布</strong></h2>
             <p>这张盘里，当前最值得观察的是工作主线、关系回应和恢复方式。你最近更适合先守住一个能产生反馈的主线，再决定是否开启新的方向。</p>
             <div><span>工作主线</span><span>关系回应</span><span>恢复方式</span></div>
             <footer><small>今日关注</small><strong>{insight.today.keyword}</strong><span>{insight.today.action}</span></footer>
@@ -91,9 +91,9 @@ export function ZiweiReportPage() {
               <header className="ziwei-section-heading"><div><small>领域总览</small><h2>先看这张盘的三个重点</h2></div><span><Orbit /></span></header>
               <p>不要同时解决所有问题。先看精力主要落在哪里，再决定今天应该推进、确认还是休息。</p>
               <div className="ziwei-domain-brief">
-                <div><small>工作主线</small><strong>先完成一件能产生明确反馈的关键任务</strong></div>
-                <div><small>关系回应</small><strong>{insight.relationship.summary}</strong></div>
-                <div><small>恢复方式</small><strong>{insight.environment.stableZone[0] || "回到边界清楚、节奏稳定的环境"}</strong></div>
+                <div><span><Gauge /></span><small>工作主线</small><strong>完成一件能产生反馈的任务</strong></div>
+                <div><span><HeartHandshake /></span><small>关系回应</small><strong>先确认回应是否持续</strong></div>
+                <div><span><ShieldCheck /></span><small>恢复方式</small><strong>回到边界清楚、节奏稳定的环境</strong></div>
               </div>
             </section>
           </MobileReveal>

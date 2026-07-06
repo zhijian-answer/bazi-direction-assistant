@@ -1,3 +1,6 @@
+import Image from "next/image";
+import orbitMark from "../../../public/mobile/xuanshu-orbit-mark.webp";
+
 const palaces: ReadonlyArray<{ label: string; note: string; position: number; key?: boolean }> = [
   { label: "兄弟", note: "同辈协作", position: 1 },
   { label: "夫妻", note: "亲密回应", position: 2, key: true },
@@ -23,6 +26,7 @@ export function ZiweiPalaceMap({ mingGong, shenGong }: { mingGong?: string; shen
         </div>
       ))}
       <div className="ziwei-palace-center">
+        <Image className="ziwei-palace-center__orbit" src={orbitMark} alt="" aria-hidden="true" />
         <span>十二宫</span>
         <strong>人生领域结构</strong>
         <div className="ziwei-palace-points">
