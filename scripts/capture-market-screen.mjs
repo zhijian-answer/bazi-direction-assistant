@@ -6,6 +6,7 @@ const origin = process.argv[2] ?? "http://127.0.0.1:3130";
 const route = process.argv[3] ?? "/m/";
 const readySelector = process.argv[4] ?? "main";
 const label = process.argv[5] ?? "market-screen";
+const clickLabel = process.argv[6];
 const outputDir = path.resolve("output/playwright/market-screen");
 const viewports = [
   { width: 375, height: 812 },
@@ -32,6 +33,9 @@ for (const viewport of viewports) {
   }
 
   await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });
+  if (clickLabel) {
+    await page.getByRole("button", { name: clickLabel, exact: true }).click();
+  }
   await page.locator(readySelector).waitFor();
   await page.waitForTimeout(900);
 

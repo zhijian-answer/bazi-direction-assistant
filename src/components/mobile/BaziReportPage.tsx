@@ -244,12 +244,15 @@ export function BaziReportPage({ initialTab = "bazi" }: { initialTab?: BaziTab }
 
 function FlowPanel({ report, onAsk }: { report: ReturnType<typeof buildMobileFlowReport>; onAsk: () => void }) {
   const [titleLead, titleFocus] = report.title.split("，");
+  const focusLength = titleFocus && titleFocus.length > 5 ? 3 : 2;
+  const focusLead = titleFocus ? titleFocus.slice(0, -focusLength) : "";
+  const focusKeyword = titleFocus ? titleFocus.slice(-focusLength) : "";
   return (
     <section className="flow-page">
       <header className="flow-hero">
         <Image src={armillaryImage} alt="" aria-hidden="true" priority sizes="390px" />
         <small>{report.dateLabel}</small>
-        <h1>{titleLead}{titleFocus ? "，" : ""}<br />{titleFocus ? <span>{titleFocus}</span> : null}</h1>
+        <h1>{titleLead}{titleFocus ? "，" : ""}<br />{titleFocus ? <span>{focusLead}<strong>{focusKeyword}</strong></span> : null}</h1>
         <p>{report.summary}</p>
       </header>
       <section className="flow-matrix-section">
@@ -259,10 +262,10 @@ function FlowPanel({ report, onAsk }: { report: ReturnType<typeof buildMobileFlo
         </div>
       </section>
       <section className="flow-focus-card">
-        <small>{report.focus.eyebrow}</small><h2>{report.focus.title}</h2><p>{report.focus.note}</p>
+        <header><span><Gauge /></span><div><small>{report.focus.eyebrow}</small><h2>{report.focus.title}</h2></div></header><p>{report.focus.note}</p>
         <div><span>适合推进<strong>{report.focus.suitable}</strong></span><span>需要留意<strong>{report.focus.caution}</strong></span></div>
       </section>
-      <section className="flow-months"><header><small>近四个月</small><h2>每个月的关注重点</h2></header>{report.months.map((item, index) => <MobileReveal key={`${item.month}-${item.stem}`} delay={index * 0.04}><article className={item.isCurrent ? "is-current" : ""}><div><small>{item.month}</small><strong>{item.stem}</strong></div><span>{item.theme}</span><p>{item.note}</p></article></MobileReveal>)}</section>
+      <section className="flow-months"><header><small>近四个月</small><h2>每个月的关注重点</h2></header>{report.months.map((item, index) => <MobileReveal key={`${item.month}-${item.stem}`} delay={index * 0.04}><article className={item.isCurrent ? "is-current" : ""}><div><small>{item.month}</small><strong>{item.stem}</strong></div><span>{item.theme}</span><p>{item.note}</p><ArrowRight aria-hidden="true" /></article></MobileReveal>)}</section>
       <motion.button type="button" className="flow-ask-button" onClick={onAsk} whileTap={{ scale: 0.98 }}><Sparkles />{report.question.prompt}<ArrowRight /></motion.button>
       <section className="report-boundary"><CheckCircle2 /><p>阶段提示仅供文化娱乐和自我探索，不应作为投资、健康、法律或职业决定的唯一依据。</p></section>
     </section>
