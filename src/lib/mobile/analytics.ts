@@ -42,9 +42,16 @@ export function finishMobileTiming(key: string) {
 }
 
 export function trackMobileEvent(event: MobileAnalyticsEventName, metadata: EventMetadata = {}, durationMs?: number) {
-  if (process.env.NEXT_PUBLIC_DISABLE_MOBILE_ANALYTICS === "true" || typeof window === "undefined" || navigator.doNotTrack === "1") return;
+  if (
+    process.env.NEXT_PUBLIC_DISABLE_MOBILE_ANALYTICS === "true"
+    || process.env.NEXT_PUBLIC_MOBILE_STATIC === "1"
+    || typeof window === "undefined"
+    || navigator.doNotTrack === "1"
+  ) return;
   const payload = {
     event,
+    appVersion: process.env.NEXT_PUBLIC_APP_VERSION || "0.1.0",
+    ruleVersion: "market-v1",
     occurredAt: new Date().toISOString(),
     route: window.location.pathname,
     sessionId: getSessionId(),

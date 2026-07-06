@@ -1,14 +1,27 @@
 export const mobileAnalyticsEvents = [
+  "app_open",
+  "onboarding_start",
+  "onboarding_demo_select",
+  "profile_create_start",
+  "profile_create_step_complete",
+  "profile_create_complete",
+  "report_view",
   "home_hero_impression",
   "question_click",
   "question_sheet_open",
   "question_change",
+  "share_poster_open",
   "share_image_generate_start",
   "share_image_generate_success",
   "share_image_generate_failure",
   "share_image_save_success",
   "share_image_share_success",
   "share_image_share_failure",
+  "login_prompt_show",
+  "login_success",
+  "sync_success",
+  "sync_fail",
+  "insufficient_data_show",
 ] as const;
 
 export type MobileAnalyticsEventName = (typeof mobileAnalyticsEvents)[number];

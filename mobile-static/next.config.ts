@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   basePath,
   assetPrefix: basePath || undefined,
   images: { unoptimized: true },
+  env: { NEXT_PUBLIC_MOBILE_STATIC: "1" },
 };
 
 export default nextConfig;

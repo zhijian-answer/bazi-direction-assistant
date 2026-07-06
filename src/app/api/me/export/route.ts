@@ -21,6 +21,9 @@ export async function GET() {
   const checkins = db.checkins
     .filter((checkin) => checkin.userId === user.id)
     .sort((a, b) => b.date.localeCompare(a.date) || b.updatedAt.localeCompare(a.updatedAt));
+  const reports = db.reports.filter((item) => item.userId === user.id);
+  const shareImages = db.shareImages.filter((item) => item.userId === user.id);
+  const syncStates = db.syncStates.filter((item) => item.userId === user.id);
 
   const payload = {
     exportedAt: now.toISOString(),
@@ -30,6 +33,9 @@ export async function GET() {
     profiles,
     questions,
     checkins,
+    reports,
+    shareImages,
+    syncStates,
     generated: profiles.map((profile) => ({
       profileId: profile.id,
       dailyGuidance: buildDailyGuidance(profile, now),

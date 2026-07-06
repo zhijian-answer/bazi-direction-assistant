@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { buildBaziChart } from "@/lib/bazi";
+import { buildValidatedBaziChart } from "@/lib/bazi-server";
 import { appLimits, trimToLimit } from "@/lib/limits";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { addProfileWithLimit, deleteProfileData, newId, readDb } from "@/lib/store";
 import type { BirthProfile, CalendarType, Gender } from "@/lib/types";
+
+function optionalCoordinate(value: unknown) {
+  if (value === undefined || value === null || value === "") return undefined;
+  const coordinate = Number(value);
+  return Number.isFinite(coordinate) ? coordinate : undefined;
+}
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -43,8 +49,8 @@ export async function POST(request: Request) {
     const gender = (["male", "female", "other"].includes(body.gender)
       ? body.gender
       : "other") as Gender;
-    if (!birthDate || !birthPlace) {
-      return NextResponse.json({ error: "请填写出生日期和出生地点" }, { status: 400 });
+    if (!birthDate) {
+      return NextResponse.json({ error: "请填写出生日期" }, { status: 400 });
     }
     const profile: BirthProfile = {
       id: newId("profile"),
@@ -56,10 +62,12 @@ export async function POST(request: Request) {
       birthDate,
       birthTime,
       birthPlace,
+      latitude: optionalCoordinate(body.latitude),
+      longitude: optionalCoordinate(body.longitude),
       timezone,
       timeUnknown: Boolean(body.timeUnknown),
       createdAt: new Date().toISOString(),
-      chart: buildBaziChart({
+      chart: buildValidatedBaziChart({
         calendarType,
         birthDate,
         birthTime,

@@ -9,14 +9,19 @@
     "build:mobile-static": "next build mobile-static && node scripts/prepare-mobile-static.mjs",
     "start": "next start",
     "lint": "eslint",
-    "check": "npm run lint && npm run build",
+    "test": "vitest run",
+    "test:ziwei": "vitest run src/lib/ziwei/__tests__",
+    "check": "npm run lint && npm run test && npm run build",
     "smoke": "node scripts/smoke.mjs",
     "backup": "node scripts/backup-data.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/noto-serif-sc": "^5.2.10",
     "bazi-calculator-by-alvamind": "^1.0.2",
+    "circular-natal-horoscope-js": "^1.1.0",
     "framer-motion": "^12.42.2",
     "html-to-image": "^1.11.13",
+    "iztro": "2.5.8",
     "lucide-react": "^1.17.0",
     "lunar-javascript": "^1.7.7",
     "next": "16.2.9",
@@ -38,6 +43,7 @@
     "eslint-config-next": "16.2.9",
     "playwright": "^1.60.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "4.1.9"
   }
 }

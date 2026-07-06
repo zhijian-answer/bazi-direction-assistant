@@ -22,6 +22,11 @@ export async function GET() {
     profiles: db.profiles.length,
     questions: db.questions.length,
     checkins: db.checkins.length,
+    reports: db.reports.length,
+    shareImages: db.shareImages.length,
+    contentRules: db.contentRules.length,
+    syncStates: db.syncStates.length,
+    syncConflicts: db.syncStates.filter((item) => item.status === "conflict").length,
     todayQuestions: todayQuestions.length,
     localQuestions,
     openaiQuestions,
@@ -35,6 +40,20 @@ export async function GET() {
       question: question.question,
       source: question.usage.source,
       createdAt: question.createdAt,
+    })),
+    latestReports: db.reports.slice(0, 8).map((report) => ({
+      id: report.id,
+      profileId: report.profileId,
+      type: report.type,
+      status: report.status,
+      createdAt: report.createdAt,
+    })),
+    latestShareImages: db.shareImages.slice(0, 8).map((image) => ({
+      id: image.id,
+      profileId: image.profileId,
+      type: image.type,
+      title: image.title,
+      createdAt: image.createdAt,
     })),
   });
 }

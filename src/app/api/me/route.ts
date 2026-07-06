@@ -11,6 +11,9 @@ export async function GET() {
       profiles: [],
       questions: [],
       checkins: [],
+      reports: [],
+      shareImages: [],
+      syncStates: [],
       remainingToday: 0,
       isAdmin: false,
     });
@@ -23,6 +26,9 @@ export async function GET() {
   const checkins = db.checkins
     .filter((checkin) => checkin.userId === user.id)
     .sort((a, b) => b.date.localeCompare(a.date) || b.updatedAt.localeCompare(a.updatedAt));
+  const reports = db.reports.filter((item) => item.userId === user.id).slice(0, 50);
+  const shareImages = db.shareImages.filter((item) => item.userId === user.id).slice(0, 100);
+  const syncStates = db.syncStates.filter((item) => item.userId === user.id);
   const usedToday = questionsToday(db.questions, user.id).length;
   return NextResponse.json({
     user,
@@ -30,6 +36,9 @@ export async function GET() {
     profiles,
     questions,
     checkins,
+    reports,
+    shareImages,
+    syncStates,
     remainingToday: Math.max(0, user.dailyQuestionLimit - usedToday),
   });
 }

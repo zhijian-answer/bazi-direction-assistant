@@ -1,0 +1,115 @@
+:root {
+  color-scheme: dark;
+
+  /* Ink laboratory */
+  --xs-bg-0: #030608;
+  --xs-bg-1: #05090b;
+  --xs-bg-2: #071011;
+  --xs-bg-3: #0b1518;
+  --xs-bg-4: #101d20;
+
+  /* Material layers */
+  --xs-surface-metal: rgba(7, 14, 16, 0.96);
+  --xs-surface-glass: rgba(10, 20, 22, 0.84);
+  --xs-surface-raised: rgba(15, 27, 29, 0.92);
+  --xs-surface-paper: #10191a;
+  --xs-surface-paper-warm: #191815;
+  --xs-surface-brass: linear-gradient(135deg, #6f4a20 0%, #d8aa5d 48%, #8d612b 100%);
+
+  /* Text */
+  --xs-text-1: #fff4de;
+  --xs-text-2: #e9d9b7;
+  --xs-text-3: #b9a98a;
+  --xs-text-muted: #7d7468;
+  --xs-text-on-brass: #1c140c;
+
+  /* Metals and restrained signals */
+  --xs-brass-0: #f0d79a;
+  --xs-brass-1: #d8aa5d;
+  --xs-brass-2: #a97435;
+  --xs-brass-3: #6f4a20;
+  --xs-cinnabar-1: #d65a45;
+  --xs-cinnabar-2: #9f3f32;
+  --xs-jade-1: #7ead98;
+  --xs-jade-2: #436e61;
+  --xs-blue-1: #8db8d8;
+  --xs-blue-2: #4f7188;
+
+  --xs-system-home: var(--xs-brass-1);
+  --xs-system-bazi: var(--xs-brass-1);
+  --xs-system-zodiac: var(--xs-blue-1);
+  --xs-system-ziwei: var(--xs-jade-1);
+
+  /* Instrument rules */
+  --xs-border-hairline: rgba(216, 170, 93, 0.12);
+  --xs-border-soft: rgba(216, 170, 93, 0.2);
+  --xs-border-base: rgba(216, 170, 93, 0.32);
+  --xs-border-strong: rgba(240, 215, 154, 0.54);
+  --xs-line-soft: rgba(233, 217, 183, 0.1);
+  --xs-line-cool: rgba(126, 173, 152, 0.16);
+
+  --xs-font-serif: "Noto Serif SC Variable", "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", serif;
+  --xs-font-sans: "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", sans-serif;
+  --xs-font-data: "JetBrains Mono", "SFMono-Regular", "Roboto Mono", "Consolas", monospace;
+
+  --xs-title-hero: 32px;
+  --xs-title-xl: 27px;
+  --xs-title-lg: 22px;
+  --xs-title-md: 18px;
+  --xs-body-lg: 15px;
+  --xs-body-md: 13px;
+  --xs-body-sm: 11px;
+  --xs-caption: 10px;
+
+  --xs-space-1: 4px;
+  --xs-space-2: 8px;
+  --xs-space-3: 12px;
+  --xs-space-4: 16px;
+  --xs-space-5: 20px;
+  --xs-space-6: 24px;
+  --xs-space-7: 28px;
+  --xs-space-8: 32px;
+  --xs-space-10: 40px;
+
+  --xs-radius-sm: 8px;
+  --xs-radius-md: 12px;
+  --xs-radius-lg: 16px;
+  --xs-radius-sheet: 24px;
+  --xs-radius-full: 999px;
+
+  --xs-shadow-card: 0 24px 64px rgba(0, 0, 0, 0.42);
+  --xs-shadow-float: 0 34px 96px rgba(0, 0, 0, 0.62);
+  --xs-shadow-inner: inset 0 1px 0 rgba(255, 244, 222, 0.04);
+  --xs-shadow-brass-inset: inset 0 0 0 1px rgba(240, 215, 154, 0.06);
+  --xs-glow-brass: 0 0 24px rgba(216, 170, 93, 0.12);
+  --xs-glow-jade: 0 0 22px rgba(126, 173, 152, 0.12);
+
+  --xs-blur-sheet: 22px;
+  --xs-z-nav: 80;
+  --xs-z-sheet: 120;
+  --xs-z-toast: 150;
+
+  --xs-motion-instant: 120ms;
+  --xs-motion-fast: 160ms;
+  --xs-motion-base: 260ms;
+  --xs-motion-slow: 420ms;
+  --xs-motion-draw: 760ms;
+  --xs-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --xs-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+[data-system="home"],
+[data-system="bazi"] {
+  --system-accent: var(--xs-brass-1);
+  --system-accent-soft: rgba(216, 170, 93, 0.12);
+}
+
+[data-system="zodiac"] {
+  --system-accent: var(--xs-blue-1);
+  --system-accent-soft: rgba(141, 184, 216, 0.12);
+}
+
+[data-system="ziwei"] {
+  --system-accent: var(--xs-jade-1);
+  --system-accent-soft: rgba(126, 173, 152, 0.12);
+}

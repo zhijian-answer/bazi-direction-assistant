@@ -6,6 +6,8 @@ const allowedEnvironments = new Set(["ios_safari", "ios_wechat", "android_chrome
 
 type AnalyticsPayload = {
   event?: unknown;
+  appVersion?: unknown;
+  ruleVersion?: unknown;
   occurredAt?: unknown;
   route?: unknown;
   sessionId?: unknown;
@@ -41,6 +43,8 @@ export async function POST(request: Request) {
 
   const normalized = {
     event: payload.event,
+    appVersion: typeof payload.appVersion === "string" ? payload.appVersion.slice(0, 30) : "unknown",
+    ruleVersion: typeof payload.ruleVersion === "string" ? payload.ruleVersion.slice(0, 40) : "unknown",
     occurredAt: typeof payload.occurredAt === "string" ? payload.occurredAt.slice(0, 40) : new Date().toISOString(),
     route: typeof payload.route === "string" ? payload.route.slice(0, 120) : "/",
     sessionId: typeof payload.sessionId === "string" ? payload.sessionId.slice(0, 80) : "unknown",

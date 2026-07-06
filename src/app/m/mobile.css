@@ -28,6 +28,7 @@
 .mobile-shell--with-nav { padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
 .mobile-shell--bazi { background: #f7ead5; color: #4a392e; }
 .mobile-shell--zodiac { background: #dfe8fb; color: #2f3f67; }
+.mobile-shell--ziwei { background: #ede7dc; color: #3f3832; }
 
 .mobile-shell button,
 .mobile-shell a,
@@ -95,6 +96,7 @@
 }
 
 .mobile-shell--zodiac .mobile-topbar { background: rgba(223, 232, 251, 0.91); }
+.mobile-shell--ziwei .mobile-topbar { background: rgba(237, 231, 220, 0.93); }
 .mobile-topbar > div:first-child { display: flex; justify-content: flex-start; }
 .mobile-topbar-actions { display: flex; justify-content: flex-end; }
 .mobile-topbar-spacer { width: 44px; height: 44px; }
@@ -112,17 +114,22 @@
 }
 
 .mobile-shell--zodiac .mobile-segment-tabs { background: rgba(223, 232, 251, 0.96); }
+.mobile-shell--ziwei .mobile-segment-tabs { background: rgba(237, 231, 220, 0.96); }
 .mobile-segment-tabs::-webkit-scrollbar { display: none; }
 .mobile-segment-tabs > div { min-width: max-content; display: flex; padding: 0 16px; }
 .mobile-segment-tabs a,
 .mobile-segment-tabs button { position: relative; min-width: 64px; min-height: 48px; border: 0; background: transparent; padding: 0 14px; color: #8c7460; font-size: 14px; text-align: center; text-decoration: none; cursor: pointer; }
 .mobile-shell--zodiac .mobile-segment-tabs a,
 .mobile-shell--zodiac .mobile-segment-tabs button { color: #66759d; }
+.mobile-shell--ziwei .mobile-segment-tabs a,
+.mobile-shell--ziwei .mobile-segment-tabs button { color: #756c63; }
 .mobile-segment-tabs a { display: inline-flex; align-items: center; justify-content: center; }
 .mobile-segment-tabs .is-active { color: #5d4030; font-weight: 700; }
 .mobile-shell--zodiac .mobile-segment-tabs .is-active { color: #263a69; }
+.mobile-shell--ziwei .mobile-segment-tabs .is-active { color: #31564d; }
 .mobile-segment-tabs .is-active::after { position: absolute; inset: auto 16px 4px; height: 3px; content: ""; border-radius: 999px; background: #9e5d48; }
 .mobile-shell--zodiac .mobile-segment-tabs .is-active::after { background: #566faf; }
+.mobile-shell--ziwei .mobile-segment-tabs .is-active::after { background: #4f7568; }
 
 .mobile-sheet-layer { position: fixed; z-index: 120; inset: 0; display: flex; align-items: flex-end; justify-content: center; }
 .mobile-sheet-backdrop { position: absolute; inset: 0; width: 100%; border: 0; background: rgba(24, 25, 27, 0.46); }
@@ -222,6 +229,7 @@
 .create-submit { min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 6px; border: 0; border-radius: 10px; background: #a95042; color: white; font-size: 15px; font-weight: 700; box-shadow: 0 10px 22px rgba(169, 80, 66, 0.2); }
 .create-submit svg { width: 18px; }
 .create-boundary { color: #999087; font-size: 10px; line-height: 1.7; text-align: center; }
+.create-field-note { border-left: 3px solid #b38a67; background: #f4ede4; padding: 10px 12px; color: #806f62; font-size: 11px; line-height: 1.7; }
 .generating-screen { min-height: 100dvh; display: flex; align-items: center; flex-direction: column; padding: calc(92px + env(safe-area-inset-top)) 28px calc(40px + env(safe-area-inset-bottom)); text-align: center; }
 .generating-mark { width: 116px; height: 116px; display: grid; place-items: center; border: 1px solid rgba(154, 89, 72, 0.3); border-radius: 50%; box-shadow: inset 0 0 0 20px rgba(193, 137, 103, 0.08), 0 16px 36px rgba(84, 58, 44, 0.09); }
 .generating-mark span { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 50%; background: #314044; color: #e9c894; font-family: "Songti SC", serif; font-size: 25px; font-weight: 700; }
@@ -873,6 +881,74 @@
 .reading-reminder-card strong { display: block; margin-top: 5px; font-family: "Songti SC", serif; font-size: 18px; line-height: 1.5; }
 .reading-reminder-card p { margin-top: 7px; color: #e4e9f7; font-size: 10px; line-height: 1.7; }
 
+.ziwei-cover-card {
+  position: relative;
+  isolation: isolate;
+  min-height: 430px;
+  overflow: hidden;
+  margin: 14px 16px 18px;
+  border: 1px solid rgba(220, 193, 151, 0.2);
+  border-radius: 16px;
+  background: linear-gradient(150deg, #203b37 0%, #3f3930 58%, #6f4b3c 100%);
+  padding: 20px;
+  color: #f7f0e4;
+  box-shadow: 0 18px 40px rgba(45, 40, 34, 0.2);
+}
+.ziwei-cover-card::before { position: absolute; z-index: -1; top: -90px; right: -72px; width: 250px; height: 250px; border: 1px solid rgba(235, 210, 169, 0.14); border-radius: 50%; box-shadow: 0 0 0 38px rgba(255,255,255,0.025), 0 0 0 76px rgba(255,255,255,0.018); content: ""; }
+.ziwei-cover-card::after { position: absolute; z-index: -1; right: -8px; bottom: -52px; content: "微"; color: rgba(255,255,255,0.045); font-family: "Songti SC", serif; font-size: 190px; line-height: 1; }
+.ziwei-cover-card > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ziwei-cover-card > header span { display: flex; align-items: center; gap: 7px; color: #e9cca2; font-size: 10px; font-weight: 700; }
+.ziwei-cover-card > header svg { width: 17px; height: 17px; }
+.ziwei-cover-card > header small { color: #b9c5c0; font-size: 8px; }
+.ziwei-cover-kicker { margin-top: 52px; color: #d8b98e !important; font-size: 10px !important; font-weight: 700; }
+.ziwei-cover-card h1 { max-width: 332px; margin-top: 10px; font-family: "Songti SC", serif; font-size: 29px; line-height: 1.42; }
+.ziwei-cover-card > p:not(.ziwei-cover-kicker) { margin-top: 13px; color: #d7ddd9; font-size: 12px; line-height: 1.85; }
+.ziwei-cover-card > div { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 18px; }
+.ziwei-cover-card > div span { border: 1px solid rgba(237, 211, 171, 0.25); border-radius: 999px; background: rgba(255,255,255,0.06); padding: 7px 10px; color: #f0dcc1; font-size: 9px; }
+.ziwei-cover-card > footer { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 14px; }
+.ziwei-cover-card > footer small { grid-row: 1 / 3; align-self: center; color: #b7c1bd; font-size: 8px; }
+.ziwei-cover-card > footer strong { color: #ebc995; font-size: 18px; }
+.ziwei-cover-card > footer span { color: #d5dcda; font-size: 9px; line-height: 1.5; }
+
+.ziwei-life-grid { display: grid; gap: 11px; padding: 0 16px 18px; }
+.ziwei-life-grid article { min-height: 218px; border: 1px solid rgba(87, 73, 59, 0.11); border-radius: 15px; background: #fffaf2; padding: 18px; box-shadow: 0 9px 22px rgba(64, 54, 45, 0.06); }
+.ziwei-life-grid article > header { display: flex; align-items: center; gap: 7px; color: #4f7568; font-size: 10px; font-weight: 700; }
+.ziwei-life-grid article > header svg { width: 18px; height: 18px; }
+.ziwei-life-grid article h2 { margin-top: 15px; color: #4a4037; font-family: "Songti SC", serif; font-size: 21px; line-height: 1.45; }
+.ziwei-life-grid article p { margin-top: 11px; color: #776b61; font-size: 11px; line-height: 1.8; }
+.ziwei-life-grid article ul { display: grid; gap: 9px; margin-top: 14px; padding: 0; list-style: none; }
+.ziwei-life-grid article li { position: relative; padding-left: 16px; color: #74685e; font-size: 11px; line-height: 1.7; }
+.ziwei-life-grid article li::before { position: absolute; top: 8px; left: 0; width: 6px; height: 6px; border-radius: 50%; background: #739184; content: ""; }
+.ziwei-life-grid article > strong { display: block; margin-top: 14px; border-left: 3px solid #bf9b74; background: #f3e8da; padding: 10px 11px; color: #705749; font-size: 11px; line-height: 1.7; }
+
+.ziwei-question-section { padding-bottom: 12px; }
+.ziwei-share-card,
+.ziwei-evidence-card { margin: 0 16px 14px; border: 1px solid rgba(83, 70, 58, 0.12); border-radius: 15px; background: #fffaf2; padding: 19px; }
+.ziwei-share-card small,
+.ziwei-evidence-card small { color: #4f7568; font-size: 9px; font-weight: 700; }
+.ziwei-share-card h2,
+.ziwei-evidence-card h2 { margin-top: 6px; color: #4a4037; font-family: "Songti SC", serif; font-size: 21px; line-height: 1.45; }
+.ziwei-share-card p { margin-top: 10px; color: #796d62; font-size: 11px; line-height: 1.75; }
+.ziwei-share-card button { min-height: 46px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; margin-top: 15px; border: 0; border-radius: 9px; background: #4f7568; padding: 0 15px; color: white; font-size: 12px; font-weight: 700; }
+.ziwei-share-card button svg { width: 17px; }
+.ziwei-evidence-card > header { display: flex; align-items: center; gap: 11px; }
+.ziwei-evidence-card > header > svg { width: 24px; height: 24px; color: #a36c52; }
+.ziwei-evidence-card details { margin-top: 14px; border-top: 1px solid #e8ddd0; }
+.ziwei-evidence-card summary { min-height: 48px; display: flex; align-items: center; color: #6b5d52; font-size: 11px; font-weight: 700; cursor: pointer; }
+.ziwei-evidence-card dl { display: grid; gap: 9px; padding-bottom: 4px; }
+.ziwei-evidence-card dl div { display: grid; grid-template-columns: 72px 1fr; gap: 10px; }
+.ziwei-evidence-card dt { color: #98887b; font-size: 9px; }
+.ziwei-evidence-card dd { color: #5f534a; font-size: 10px; line-height: 1.6; }
+
+.ziwei-state { min-height: 440px; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 42px 28px; text-align: center; }
+.ziwei-state > svg { width: 44px; height: 44px; color: #4f7568; }
+.ziwei-state > strong { margin-top: 18px; color: #403831; font-family: "Songti SC", serif; font-size: 23px; line-height: 1.4; }
+.ziwei-state > p { max-width: 320px; margin-top: 10px; color: #7d7268; font-size: 12px; line-height: 1.8; }
+.ziwei-state > a { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; margin-top: 20px; border-radius: 9px; background: #4f7568; padding: 0 16px; color: white; font-size: 12px; font-weight: 700; text-decoration: none; }
+.ziwei-state > a svg { width: 17px; }
+.ziwei-state > a.is-secondary { min-height: 44px; margin-top: 8px; background: transparent; color: #526e65; font-weight: 600; }
+.ziwei-state--notice > svg { color: #a06950; }
+
 @media (max-width: 374px) {
   .bazi-cover-card { margin-inline: 12px; padding: 16px; }
   .bazi-cover-card h1 { font-size: 24px; }
@@ -882,4 +958,6 @@
   .share-insight-card h3 { font-size: 23px; }
   .zodiac-cover-intro h1 { font-size: 24px; }
   .zodiac-highlight-card h2 { font-size: 20px; }
+  .ziwei-cover-card { margin-inline: 12px; padding: 17px; }
+  .ziwei-cover-card h1 { font-size: 25px; }
 }

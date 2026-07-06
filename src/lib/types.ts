@@ -118,6 +118,8 @@ export type BirthProfile = {
   birthDate: string;
   birthTime: string;
   birthPlace: string;
+  latitude?: number;
+  longitude?: number;
   timezone?: string;
   timeUnknown: boolean;
   createdAt: string;
@@ -208,6 +210,51 @@ export type BirthReport = {
   disclaimers: string[];
 };
 
+export type ReportType = "bazi" | "zodiac" | "ziwei" | "liupan";
+
+export type StoredReport = {
+  id: string;
+  userId: string;
+  profileId: string;
+  type: ReportType;
+  status: "ready" | "error";
+  inputHash: string;
+  engineVersion: string;
+  ruleVersion: string;
+  content: unknown;
+  createdAt: string;
+};
+
+export type StoredShareImage = {
+  id: string;
+  userId: string;
+  profileId: string;
+  type: "personality" | "daily" | "zodiac" | "ziwei" | "question";
+  sourceId: string;
+  title: string;
+  imageUrl?: string;
+  createdAt: string;
+  syncedAt?: string;
+};
+
+export type ContentRule = {
+  id: string;
+  type: "daily" | "question" | "bazi" | "zodiac" | "ziwei" | "liupan" | "disclaimer" | "onboarding";
+  version: string;
+  status: "draft" | "active" | "archived";
+  content: unknown;
+  updatedAt: string;
+};
+
+export type SyncState = {
+  userId: string;
+  localProfileId: string;
+  cloudProfileId: string;
+  status: "synced" | "conflict" | "error";
+  lastSyncedAt: string;
+  error?: string;
+};
+
 export type ForecastMonth = {
   month: number;
   focusElement: ElementKey;
@@ -251,4 +298,8 @@ export type AppDb = {
   profiles: BirthProfile[];
   questions: GuidanceQuestion[];
   checkins: ActionCheckin[];
+  reports: StoredReport[];
+  shareImages: StoredShareImage[];
+  contentRules: ContentRule[];
+  syncStates: SyncState[];
 };

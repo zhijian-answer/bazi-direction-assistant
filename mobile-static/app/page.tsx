@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function StaticIndexPage() {
-  redirect("/m");
+  redirect(`${process.env.PAGES_BASE_PATH || ""}/m`);
 }

@@ -1,5 +1,4 @@
 import { Lunar, Solar } from "lunar-javascript";
-import { BaziCalculator } from "bazi-calculator-by-alvamind";
 import type {
   BaziChart,
   CalendarType,
@@ -168,55 +167,16 @@ function getEarthlyRelations(branches: Record<ChartPosition, string>): EarthlyRe
   return relations;
 }
 
-function getAlvamindValidation(input: {
-  calendarType: CalendarType;
-  solarDate: string;
-  hour: number;
-  gender: Gender;
-  pillars: Record<ChartPosition, string>;
-}) {
-  const { year, month, day } = splitDate(input.solarDate);
-  if (year < 1930 || year > 2048) {
-    return { primary: "lunar-javascript" as const, validationStatus: "unavailable" as const };
-  }
-
-  try {
-    const calculator = new BaziCalculator(year, month, day, input.hour, input.gender === "female" ? "female" : "male");
-    const comparison = calculator.calculatePillars();
-    const matchedPillars = (Object.keys(input.pillars) as ChartPosition[]).filter(
-      (position) => comparison[position].chinese === input.pillars[position],
-    ).length;
-    const weighted = calculator.calculateBasicAnalysis().fiveFactors;
-    return {
-      primary: "lunar-javascript" as const,
-      validator: "bazi-calculator-by-alvamind" as const,
-      validationStatus: matchedPillars === 4 ? ("matched" as const) : ("different" as const),
-      matchedPillars,
-      weightedBalance: {
-        wood: weighted.WOOD,
-        fire: weighted.FIRE,
-        earth: weighted.EARTH,
-        metal: weighted.METAL,
-        water: weighted.WATER,
-      },
-    };
-  } catch {
-    return {
-      primary: "lunar-javascript" as const,
-      validator: "bazi-calculator-by-alvamind" as const,
-      validationStatus: "unavailable" as const,
-    };
-  }
-}
-
-export function buildBaziChart(input: {
+export type BaziChartInput = {
   calendarType: CalendarType;
   birthDate: string;
   birthTime: string;
   timeUnknown?: boolean;
   isLeapMonth?: boolean;
   gender?: Gender;
-}): BaziChart {
+};
+
+export function buildBaziChart(input: BaziChartInput): BaziChart {
   const { year, month, day } = splitDate(input.birthDate);
   const { hour, minute } = splitTime(input.timeUnknown ? "12:00" : input.birthTime);
 
@@ -320,13 +280,7 @@ export function buildBaziChart(input: {
     relations: getEarthlyRelations(branches),
     luckCycles,
     annualLuck,
-    engine: getAlvamindValidation({
-      calendarType: input.calendarType,
-      solarDate: solar.toYmdHms().slice(0, 10),
-      hour,
-      gender: input.gender || "other",
-      pillars,
-    }),
+    engine: { primary: "lunar-javascript", validationStatus: "unavailable" },
     nayin: {
       year: eightChar.getYearNaYin(),
       month: eightChar.getMonthNaYin(),

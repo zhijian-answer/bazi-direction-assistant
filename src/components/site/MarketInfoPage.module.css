@@ -1,0 +1,22 @@
+.page { min-height: 100dvh; background: radial-gradient(circle at 80% 0, rgba(171,130,72,.13), transparent 26%), #030708; padding: 24px 16px 48px; color: #f0e9dc; }
+.article { width: min(100%, 760px); margin: 0 auto; border: 1px solid rgba(216,170,93,.34); background: linear-gradient(160deg, rgba(17,24,24,.96), rgba(7,11,12,.98)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.025), 0 24px 80px rgba(0,0,0,.38); }
+.header { padding: 24px 22px 26px; border-bottom: 1px solid rgba(216,170,93,.18); background-image: linear-gradient(rgba(216,170,93,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(216,170,93,.035) 1px, transparent 1px); background-size: 28px 28px; }
+.brand { width: fit-content; min-height: 44px; display: flex; align-items: center; gap: 9px; color: #e0b565; text-decoration: none; }
+.brand span { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid rgba(216,170,93,.58); border-radius: 50%; font-family: "Noto Serif SC Variable", "Songti SC", serif; }
+.brand strong { font-family: "Noto Serif SC Variable", "Songti SC", serif; font-size: 20px; }
+.header > small { display: block; margin-top: 30px; color: #d8aa5d; font-size: 11px; }
+.header h1 { margin: 7px 0 0; font-family: "Noto Serif SC Variable", "Songti SC", serif; font-size: clamp(32px, 7vw, 52px); font-weight: 560; line-height: 1.25; }
+.header p { max-width: 620px; margin: 14px 0 0; color: #c8c0b2; font-size: 14px; line-height: 1.85; }
+.header time { display: block; margin-top: 16px; color: #817d73; font: 11px/1.5 ui-monospace, monospace; }
+.sections { padding: 4px 22px 16px; }
+.sections section { display: grid; grid-template-columns: 34px minmax(0,1fr); gap: 11px; padding: 24px 0; border-bottom: 1px solid rgba(216,170,93,.13); }
+.sections section > span { color: #9e7841; font: 11px/1.8 ui-monospace, monospace; }
+.sections h2 { margin: 0; color: #ecdfca; font-family: "Noto Serif SC Variable", "Songti SC", serif; font-size: 20px; font-weight: 580; }
+.sections p { margin: 10px 0 0; color: #b8b4aa; font-size: 13px; line-height: 1.85; }
+.sections ul { margin: 12px 0 0; padding-left: 18px; color: #aaa79d; font-size: 12px; line-height: 1.8; }
+.sections li + li { margin-top: 5px; }
+.footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 22px; }
+.footer > a { min-height: 44px; display: inline-flex; align-items: center; border: 1px solid rgba(216,170,93,.42); padding: 0 16px; color: #e0b565; text-decoration: none; }
+.footer nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 13px; }
+.footer nav a { min-height: 44px; display: inline-flex; align-items: center; color: #8f918d; font-size: 12px; text-decoration: none; }
+@media (max-width: 480px) { .page { padding: 0; } .article { border-inline: 0; } .header { padding-top: calc(22px + env(safe-area-inset-top)); } .footer { align-items: flex-start; flex-direction: column; } .footer nav { justify-content: flex-start; } }

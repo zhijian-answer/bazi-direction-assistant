@@ -13,7 +13,9 @@
     "app/**/*.tsx",
     "../src/components/mobile/**/*.ts",
     "../src/components/mobile/**/*.tsx",
-    "../src/lib/mobile/**/*.ts"
+    "../src/lib/mobile/**/*.ts",
+    "../src/lib/ziwei/**/*.ts",
+    "../src/types/**/*.d.ts"
   ],
   "exclude": ["../node_modules"]
 }

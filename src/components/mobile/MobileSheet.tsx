@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useId, useRef } from "react";
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 export function MobileSheet({ open, title, children, onClose, onOpened, layerClassName = "" }: { open: boolean; title: string; children: ReactNode; onClose: () => void; onOpened?: () => void; layerClassName?: string }) {
   const titleId = useId();
@@ -45,10 +46,10 @@ export function MobileSheet({ open, title, children, onClose, onOpened, layerCla
     };
   }, [open, onClose]);
 
-  return (
+  const layer = (
     <AnimatePresence>
       {open ? (
-        <motion.div className={`mobile-sheet-layer ${layerClassName}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <motion.div className={`mobile-sheet-layer ${layerClassName}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.16 }}>
           <button type="button" className="mobile-sheet-backdrop" onClick={onClose} aria-label="关闭弹层" />
           <motion.section
             ref={sheetRef}
@@ -59,7 +60,7 @@ export function MobileSheet({ open, title, children, onClose, onOpened, layerCla
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 28, stiffness: 320 }}
+            transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
             onAnimationComplete={() => onOpened?.()}
           >
             <div className="mobile-sheet-handle" />
@@ -75,4 +76,6 @@ export function MobileSheet({ open, title, children, onClose, onOpened, layerCla
       ) : null}
     </AnimatePresence>
   );
+
+  return typeof document === "undefined" ? null : createPortal(layer, document.body);
 }

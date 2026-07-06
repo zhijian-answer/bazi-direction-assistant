@@ -6,9 +6,13 @@ import type {
   ActionCheckin,
   AppDb,
   BirthProfile,
+  ContentRule,
   GuidanceQuestion,
   PublicUser,
   Session,
+  StoredReport,
+  StoredShareImage,
+  SyncState,
   User,
 } from "./types";
 
@@ -18,6 +22,10 @@ const emptyDb: AppDb = {
   profiles: [],
   questions: [],
   checkins: [],
+  reports: [],
+  shareImages: [],
+  contentRules: [],
+  syncStates: [],
 };
 
 let writeQueue = Promise.resolve();
@@ -142,6 +150,9 @@ export async function deleteUserData(userId: string) {
       profiles: db.profiles.filter((profile) => profile.userId === userId).length,
       questions: db.questions.filter((question) => question.userId === userId).length,
       checkins: db.checkins.filter((checkin) => checkin.userId === userId).length,
+      reports: db.reports.filter((report) => report.userId === userId).length,
+      shareImages: db.shareImages.filter((image) => image.userId === userId).length,
+      syncStates: db.syncStates.filter((state) => state.userId === userId).length,
     };
 
     db.users = db.users.filter((user) => user.id !== userId);
@@ -149,6 +160,9 @@ export async function deleteUserData(userId: string) {
     db.profiles = db.profiles.filter((profile) => profile.userId !== userId);
     db.questions = db.questions.filter((question) => question.userId !== userId);
     db.checkins = db.checkins.filter((checkin) => checkin.userId !== userId);
+    db.reports = db.reports.filter((report) => report.userId !== userId);
+    db.shareImages = db.shareImages.filter((image) => image.userId !== userId);
+    db.syncStates = db.syncStates.filter((state) => state.userId !== userId);
 
     return deleted;
   });
@@ -185,6 +199,15 @@ export async function addProfileWithLimit(profile: BirthProfile, maxProfilesPerU
   });
 }
 
+export async function replaceProfile(profile: BirthProfile) {
+  return mutateDb((db) => {
+    const index = db.profiles.findIndex((item) => item.id === profile.id && item.userId === profile.userId);
+    if (index < 0) throw new Error("命盘档案不存在");
+    db.profiles[index] = profile;
+    return profile;
+  });
+}
+
 export async function deleteProfileData(input: { userId: string; profileId: string }) {
   return mutateDb((db) => {
     const profile = db.profiles.find(
@@ -202,6 +225,12 @@ export async function deleteProfileData(input: { userId: string; profileId: stri
       checkins: db.checkins.filter(
         (checkin) => checkin.userId === input.userId && checkin.profileId === input.profileId,
       ).length,
+      reports: db.reports.filter(
+        (report) => report.userId === input.userId && report.profileId === input.profileId,
+      ).length,
+      shareImages: db.shareImages.filter(
+        (image) => image.userId === input.userId && image.profileId === input.profileId,
+      ).length,
     };
 
     db.profiles = db.profiles.filter((item) => item.id !== input.profileId);
@@ -210,6 +239,15 @@ export async function deleteProfileData(input: { userId: string; profileId: stri
     );
     db.checkins = db.checkins.filter(
       (checkin) => !(checkin.userId === input.userId && checkin.profileId === input.profileId),
+    );
+    db.reports = db.reports.filter(
+      (report) => !(report.userId === input.userId && report.profileId === input.profileId),
+    );
+    db.shareImages = db.shareImages.filter(
+      (image) => !(image.userId === input.userId && image.profileId === input.profileId),
+    );
+    db.syncStates = db.syncStates.filter(
+      (state) => !(state.userId === input.userId && state.cloudProfileId === input.profileId),
     );
 
     return deleted;
@@ -263,4 +301,62 @@ export function questionsToday(questions: GuidanceQuestion[], userId: string) {
   return questions.filter(
     (question) => question.userId === userId && question.createdAt.slice(0, 10) === today,
   );
+}
+
+export async function addStoredReport(report: StoredReport) {
+  return mutateDb((db) => {
+    const existing = db.reports.find((item) =>
+      item.userId === report.userId &&
+      item.profileId === report.profileId &&
+      item.type === report.type &&
+      item.inputHash === report.inputHash &&
+      item.ruleVersion === report.ruleVersion,
+    );
+    if (existing) return existing;
+    db.reports.unshift(report);
+    db.reports = db.reports.slice(0, 2000);
+    return report;
+  });
+}
+
+export async function addStoredShareImage(image: StoredShareImage) {
+  return mutateDb((db) => {
+    db.shareImages.unshift(image);
+    db.shareImages = db.shareImages.slice(0, 3000);
+    return image;
+  });
+}
+
+export async function deleteStoredShareImage(input: { userId: string; imageId: string }) {
+  return mutateDb((db) => {
+    const before = db.shareImages.length;
+    db.shareImages = db.shareImages.filter((image) => !(image.id === input.imageId && image.userId === input.userId));
+    return before !== db.shareImages.length;
+  });
+}
+
+export async function upsertSyncState(state: SyncState) {
+  return mutateDb((db) => {
+    const index = db.syncStates.findIndex((item) => item.userId === state.userId && item.localProfileId === state.localProfileId);
+    if (index >= 0) db.syncStates[index] = state;
+    else db.syncStates.push(state);
+    return state;
+  });
+}
+
+export async function upsertContentRule(rule: ContentRule) {
+  return mutateDb((db) => {
+    if (rule.status === "active") {
+      db.contentRules = db.contentRules.map((item) =>
+        item.type === rule.type && item.id !== rule.id && item.status === "active"
+          ? { ...item, status: "archived" as const, updatedAt: rule.updatedAt }
+          : item,
+      );
+    }
+    const index = db.contentRules.findIndex((item) => item.id === rule.id);
+    if (index >= 0) db.contentRules[index] = rule;
+    else db.contentRules.unshift(rule);
+    db.contentRules = db.contentRules.slice(0, 500);
+    return rule;
+  });
 }

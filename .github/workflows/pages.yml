@@ -7,10 +7,14 @@ on:
     paths:
       - ".github/workflows/pages.yml"
       - "mobile-static/**"
+      - "public/mobile/**"
       - "scripts/prepare-mobile-static.mjs"
       - "src/app/m/**"
       - "src/components/mobile/**"
+      - "src/components/site/**"
       - "src/lib/mobile/**"
+      - "src/lib/market-info-content.ts"
+      - "src/styles/**"
       - "package.json"
       - "package-lock.json"
   workflow_dispatch:

@@ -1,9 +1,10 @@
 "use client";
 
 import { Check, Download, ImageDown, RefreshCw, Share2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { SharePosterData } from "@/lib/mobile/types";
 import { finishMobileTiming, startMobileTiming, trackMobileEvent } from "@/lib/mobile/analytics";
+import { useMobileProfile } from "@/lib/mobile/profile";
 import { MobileSheet } from "./MobileSheet";
 import { SharePoster } from "./SharePoster";
 import { useShareImage } from "./useShareImage";
@@ -12,9 +13,21 @@ export function SharePosterSheet({ open, onClose, items, initialIndex = 0 }: { o
   const [selectedIndex, setSelectedIndex] = useState(initialIndex);
   const [notice, setNotice] = useState("");
   const exportRef = useRef<HTMLDivElement>(null);
+  const profile = useMobileProfile();
   const selected = items[selectedIndex] ?? items[0];
-  const analyticsContext = { posterId: selected?.id ?? "unknown", category: selected?.category ?? "unknown" };
-  const { dataUrl, status, error, generate, reset } = useShareImage(exportRef, analyticsContext);
+  const analyticsContext = useMemo(() => ({
+    posterId: selected?.id ?? "unknown",
+    category: selected?.category ?? "question",
+    profileId: profile.id ?? "local-profile",
+    cloudProfileId: profile.cloudProfileId,
+    title: selected?.title ?? "结构观察",
+  }), [profile.cloudProfileId, profile.id, selected?.category, selected?.id, selected?.title]);
+  const { dataUrl, status, error, generate, reset, markDelivery } = useShareImage(exportRef, analyticsContext);
+
+  useEffect(() => {
+    if (!open || !selected) return;
+    trackMobileEvent("share_poster_open", analyticsContext);
+  }, [analyticsContext, open, selected]);
 
   function choose(index: number) {
     setSelectedIndex(index);
@@ -33,6 +46,7 @@ export function SharePosterSheet({ open, onClose, items, initialIndex = 0 }: { o
     link.download = `玄枢-${selected.id}-1080x1920.png`;
     link.href = image;
     link.click();
+    markDelivery("saved");
     trackMobileEvent("share_image_save_success", { ...analyticsContext, delivery: "browser_download_triggered" });
     setNotice("已生成 1080×1920 PNG。若浏览器未直接保存，可长按下方完整图片。 ");
   }
@@ -46,6 +60,7 @@ export function SharePosterSheet({ open, onClose, items, initialIndex = 0 }: { o
       const file = new File([blob], `玄枢-${selected.id}.png`, { type: "image/png" });
       if (typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ title: selected.title, text: "玄枢 · 让命理，被科学看见", files: [file] });
+        markDelivery("shared");
         trackMobileEvent("share_image_share_success", analyticsContext, finishMobileTiming("share_image_share"));
         setNotice("图片分享面板已打开。 ");
       } else {
@@ -65,7 +80,7 @@ export function SharePosterSheet({ open, onClose, items, initialIndex = 0 }: { o
   if (!selected) return null;
 
   return (
-    <MobileSheet open={open} title="生成分享图" onClose={onClose} layerClassName="share-poster-sheet-layer">
+    <MobileSheet open={open} title="保存这份结构观察" onClose={onClose} layerClassName="share-poster-sheet-layer">
       <div className="share-poster-sheet">
         {items.length > 1 ? (
           <div className="share-poster-options" aria-label="选择分享图内容">

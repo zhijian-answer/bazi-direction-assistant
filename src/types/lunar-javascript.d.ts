@@ -58,6 +58,9 @@ declare module "lunar-javascript" {
   };
 
   type SolarLike = {
+    getYear(): number;
+    getMonth(): number;
+    getDay(): number;
     getLunar(): LunarLike;
     toYmdHms(): string;
   };

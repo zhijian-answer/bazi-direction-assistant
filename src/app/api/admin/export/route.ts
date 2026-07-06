@@ -31,6 +31,11 @@ export async function GET(request: Request) {
           sessions: db.sessions.map((session) => ({ ...session, token: "[redacted]" })),
           profiles: db.profiles,
           questions: db.questions,
+          checkins: db.checkins,
+          reports: db.reports,
+          shareImages: db.shareImages,
+          contentRules: db.contentRules,
+          syncStates: db.syncStates,
         },
       };
 

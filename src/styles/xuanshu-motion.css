@@ -1,0 +1,94 @@
+@keyframes xs-orbit-draw {
+  from { stroke-dashoffset: 1; opacity: 0; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes xs-node-light {
+  0%, 100% { opacity: 0.42; transform: scale(0.92); }
+  50% { opacity: 0.9; transform: scale(1); }
+}
+
+@keyframes xs-reading-sweep {
+  0% { transform: translateX(-115%); opacity: 0; }
+  30% { opacity: 0.45; }
+  100% { transform: translateX(115%); opacity: 0; }
+}
+
+@keyframes xs-instrument-reveal {
+  from { opacity: 0; transform: translate3d(10px, 4px, 0) scale(0.985); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes xs-panel-rise {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.cosmic-background__orbit {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: xs-orbit-draw var(--xs-motion-draw) var(--xs-ease-out) forwards;
+}
+
+.cosmic-background__orbit--delay { animation-delay: 80ms; }
+.cosmic-background__orbit--late { animation-delay: 160ms; }
+
+.cosmic-background__node {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: xs-node-light 5.6s var(--xs-ease-in-out) infinite;
+}
+
+.cosmic-background__node--delay { animation-delay: 1.4s; }
+.cosmic-background__node--late { animation-delay: 2.8s; }
+
+.cosmic-background__instrument {
+  animation: xs-instrument-reveal 900ms var(--xs-ease-out) both;
+}
+
+.today-status-card__instrument {
+  animation: xs-instrument-reveal 760ms 80ms var(--xs-ease-out) both;
+}
+
+.xs-instrument-panel,
+.xs-orbit-chart {
+  animation: xs-panel-rise var(--xs-motion-base) var(--xs-ease-out) both;
+}
+
+.xs-pressable {
+  transition: transform var(--xs-motion-fast) var(--xs-ease-out), border-color var(--xs-motion-fast) ease, background-color var(--xs-motion-fast) ease;
+}
+
+.xs-pressable:active { transform: scale(0.985); }
+
+.mobile-icon-button,
+.mobile-segment-tabs a,
+.mobile-segment-tabs button,
+.question-prompt-grid button,
+.question-insight-actions button,
+.share-poster-actions button,
+.mobile-bottom-nav a > span {
+  transition: transform var(--xs-motion-fast) var(--xs-ease-out), color var(--xs-motion-fast) ease, background-color var(--xs-motion-fast) ease, border-color var(--xs-motion-fast) ease;
+}
+
+.mobile-icon-button:active,
+.mobile-segment-tabs a:active,
+.mobile-segment-tabs button:active,
+.question-prompt-grid button:active,
+.question-insight-actions button:active,
+.share-poster-actions button:active { transform: scale(0.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .cosmic-background__orbit {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}

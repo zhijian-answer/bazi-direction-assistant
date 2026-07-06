@@ -1,19 +1,29 @@
 "use client";
 
 import { toPng } from "html-to-image";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { trackMobileEvent } from "@/lib/mobile/analytics";
+import { recordShareImage, updateShareImageDelivery } from "@/lib/mobile/shareHistory";
+import type { ShareImageRecord, SharePosterData } from "@/lib/mobile/types";
 
-export function useShareImage(targetRef: RefObject<HTMLElement | null>, analyticsContext: { posterId: string; category: string }) {
+export function useShareImage(targetRef: RefObject<HTMLElement | null>, analyticsContext: {
+  posterId: string;
+  category: SharePosterData["category"];
+  profileId: string;
+  cloudProfileId?: string;
+  title: string;
+}) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "generating" | "ready" | "error">("idle");
   const [error, setError] = useState("");
+  const recordIdRef = useRef<string | null>(null);
 
   const reset = useCallback(() => {
     setDataUrl(null);
     setStatus("idle");
     setError("");
+    recordIdRef.current = null;
   }, []);
 
   const generate = useCallback(async () => {
@@ -33,6 +43,24 @@ export function useShareImage(targetRef: RefObject<HTMLElement | null>, analytic
       });
       setDataUrl(next);
       setStatus("ready");
+      recordIdRef.current = recordShareImage({
+        profileId: analyticsContext.profileId,
+        type: analyticsContext.category,
+        sourceId: analyticsContext.posterId,
+        title: analyticsContext.title,
+      });
+      if (analyticsContext.cloudProfileId) {
+        void fetch("/api/share-images", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            profileId: analyticsContext.cloudProfileId,
+            type: analyticsContext.category,
+            sourceId: analyticsContext.posterId,
+            title: analyticsContext.title,
+          }),
+        }).catch(() => undefined);
+      }
       trackMobileEvent("share_image_generate_success", analyticsContext, Math.round((performance.now() - startedAt) * 10) / 10);
       return next;
     } catch {
@@ -43,5 +71,9 @@ export function useShareImage(targetRef: RefObject<HTMLElement | null>, analytic
     }
   }, [analyticsContext, status, targetRef]);
 
-  return { dataUrl, status, error, generate, reset };
+  const markDelivery = useCallback((delivery: ShareImageRecord["delivery"]) => {
+    if (recordIdRef.current) updateShareImageDelivery(recordIdRef.current, delivery);
+  }, []);
+
+  return { dataUrl, status, error, generate, reset, markDelivery };
 }

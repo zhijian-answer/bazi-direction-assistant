@@ -27,6 +27,7 @@ import { BirthForm } from "@/components/bazi/BirthForm";
 import { ResultSection } from "@/components/bazi/ResultSection";
 import { PublicHome } from "@/components/home/PublicHome";
 import { DisclaimerFooter } from "@/components/site/DisclaimerFooter";
+import { trackMobileEvent } from "@/lib/mobile/analytics";
 
 type AppState = {
   user: PublicUser | null;
@@ -284,6 +285,7 @@ export default function Home() {
         email: form.get("email"),
         password: form.get("password"),
       });
+      trackMobileEvent("login_success", { source: "public_login" });
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "登录失败，请检查邮箱和密码");
@@ -315,6 +317,7 @@ export default function Home() {
         isLeapMonth: form.get("isLeapMonth") === "on",
         timezone: form.get("timezone"),
       });
+      trackMobileEvent("login_success", { source: "public_register" });
       await refresh();
       setSelectedProfileId(data.profile.id);
       setActivePanel("report");

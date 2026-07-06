@@ -1,5 +1,5 @@
 import { getDailyInsight } from "./dailyInsightCatalog";
-import { getQuestions } from "./questionInsightCatalog";
+import { buildMobileQuestions } from "./buildMobileQuestions";
 import type { DailyInsightData, MobileProfile, QuestionInsightData } from "./types";
 
 export type InsightDataAdapter = {
@@ -12,7 +12,7 @@ export function createInsightDataAdapter(overrides: Partial<InsightDataAdapter> 
   return {
     source: overrides.source ?? "local-catalog-v1",
     getDailyInsight: overrides.getDailyInsight ?? getDailyInsight,
-    getQuestions: overrides.getQuestions ?? ((context) => getQuestions(context)),
+    getQuestions: overrides.getQuestions ?? ((context, profile) => profile && (context === "home" || context === "bazi") ? buildMobileQuestions(context, profile) : []),
   };
 }
 

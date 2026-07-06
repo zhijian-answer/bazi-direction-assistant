@@ -1,5 +1,6 @@
 import { CreateProfileFlow } from "@/components/mobile/CreateProfileFlow";
 
-export default function CreateMobileProfilePage() {
-  return <CreateProfileFlow />;
+export default async function CreateMobileProfilePage({ searchParams }: { searchParams: Promise<{ mode?: string }> }) {
+  const { mode } = await searchParams;
+  return <CreateProfileFlow mode={mode === "new" ? "new" : "edit"} />;
 }

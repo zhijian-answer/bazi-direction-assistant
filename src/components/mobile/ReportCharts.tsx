@@ -18,10 +18,10 @@ import {
 import type { ElementDatum } from "@/lib/mobile/types";
 
 const tooltipStyle = {
-  border: "1px solid rgba(88, 71, 53, 0.12)",
+  border: "1px solid rgba(216, 170, 93, 0.32)",
   borderRadius: 8,
-  background: "rgba(255, 253, 249, 0.96)",
-  color: "#4f4136",
+  background: "rgba(5, 12, 13, 0.96)",
+  color: "#e9d9b7",
   fontSize: 12,
 };
 
@@ -31,7 +31,7 @@ export function FiveElementsChart({ data }: { data: ElementDatum[] }) {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
           <XAxis type="number" hide domain={[0, 32]} />
-          <YAxis type="category" dataKey="label" width={28} axisLine={false} tickLine={false} tick={{ fill: "#745c49", fontSize: 12 }} />
+          <YAxis type="category" dataKey="label" width={28} axisLine={false} tickLine={false} tick={{ fill: "#c8b58f", fontSize: 12 }} />
           <Bar dataKey="value" radius={[8, 8, 8, 8]} isAnimationActive animationDuration={900}>
             {data.map((item) => <Cell key={item.key} fill={item.color} />)}
           </Bar>
@@ -74,9 +74,9 @@ export function TenGodChart({ data }: { data: Array<{ name: string; value: numbe
     <div className="mobile-chart mobile-chart--bars" aria-label="处理人和事的习惯构成图">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" margin={{ top: 2, right: 16, bottom: 2, left: 2 }}>
-          <CartesianGrid horizontal={false} stroke="rgba(120, 89, 61, 0.1)" />
+          <CartesianGrid horizontal={false} stroke="rgba(216, 170, 93, 0.12)" />
           <XAxis type="number" hide domain={[0, 30]} />
-          <YAxis type="category" dataKey="name" width={44} axisLine={false} tickLine={false} tick={{ fill: "#6d5a4d", fontSize: 12 }} />
+          <YAxis type="category" dataKey="name" width={44} axisLine={false} tickLine={false} tick={{ fill: "#c8b58f", fontSize: 12 }} />
           <Tooltip contentStyle={tooltipStyle} formatter={(value) => [`${String(value)}%`, "占比"]} />
           <Bar dataKey="value" radius={[0, 5, 5, 0]} isAnimationActive animationDuration={850}>
             {data.map((item) => <Cell key={item.name} fill={item.color} />)}
@@ -92,11 +92,11 @@ export function LuckTrendChart({ data }: { data: Array<{ age: string; value: num
     <div className="mobile-chart mobile-chart--trend" aria-label="大运趋势图">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -24 }}>
-          <CartesianGrid vertical={false} stroke="rgba(120, 89, 61, 0.1)" />
-          <XAxis dataKey="age" axisLine={false} tickLine={false} tick={{ fill: "#846f5c", fontSize: 10 }} />
+          <CartesianGrid vertical={false} stroke="rgba(216, 170, 93, 0.12)" />
+          <XAxis dataKey="age" axisLine={false} tickLine={false} tick={{ fill: "#b8a789", fontSize: 10 }} />
           <YAxis hide domain={[0, 100]} />
           <Tooltip contentStyle={tooltipStyle} formatter={(value) => [String(value), "节奏指数"]} />
-          <Area type="monotone" dataKey="value" stroke="#a96352" fill="#d9aa92" fillOpacity={0.32} strokeWidth={2} isAnimationActive animationDuration={950} />
+          <Area type="monotone" dataKey="value" stroke="#c55b47" fill="#b98a4d" fillOpacity={0.2} strokeWidth={2} isAnimationActive animationDuration={950} />
         </AreaChart>
       </ResponsiveContainer>
     </div>

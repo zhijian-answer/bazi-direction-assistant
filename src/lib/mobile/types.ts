@@ -1,12 +1,39 @@
 import type { LucideIcon } from "lucide-react";
 
 export type MobileProfile = {
+  id?: string;
   name: string;
   gender: "male" | "female" | "other";
   calendarType: "solar" | "lunar";
   birthDate: string;
   birthTime: string;
+  birthTimeKnown: boolean;
+  isLeapMonth: boolean;
   birthPlace: string;
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+  birthPlaceResolution?: "catalog" | "coordinates" | "unknown";
+  isDemo?: boolean;
+  isLocalOnly?: boolean;
+  completeness?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  syncStatus?: "local" | "pending" | "synced" | "error";
+  cloudProfileId?: string;
+};
+
+export type ShareImageRecord = {
+  id: string;
+  profileId: string;
+  type: SharePosterData["category"];
+  sourceId: string;
+  title: string;
+  width: 1080;
+  height: 1920;
+  delivery: "generated" | "saved" | "shared";
+  createdAt: string;
+  syncedAt?: string;
 };
 
 export type ElementDatum = {
@@ -47,7 +74,7 @@ export type PosterTone = "ink" | "warm" | "sage" | "sky" | "violet" | "coral";
 
 export type SharePosterData = {
   id: string;
-  category: "personality" | "daily" | "zodiac" | "question";
+  category: "personality" | "daily" | "zodiac" | "ziwei" | "question";
   eyebrow: string;
   title: string;
   body: string;
@@ -69,7 +96,7 @@ export type DailyInsightData = {
 
 export type QuestionInsightData = {
   id: string;
-  context: "home" | "bazi" | "zodiac";
+  context: "home" | "bazi" | "zodiac" | "ziwei";
   prompt: string;
   shortLabel: string;
   source: string;

@@ -7,11 +7,13 @@ export function MobileTopBar({
   title = "自己",
   onShare,
   onSettings,
+  onProfileClick,
   showBack = true,
 }: {
   title?: string;
   onShare?: () => void;
   onSettings?: () => void;
+  onProfileClick?: () => void;
   showBack?: boolean;
 }) {
   const router = useRouter();
@@ -26,7 +28,7 @@ export function MobileTopBar({
           <span className="mobile-topbar-spacer" />
         )}
       </div>
-      <button type="button" className="mobile-profile-switch" aria-label="切换当前档案">
+      <button type="button" className="mobile-profile-switch" aria-label="切换当前档案" onClick={onProfileClick ?? (() => router.push("/m/profile"))}>
         {title}
         <ChevronDown />
       </button>
