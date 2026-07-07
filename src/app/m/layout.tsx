@@ -8,6 +8,7 @@ import "@/styles/xuanshu-theme.css";
 import "@/styles/xuanshu-reports.css";
 import "@/styles/xuanshu-motion.css";
 import "@/styles/xuanshu-home.css";
+import "@/styles/xuanshu-style-lab-home.css";
 
 export const metadata: Metadata = {
   title: "玄枢｜生辰、星座与紫微报告",
