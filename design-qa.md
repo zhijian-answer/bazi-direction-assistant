@@ -157,6 +157,34 @@ final result: passed
 - 字体：首页主标题为 Noto Serif SC Variable，390px 下 29.5px / 560，行高 1.3；正文与按钮使用系统黑体。
 - 截图脚本：使用 `localhost` 避免 Next dev 资源跨域拦截，并隐藏 `nextjs-portal` 开发浮层。
 
+## 2026-07-07 追加返修
+
+- 本次修改前：`output/playwright/home-visual-rework/home-before-detail-fix-390x844.png`
+- 第一轮：`output/playwright/home-visual-rework/home-detail-fix-v1-390x844.png`
+- 第二轮：`output/playwright/home-visual-rework/home-detail-fix-v2-390x844.png`
+- 最终截图：`output/playwright/home-visual-rework/home-detail-fix-final-390x844.png`
+- 最终并排：`output/playwright/home-visual-rework/home-reference-vs-detail-fix-final-390.png`
+- 响应式：`home-detail-fix-final-375x812.png`、`home-detail-fix-final-390x844.png`、`home-detail-fix-final-430x932.png`
+
+### 本次重点修正
+
+- 将动态首页标题从报告字段感改成更像第一句提醒的表达，例如“今天不用独自硬扛，先接住已有资源”。
+- 降低主标题字重和字号压迫感，390px 下为 27.5px / 510，朱砂只强调最后关键词。
+- 调整天体仪位置、遮罩和亮度，保留主视觉，但减少压住正文的感觉。
+- 压缩并细化今日数据格、按钮和问题卡，让首屏从主仪表自然过渡到问题入口。
+- 问题卡文案改成更接近日常用户会问的话，减少“功能卡片”的生硬感。
+- 恢复所有可见点击目标不小于 44px。
+
+### 检查结果
+
+- 375：无横向溢出；主卡和问题入口可见；smallTargets = 0。
+- 390：无横向溢出；主卡完整，四个问题入口可见；smallTargets = 0。
+- 430：无横向溢出；主卡和问题入口完整；smallTargets = 0。
+- lint：passed。
+- test：8 files / 34 tests passed。
+- production build：passed。
+- mobile static build：passed。
+
 current result: improved; waiting for visual review, not marked passed
 
 ---

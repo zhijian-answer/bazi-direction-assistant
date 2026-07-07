@@ -8,12 +8,12 @@ import type { QuestionInsightData } from "@/lib/mobile/types";
 import orbitMark from "../../../public/mobile/xuanshu-orbit-mark.webp";
 
 const homeQuestionPresentation: Record<string, { title: string; note: string; icon: typeof BriefcaseBusiness }> = {
-  "home-work": { title: "事业进展如何？", note: "把握节奏，找准发力点", icon: BriefcaseBusiness },
-  "home-relationship": { title: "感情有何变化？", note: "看见关系，理解彼此", icon: Heart },
-  "home-action": { title: "现在该主动吗？", note: "判断节奏，再决定出手", icon: Coins },
-  "home-energy": { title: "为什么总觉得累？", note: "看见消耗，重新分配精力", icon: UserRound },
-  "home-choice": { title: "财富机会在哪？", note: "识别趋势，稳中求进", icon: Coins },
-  "home-today": { title: "我的状态如何？", note: "能量评估，调整身心", icon: UserRound },
+  "home-work": { title: "手上的事该怎么推进？", note: "看主线、反馈和下一步", icon: BriefcaseBusiness },
+  "home-relationship": { title: "这段关系要继续投入吗？", note: "看回应，而不是只看感觉", icon: Heart },
+  "home-action": { title: "现在适合主动一点吗？", note: "先判断节奏，再决定出手", icon: Coins },
+  "home-energy": { title: "为什么最近总觉得累？", note: "看见消耗，重新分配精力", icon: UserRound },
+  "home-choice": { title: "两个选择先看什么？", note: "先看成本、边界和回报", icon: Coins },
+  "home-today": { title: "今天最该先做哪件事？", note: "把状态落成一个动作", icon: UserRound },
 };
 
 export function QuestionPromptGrid({ questions, onSelect, title = "今天你想先问哪件事", compact = false }: { questions: QuestionInsightData[]; onSelect: (question: QuestionInsightData) => void; title?: string; compact?: boolean }) {
