@@ -1217,8 +1217,22 @@
 }
 
 /* Zodiac report: cool astronomical data, kept inside the same brass lab. */
+.mobile-shell--zodiac .mobile-topbar {
+  min-height: calc(54px + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+}
+
+.mobile-shell--zodiac .mobile-segment-tabs {
+  min-height: 46px;
+}
+
+.mobile-shell--zodiac .mobile-segment-tabs a,
+.mobile-shell--zodiac .mobile-segment-tabs button {
+  min-height: 44px;
+}
+
 .market-report--zodiac {
-  padding-top: 12px;
+  padding-top: 8px;
   --zodiac-blue: #78a9cf;
   --zodiac-blue-soft: rgba(120, 169, 207, 0.14);
 }
@@ -1226,12 +1240,12 @@
 .market-report--zodiac .zodiac-cover-intro {
   position: relative;
   overflow: hidden;
-  min-height: 350px;
-  margin: 0 14px 14px;
+  min-height: 172px;
+  margin: 0 14px 8px;
   border: 1px solid rgba(190, 144, 77, 0.42);
   border-radius: 13px;
   background: #040b0d;
-  padding: 22px 20px;
+  padding: 13px 15px 11px;
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
 }
 
@@ -1248,14 +1262,14 @@
 .market-report--zodiac .zodiac-cover-instrument {
   position: absolute;
   z-index: 0;
-  top: -20px;
-  right: -82px;
-  width: 325px;
-  height: 365px;
+  top: -28px;
+  right: -54px;
+  width: 220px;
+  height: 244px;
   object-fit: cover;
   object-position: 64% 18%;
-  opacity: 0.94;
-  filter: hue-rotate(6deg) saturate(0.78) contrast(1.08) brightness(0.9);
+  opacity: 0.78;
+  filter: hue-rotate(6deg) saturate(0.75) contrast(1.08) brightness(0.84);
   mask-image: linear-gradient(120deg, transparent, #000 34%, #000 86%, transparent);
 }
 
@@ -1275,22 +1289,31 @@
 }
 
 .market-report--zodiac .zodiac-cover-intro h1 {
-  max-width: 320px;
-  margin-top: 24px;
+  max-width: 260px;
+  margin-top: 13px;
   color: #f2e8da;
   font-family: var(--xs-font-serif);
-  font-size: 30px;
-  font-weight: 540;
-  line-height: 1.46;
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.4;
   text-wrap: balance;
 }
 
+.market-report--zodiac .zodiac-cover-intro h1 > span {
+  display: block;
+}
+
 .market-report--zodiac .zodiac-cover-intro > p {
-  max-width: 275px;
-  margin-top: 16px;
+  max-width: 250px;
+  margin-top: 7px;
   color: #b4b5b4;
-  font-size: 11.5px;
-  line-height: 1.78;
+  font-size: 9.5px;
+  line-height: 1.55;
+}
+
+.market-report--zodiac .zodiac-cover-intro > p strong {
+  color: #89b9d8;
+  font-weight: 600;
 }
 
 .market-report--zodiac .zodiac-cover-intro .zodiac-orbit-mark {
@@ -1344,7 +1367,54 @@
 }
 
 .market-report--zodiac .zodiac-highlight-card {
-  padding: 18px;
+  margin-bottom: 8px;
+  padding: 10px 12px 9px;
+}
+
+.market-report--zodiac .zodiac-highlight-card > header {
+  min-height: 32px;
+}
+
+.market-report--zodiac .zodiac-highlight-card header div {
+  font-size: 8.5px;
+}
+
+.market-report--zodiac .zodiac-highlight-card header button {
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 8px;
+}
+
+.market-report--zodiac .zodiac-highlight-card h2 {
+  max-width: 330px;
+  margin-top: 3px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.market-report--zodiac .zodiac-highlight-card > p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 3px;
+  font-size: 8.5px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.market-report--zodiac .mobile-chart--zodiac {
+  height: 70px;
+  margin-top: 2px;
+}
+
+.market-report--zodiac .zodiac-highlight-meta {
+  margin-top: -5px;
+}
+
+.market-report--zodiac .zodiac-highlight-card > footer {
+  margin-top: 5px;
+  padding-top: 5px;
 }
 
 .market-report--zodiac .zodiac-highlight-card header div,
@@ -1414,12 +1484,60 @@
 }
 
 .market-report--zodiac .zodiac-core-grid {
-  gap: 8px;
+  gap: 7px;
+  padding-bottom: 8px;
   padding-inline: 14px;
 }
 
 .market-report--zodiac .zodiac-core-grid article {
-  min-height: 190px;
+  min-height: 124px;
+  border-radius: 9px;
+  padding: 9px 8px;
+}
+
+.market-report--zodiac .zodiac-core-grid svg {
+  width: 18px;
+  height: 18px;
+}
+
+.market-report--zodiac .zodiac-core-grid small {
+  margin-top: 7px;
+  font-size: 7.5px;
+}
+
+.market-report--zodiac .zodiac-core-grid strong {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.market-report--zodiac .zodiac-core-grid p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 5px;
+  font-size: 8px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.market-report--zodiac #relationships .question-prompt-section--compact {
+  margin-top: 0;
+  padding: 12px;
+}
+
+.market-report--zodiac #relationships .question-prompt-section--compact > header h2 {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.market-report--zodiac #relationships .question-prompt-grid {
+  margin-top: 8px;
+}
+
+.market-report--zodiac #relationships .question-prompt-grid button {
+  min-height: 44px;
+  padding-block: 7px;
 }
 
 .market-report--zodiac .zodiac-core-grid svg,
@@ -1932,9 +2050,12 @@
     margin-inline: 12px;
   }
 
-  .market-report--zodiac .zodiac-cover-intro h1,
+  .market-report--zodiac .zodiac-cover-intro h1 {
+    font-size: 20px;
+  }
+
   .market-report--ziwei .ziwei-cover-card h2 {
-    font-size: 27px;
+    font-size: 20px;
   }
 
   .market-report--zodiac .zodiac-core-grid,

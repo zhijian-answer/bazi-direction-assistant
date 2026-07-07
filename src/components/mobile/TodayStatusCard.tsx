@@ -37,6 +37,10 @@ export function TodayStatusCard({ insight, dateLabel, onShare }: { insight: Dail
     <section className="today-status-card">
       <div className="today-status-card__hero">
         <Image className="today-status-card__instrument" src={armillaryImage} alt="" aria-hidden="true" priority sizes="320px" />
+        <span className="today-status-card__scope today-status-card__scope--one" aria-hidden="true" />
+        <span className="today-status-card__scope today-status-card__scope--two" aria-hidden="true" />
+        <span className="today-status-card__node today-status-card__node--one" aria-hidden="true" />
+        <span className="today-status-card__node today-status-card__node--two" aria-hidden="true" />
         <header><span><CalendarDays />{dateLabel} · 今日观察</span><em>{insight.keyword}</em></header>
         <h1><span>{coverTitle.lead}</span>{coverTitle.detail || coverTitle.emphasis ? <span className="today-status-card__title-detail">{coverTitle.detail}<strong>{coverTitle.emphasis}</strong></span> : null}</h1>
         <p>{insight.summary}</p>
@@ -48,8 +52,8 @@ export function TodayStatusCard({ insight, dateLabel, onShare }: { insight: Dail
         </div>
       </div>
       <div className="today-status-dashboard">
-        <div><small>适合做什么</small>{suitable.map((item) => <span key={item}>{item}</span>)}</div>
-        <div><small>暂时少做什么</small>{avoid.map((item) => <span key={item}>{item}</span>)}</div>
+        <div><small>适合做什么</small><strong>适合</strong>{suitable.map((item) => <span key={item}>{item}</span>)}</div>
+        <div><small>暂时少做什么</small><strong>少做</strong>{avoid.map((item) => <span key={item}>{item}</span>)}</div>
         <div className="today-status-action"><small>今天的一步</small><strong>{insight.action}</strong><i aria-hidden="true"><Focus /></i></div>
       </div>
       <footer>

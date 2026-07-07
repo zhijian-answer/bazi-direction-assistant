@@ -37,16 +37,33 @@ for (const viewport of viewports) {
   });
   page.on("pageerror", (error) => errors.push(error.message));
 
+  await page.addInitScript((value) => {
+    window.localStorage.setItem("xuanshu-mobile-profile", JSON.stringify(value));
+  }, profile);
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+  await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
   console.log(`Opened ${viewport.width}`);
   await page.waitForTimeout(800);
   if (await page.locator(".home-welcome").count()) {
-    await page.locator(".home-welcome button").click();
+    const demoButton = page.getByRole("button", { name: /先看示例/ });
+    if (await demoButton.count()) {
+      await demoButton.click();
+      await page.waitForTimeout(1600);
+    } else {
+      await page.evaluate((value) => {
+        window.localStorage.setItem("xuanshu-mobile-profile", JSON.stringify(value));
+        window.dispatchEvent(new Event("xuanshu-mobile-profile-change"));
+      }, profile);
+    }
   } else {
     await page.evaluate((value) => {
       window.localStorage.setItem("xuanshu-mobile-profile", JSON.stringify(value));
       window.dispatchEvent(new Event("xuanshu-mobile-profile-change"));
     }, profile);
+  }
+  if (!(await page.locator(".today-status-card").count())) {
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(1800);
   }
   await page.waitForTimeout(1200);
   if (!(await page.locator(".today-status-card").count())) {

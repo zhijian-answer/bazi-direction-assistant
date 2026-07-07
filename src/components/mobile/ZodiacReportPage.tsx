@@ -87,6 +87,13 @@ export function ZodiacReportPage() {
   const [profileSwitcherOpen, setProfileSwitcherOpen] = useState(false);
   const [posterItems, setPosterItems] = useState<SharePosterData[]>([]);
   const [posterIndex, setPosterIndex] = useState(0);
+  const [zodiacCoverTitle, zodiacCoverConclusion = zodiacReport.identity.subtitle] = zodiacReport.identity.title.split("：");
+  const zodiacCoverParts = zodiacCoverTitle.split("、");
+  const zodiacCoverFirstLine = zodiacCoverParts.slice(0, 2).join("、");
+  const zodiacCoverSecondLine = zodiacCoverParts.slice(2).join("、");
+  const conclusionKeywordLength = zodiacCoverConclusion.length > 8 ? 4 : 3;
+  const conclusionLead = zodiacCoverConclusion.slice(0, -conclusionKeywordLength);
+  const conclusionKeyword = zodiacCoverConclusion.slice(-conclusionKeywordLength);
 
   useEffect(() => {
     trackMobileEvent("report_view", { reportType: "zodiac", profileKind: profile.isDemo ? "demo" : "local", partial: zodiacReport.completeness.isPartial });
@@ -116,8 +123,8 @@ export function ZodiacReportPage() {
       <section className="zodiac-cover-intro">
         <Image className="zodiac-cover-instrument" src={armillaryImage} alt="" aria-hidden="true" priority sizes="390px" />
         <div><small>你的星座人格封面</small><span>结构化观察</span></div>
-        <h1>{zodiacReport.identity.title}</h1>
-        <p>{zodiacReport.identity.subtitle}</p>
+        <h1>{zodiacCoverFirstLine}{zodiacCoverSecondLine ? <span>{zodiacCoverSecondLine}</span> : null}</h1>
+        <p>{conclusionLead}<strong>{conclusionKeyword}</strong></p>
         <div className="zodiac-orbit-mark" aria-hidden="true"><Orbit /><span>{signName(zodiacReport.signs.sun)}</span></div>
       </section>
 
@@ -138,8 +145,6 @@ export function ZodiacReportPage() {
         </section>
       </MobileReveal>
 
-      <div id="relationships"><QuestionPromptGrid questions={zodiacQuestions} onSelect={setSelectedQuestion} title="关系里，你最想先看懂哪一件事" compact /></div>
-
       <section className="zodiac-core-grid">
         {zodiacReport.core.map((item, index) => {
           const Icon = coreIcons[index];
@@ -155,6 +160,8 @@ export function ZodiacReportPage() {
           );
         })}
       </section>
+
+      <div id="relationships"><QuestionPromptGrid questions={zodiacQuestions} onSelect={setSelectedQuestion} title="关系里，你最想先看懂哪一件事" compact /></div>
 
       <section id="traits" className="zodiac-traits-section">
         <header><small>六个被看见的瞬间</small><h2>不同场景里的你，都是真的</h2></header>

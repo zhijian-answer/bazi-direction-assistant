@@ -1078,3 +1078,420 @@ body:has(.mobile-shell--home)::-webkit-scrollbar { display: none; }
   .mobile-shell--home .question-prompt-copy strong { font-size: 12px; }
   .mobile-shell--home .question-prompt-copy small { font-size: 9.5px; }
 }
+
+/* Visual correction pass: make the signed-in home read as one finished instrument screen. */
+.mobile-shell--home {
+  --home-ink: #02070a;
+  --home-ink-2: #061115;
+  --home-brass-soft: #c99a55;
+  --home-brass-hot: #f0d19a;
+  --home-red: #d25a45;
+  --home-milk: #f6ecdf;
+  --home-muted: #b9b0a4;
+}
+
+.mobile-shell--home .mobile-shell-content {
+  background:
+    radial-gradient(circle at 74% 20%, rgba(90, 126, 127, 0.16), transparent 31%),
+    radial-gradient(circle at 28% 9%, rgba(210, 154, 80, 0.07), transparent 29%),
+    linear-gradient(90deg, transparent 0 30px, rgba(214, 170, 101, 0.095) 30px 31px, transparent 31px),
+    linear-gradient(180deg, rgba(2, 8, 10, 0.8), rgba(2, 7, 9, 0.98));
+}
+
+.mobile-shell--home .app-home-header--daily {
+  min-height: 72px;
+  border-bottom-color: rgba(214, 170, 101, 0.32);
+  background:
+    linear-gradient(90deg, transparent 0 30px, rgba(214, 170, 101, 0.12) 30px 31px, transparent 31px),
+    linear-gradient(180deg, rgba(2, 8, 10, 0.98), rgba(2, 8, 10, 0.82));
+}
+
+.mobile-shell--home .app-home-brand strong {
+  color: var(--home-milk);
+  font-size: 24px;
+  font-variation-settings: "wght" 600;
+  font-weight: 600;
+  text-shadow: 0 0 18px rgba(240, 209, 154, 0.08);
+}
+
+.mobile-shell--home .app-home-brand small {
+  color: #c2b7a9;
+  letter-spacing: 0;
+}
+
+.mobile-shell--home .app-create-button {
+  border-color: rgba(240, 209, 154, 0.42);
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(24, 31, 28, 0.98), rgba(5, 12, 13, 0.98)),
+    linear-gradient(135deg, rgba(240, 209, 154, 0.12), transparent 45%);
+  box-shadow: inset 0 1px rgba(255, 235, 195, 0.08), 0 8px 22px rgba(0, 0, 0, 0.26);
+}
+
+.mobile-shell--home .today-status-card {
+  margin: 11px 12px 0;
+  border-color: rgba(240, 209, 154, 0.58);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(240, 209, 154, 0.045), transparent 36%),
+    linear-gradient(145deg, #071417 0%, #02070a 67%, #090807 100%);
+  padding: 4px 4px 13px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 234, 190, 0.035),
+    inset 0 28px 70px rgba(240, 209, 154, 0.018),
+    0 26px 62px rgba(0, 0, 0, 0.48);
+}
+
+.mobile-shell--home .today-status-card::before {
+  inset: 4px 4px auto;
+  height: 266px;
+  border-color: rgba(240, 209, 154, 0.13);
+  border-radius: 7px 7px 0 0;
+  background:
+    linear-gradient(90deg, rgba(2, 8, 10, 0.99) 0%, rgba(2, 8, 10, 0.78) 46%, rgba(2, 8, 10, 0.18) 77%, rgba(2, 8, 10, 0.02) 100%),
+    radial-gradient(circle at 82% 36%, rgba(240, 209, 154, 0.12), transparent 29%),
+    repeating-linear-gradient(90deg, rgba(240, 209, 154, 0.045) 0 1px, transparent 1px 43px);
+  box-shadow: inset 0 0 48px rgba(0, 0, 0, 0.54);
+}
+
+.mobile-shell--home .today-status-card::after {
+  top: 4px;
+  right: 18px;
+  width: 82px;
+  height: 5px;
+  opacity: 0.95;
+  background: repeating-linear-gradient(90deg, transparent 0 7px, rgba(240, 209, 154, 0.88) 7px 8px);
+}
+
+.mobile-shell--home .today-status-card__hero {
+  min-height: 266px;
+  padding: 15px 13px 12px;
+}
+
+.mobile-shell--home .today-status-card__instrument {
+  top: 10px;
+  right: -44px;
+  width: 304px;
+  height: 286px;
+  object-position: 60% 16%;
+  opacity: 0.98;
+  filter: saturate(0.95) contrast(1.13) brightness(0.98);
+  mask-image: linear-gradient(102deg, transparent 0 9%, rgba(0, 0, 0, 0.18) 22%, #000 48%, #000 91%, transparent 100%);
+}
+
+.mobile-shell--home .today-status-card__hero::after {
+  background:
+    linear-gradient(90deg, rgba(2, 8, 10, 0.9) 0%, rgba(2, 8, 10, 0.58) 45%, rgba(2, 8, 10, 0.05) 78%),
+    linear-gradient(180deg, transparent 70%, rgba(2, 8, 10, 0.56));
+}
+
+.mobile-shell--home .today-status-card__scope,
+.mobile-shell--home .today-status-card__node {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.mobile-shell--home .today-status-card__scope {
+  border: 1px solid rgba(240, 209, 154, 0.18);
+  border-radius: 50%;
+}
+
+.mobile-shell--home .today-status-card__scope--one {
+  top: 76px;
+  right: -14px;
+  width: 232px;
+  height: 78px;
+  transform: rotate(-13deg);
+}
+
+.mobile-shell--home .today-status-card__scope--two {
+  top: 58px;
+  right: 50px;
+  width: 112px;
+  height: 174px;
+  border-color: rgba(99, 153, 154, 0.2);
+  transform: rotate(28deg);
+}
+
+.mobile-shell--home .today-status-card__node {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--home-red);
+  box-shadow: 0 0 12px rgba(210, 90, 69, 0.55);
+}
+
+.mobile-shell--home .today-status-card__node--one { top: 138px; right: 141px; }
+.mobile-shell--home .today-status-card__node--two {
+  top: 90px;
+  right: 64px;
+  background: #8fc2c3;
+  box-shadow: 0 0 10px rgba(143, 194, 195, 0.5);
+}
+
+.mobile-shell--home .today-status-card__hero > header span {
+  color: #cbc0b1;
+  font-size: 10.5px;
+}
+
+.mobile-shell--home .today-status-card__hero > header em {
+  border-color: rgba(240, 209, 154, 0.5);
+  border-radius: 3px 3px 8px 8px;
+  background: rgba(2, 8, 10, 0.84);
+  color: var(--home-brass-hot);
+}
+
+.mobile-shell--home .today-status-card h1 {
+  max-width: 282px;
+  margin-top: 16px;
+  color: var(--home-milk);
+  font-family: var(--home-font-display);
+  font-size: 29.5px;
+  font-variation-settings: "wght" 560;
+  font-weight: 560;
+  line-height: 1.3;
+  text-shadow: 0 4px 22px rgba(0, 0, 0, 0.95);
+}
+
+.mobile-shell--home .today-status-card h1 strong {
+  color: var(--home-red);
+  font-variation-settings: "wght" 650;
+  font-weight: 650;
+}
+
+.mobile-shell--home .today-status-card__hero > p {
+  max-width: 244px;
+  color: #ded4c8;
+  font-size: 11.5px;
+  line-height: 1.78;
+}
+
+.mobile-shell--home .today-status-tags {
+  max-width: 256px;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.mobile-shell--home .today-status-tags span {
+  min-height: 30px;
+  border-color: rgba(240, 209, 154, 0.42);
+  border-radius: 5px;
+  background: linear-gradient(180deg, rgba(12, 21, 22, 0.9), rgba(3, 10, 11, 0.88));
+  color: #e2c58b;
+  box-shadow: inset 0 1px rgba(255, 235, 195, 0.04);
+}
+
+.mobile-shell--home .today-status-dashboard {
+  grid-template-columns: 0.9fr 0.9fr 1.2fr;
+  margin: 0 7px;
+  border-color: rgba(240, 209, 154, 0.4);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(240, 209, 154, 0.025), transparent),
+    rgba(3, 10, 11, 0.97);
+}
+
+.mobile-shell--home .today-status-dashboard > div {
+  min-height: 82px;
+  padding: 10px 8px 9px;
+}
+
+.mobile-shell--home .today-status-dashboard small {
+  margin-bottom: 3px;
+  color: #8d8377;
+  font-family: var(--home-font-ui);
+  font-size: 8.5px;
+  font-weight: 500;
+}
+
+.mobile-shell--home .today-status-dashboard > div > strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #e5bd76;
+  font-family: var(--home-font-display);
+  font-size: 16px;
+  font-variation-settings: "wght" 560;
+  font-weight: 560;
+  line-height: 1;
+}
+
+.mobile-shell--home .today-status-dashboard > div > span,
+.mobile-shell--home .today-status-dashboard .today-status-action strong {
+  color: #cfc6ba;
+  font-size: 9.5px;
+  line-height: 1.5;
+}
+
+.mobile-shell--home .today-status-dashboard .today-status-action {
+  min-height: 82px !important;
+  padding-right: 26px;
+}
+
+.mobile-shell--home .today-status-dashboard .today-status-action strong {
+  max-width: 104px;
+  margin-bottom: 0;
+  color: #d8d0c4;
+  font-family: var(--home-font-ui);
+  font-size: 9.25px;
+  font-variation-settings: normal;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.mobile-shell--home .today-status-card > footer {
+  gap: 8px;
+  margin: 9px 7px 0;
+}
+
+.mobile-shell--home .today-status-card > footer a,
+.mobile-shell--home .today-status-card > footer button {
+  min-height: 48px;
+  border-radius: 7px;
+  font-size: 11.5px;
+}
+
+.mobile-shell--home .today-status-card > footer a {
+  border-color: #b65643;
+  background:
+    linear-gradient(180deg, rgba(255, 235, 210, 0.12), transparent),
+    linear-gradient(135deg, #943127 0%, #bb4f3d 52%, #842a23 100%);
+}
+
+.mobile-shell--home .today-status-card > footer button {
+  border-color: rgba(240, 209, 154, 0.58);
+  background:
+    linear-gradient(180deg, rgba(240, 209, 154, 0.06), transparent),
+    rgba(5, 13, 14, 0.96);
+  color: #ebcd91;
+}
+
+.mobile-shell--home .question-prompt-section:not(.question-prompt-section--compact) {
+  margin-top: 0;
+  padding: 32px 12px 18px;
+  background:
+    linear-gradient(90deg, transparent 0 30px, rgba(214, 170, 101, 0.16) 30px 31px, transparent 31px),
+    radial-gradient(circle at 34px 22px, rgba(214, 170, 101, 0.12), transparent 34px),
+    linear-gradient(180deg, rgba(9, 18, 20, 0.62), rgba(2, 8, 10, 0.08));
+}
+
+.mobile-shell--home .question-prompt-section:not(.question-prompt-section--compact)::before {
+  left: 30px;
+  height: 22px;
+  background: linear-gradient(rgba(214, 170, 101, 0.08), rgba(214, 170, 101, 0.9));
+  box-shadow: 0 22px 0 2px rgba(214, 170, 101, 0.9);
+}
+
+.mobile-shell--home .question-prompt-section:not(.question-prompt-section--compact)::after {
+  position: absolute;
+  top: 21px;
+  right: 15px;
+  left: 47px;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, rgba(214, 170, 101, 0.42), rgba(214, 170, 101, 0.08) 54%, transparent);
+}
+
+.mobile-shell--home .question-prompt-section > header h2 {
+  color: var(--home-milk);
+  font-size: 22px;
+  font-variation-settings: "wght" 540;
+  font-weight: 540;
+}
+
+.mobile-shell--home .question-prompt-grid {
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.mobile-shell--home .question-prompt-grid button,
+.mobile-shell--home .question-prompt-grid button:nth-child(3),
+.mobile-shell--home .question-prompt-grid button:nth-child(4) {
+  min-height: 86px;
+  grid-template-columns: 45px minmax(0, 1fr) 16px;
+  border-color: rgba(240, 209, 154, 0.34);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(240, 209, 154, 0.045), transparent 36%),
+    linear-gradient(145deg, rgba(8, 18, 20, 0.98), rgba(3, 10, 11, 0.96));
+}
+
+.mobile-shell--home .question-prompt-grid button::after {
+  position: absolute;
+  inset: 6px 6px auto auto;
+  width: 42px;
+  height: 1px;
+  content: "";
+  background: repeating-linear-gradient(90deg, rgba(240, 209, 154, 0.5) 0 1px, transparent 1px 6px);
+}
+
+.mobile-shell--home .question-prompt-orbit,
+.mobile-shell--home .question-prompt-orbit img {
+  width: 45px;
+  height: 45px;
+}
+
+.mobile-shell--home .question-prompt-copy strong {
+  color: #ecd19d;
+  font-family: var(--home-font-display);
+  font-size: 14px;
+  font-variation-settings: "wght" 560;
+  font-weight: 560;
+}
+
+.mobile-shell--home .question-prompt-copy small {
+  color: #bbb2a7;
+  font-size: 10.5px;
+}
+
+.mobile-shell--home .mobile-bottom-nav {
+  height: calc(74px + env(safe-area-inset-bottom));
+  border-top-color: rgba(240, 209, 154, 0.28);
+  background:
+    linear-gradient(90deg, transparent 0 30px, rgba(214, 170, 101, 0.1) 30px 31px, transparent 31px),
+    linear-gradient(180deg, #071012 0%, #02070a 72%, #02070a 100%);
+  box-shadow: 0 -18px 38px rgba(0, 0, 0, 0.68), inset 0 1px rgba(255, 229, 179, 0.045);
+}
+
+.mobile-shell--home .mobile-bottom-nav a > span {
+  min-height: 64px;
+}
+
+.mobile-shell--home .mobile-bottom-nav a.is-active::before {
+  display: none;
+  content: none;
+}
+
+.mobile-shell--home .mobile-bottom-nav a.is-active .mobile-bottom-nav__mark,
+.mobile-shell--home .mobile-bottom-nav a.is-active svg {
+  transform: translateY(-1px);
+  filter: drop-shadow(0 0 8px rgba(240, 209, 154, 0.2));
+}
+
+.mobile-shell--home .mobile-bottom-nav small {
+  color: inherit;
+  font-size: 10.5px;
+}
+
+@media (max-width: 379px) {
+  .mobile-shell--home .today-status-card__hero { min-height: 258px; }
+  .mobile-shell--home .today-status-card::before { height: 258px; }
+  .mobile-shell--home .today-status-card__instrument {
+    right: -58px;
+    width: 302px;
+    height: 280px;
+  }
+  .mobile-shell--home .today-status-card h1 {
+    max-width: 260px;
+    font-size: 27.5px;
+  }
+  .mobile-shell--home .today-status-dashboard > div { padding-inline: 7px; }
+  .mobile-shell--home .today-status-dashboard > div > strong { font-size: 15px; }
+  .mobile-shell--home .today-status-dashboard > div > span,
+  .mobile-shell--home .today-status-dashboard .today-status-action strong { font-size: 9px; }
+  .mobile-shell--home .question-prompt-grid button,
+  .mobile-shell--home .question-prompt-grid button:nth-child(3),
+  .mobile-shell--home .question-prompt-grid button:nth-child(4) {
+    grid-template-columns: 40px minmax(0, 1fr) 12px;
+  }
+}

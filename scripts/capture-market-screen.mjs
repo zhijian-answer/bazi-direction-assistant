@@ -45,14 +45,23 @@ for (const viewport of viewports) {
     await page.screenshot({ path: path.join(outputDir, `${label}-full-${suffix}.png`), fullPage: true });
   }
 
-  const metrics = await page.evaluate(() => ({
-    scrollWidth: document.documentElement.scrollWidth,
-    scrollHeight: document.documentElement.scrollHeight,
-    smallTargets: [...document.querySelectorAll("a, button")].filter((element) => {
+  const metrics = await page.evaluate(() => {
+    const smallTargets = [...document.querySelectorAll("a, button")].filter((element) => {
       const rect = element.getBoundingClientRect();
       return rect.width > 0 && rect.height > 0 && (rect.width < 44 || rect.height < 44);
-    }).length,
-  }));
+    });
+    return {
+      scrollWidth: document.documentElement.scrollWidth,
+      scrollHeight: document.documentElement.scrollHeight,
+      smallTargets: smallTargets.length,
+      smallTargetDetails: smallTargets.slice(0, 4).map((element) => ({
+        label: element.getAttribute("aria-label") || element.textContent?.trim().slice(0, 24),
+        className: element.className,
+        width: Math.round(element.getBoundingClientRect().width),
+        height: Math.round(element.getBoundingClientRect().height),
+      })),
+    };
+  });
   console.log(JSON.stringify({ viewport, metrics, errors }));
   await page.close();
 }
