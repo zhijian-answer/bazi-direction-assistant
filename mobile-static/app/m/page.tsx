@@ -1,5 +1,5 @@
-import { AppHome } from "@/components/mobile/AppHome";
+import FigmaV22App from "@/components/figma-v22/App";
 
 export default function StaticMobileHomePage() {
-  return <AppHome />;
+  return <FigmaV22App />;
 }

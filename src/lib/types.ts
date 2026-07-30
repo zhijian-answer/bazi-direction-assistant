@@ -75,6 +75,12 @@ export type BaziChart = {
     validationStatus?: "matched" | "different" | "unavailable";
     matchedPillars?: number;
     weightedBalance?: ElementBalance;
+    calculationScope?: "three-pillar" | "four-pillar";
+    birthTimeKnown?: boolean;
+    balanceMethod?: "visible-stems-branches";
+    timezone?: string;
+    locationApplied?: boolean;
+    uncertainties?: string[];
   };
   nayin: {
     year: string;

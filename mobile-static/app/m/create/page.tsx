@@ -10,5 +10,5 @@ export default function StaticCreateProfilePage() {
 
 function StaticCreateProfileContent() {
   const searchParams = useSearchParams();
-  return <CreateProfileFlow mode={searchParams.get("mode") === "new" ? "new" : "edit"} />;
+  return <CreateProfileFlow mode={searchParams.get("mode") === "new" ? "new" : "edit"} returnTo={searchParams.get("returnTo") ?? undefined} />;
 }

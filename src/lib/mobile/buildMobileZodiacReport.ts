@@ -173,9 +173,9 @@ export function buildMobileZodiacReport(profile: MobileProfile) {
   ];
 
   const traits = [
-    { title: "你给人的第一印象", value: risingProfile?.impression ?? sunProfile.impression, note: risingProfile ? `上升${risingProfile.name}让你先显得${risingProfile.impression}。熟悉以后，太阳${sunProfile.name}的${sunProfile.strength}会逐渐出现。` : `暂未获得上升配置。太阳${sunProfile.name}仍会让人感受到你的${sunProfile.impression}，但第一印象需要补充地点与时辰后再确认。`, highlight: rising ? `上升${risingProfile!.name}` : "上升待补充" },
-    { title: "你真正的情绪节奏", value: moonProfile?.emotion ?? "时辰不足，暂不下结论", note: moonProfile ? `月亮${moonProfile.name}让你更需要${emotionNeed(moonProfile.emotion)}。${moonProfile.recovery}，通常能帮助你恢复。` : "月亮在出生当天可能发生换座，因此暂不使用中午位置替代。", highlight: moon ? `月亮${moonProfile!.name}` : "月亮待确认" },
-    { title: "你在关系里的反应方式", value: marsProfile.action, note: moonProfile ? `火星${marsProfile.name}让你更习惯${marsProfile.action}；关系有压力时，也要照顾自己对${emotionNeed(moonProfile.emotion)}的需要。` : `火星${marsProfile.name}让你更习惯${marsProfile.action}；关系有压力时，也要照顾自己的真实感受。`, highlight: "先看行动，再看回应" },
+    { title: "你给人的第一印象", value: risingProfile?.impression ?? sunProfile.impression, note: risingProfile ? `这是你进入陌生环境时的默认方式。熟悉以后，太阳${sunProfile.name}带来的${sunProfile.strength}会逐渐出现。` : `目前没有足够资料确认上升配置，这一项只保留太阳${sunProfile.name}中相对稳定的外在表现。`, highlight: rising ? `上升${risingProfile!.name}` : "上升待补充" },
+    { title: "你真正的情绪节奏", value: moonProfile?.emotion ?? "时辰不足，暂不下结论", note: moonProfile ? `压力出现时，${moonProfile.recovery}，通常比继续压住感受更容易恢复。` : "月亮在出生当天可能发生换座，因此暂不使用中午位置替代。", highlight: moon ? `月亮${moonProfile!.name}` : "月亮待确认" },
+    { title: "你在关系里的反应方式", value: marsProfile.action, note: moonProfile ? `关系有压力时，除了处理事情，也要照顾自己对${emotionNeed(moonProfile.emotion)}的需要。` : "关系有压力时，除了处理事情，也要给自己的真实感受留出位置。", highlight: "先看行动，再看回应" },
     { title: "你会被什么样的人吸引", value: venusProfile.attraction, note: `金星${venusProfile.name}更容易被${venusProfile.attraction}吸引。能否长期相处，还要看行动是否一致。`, highlight: `金星${venusProfile.name}` },
     { title: "你擅长的表达风格", value: mercuryProfile.expression, note: `水星${mercuryProfile.name}让你更习惯${mercuryProfile.expression}。在有反馈的环境里，这种优势更容易被看见。`, highlight: `水星${mercuryProfile.name}` },
     { title: "你最容易卡住的点", value: sunProfile.friction, note: `这不是缺点，而是太阳${sunProfile.name}在压力下更容易出现的惯性。${sunProfile.daily}，会比一味逼自己更有效。`, highlight: "看见惯性，再做调整" },

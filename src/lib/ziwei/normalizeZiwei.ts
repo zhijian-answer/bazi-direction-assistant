@@ -65,6 +65,14 @@ export function normalizeZiwei(chart: RawZiweiChart, engine: ZiweiEngineInfo): N
       shenGong: bodyPalace ? `${bodyPalace.name} · ${bodyPalace.earthlyBranch}宫` : undefined,
       majorStars,
       mutagens: allMutagens,
+      palaces: chart.palaces.map((palace) => ({
+        name: palace.name,
+        heavenlyStem: palace.heavenlyStem,
+        earthlyBranch: palace.earthlyBranch,
+        majorStars: palace.majorStars.map((star) => star.name),
+        isBodyPalace: palace.isBodyPalace,
+        isOriginalPalace: palace.isOriginalPalace,
+      })),
       rawFieldsUsed: [
         "palaces[name=命宫].majorStars",
         "palaces[isBodyPalace]",

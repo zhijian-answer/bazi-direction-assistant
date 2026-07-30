@@ -1,19 +1,19 @@
-import type { ComponentType, SVGProps } from "react";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 export function StyleLabQuestionCard({
-  icon: Icon,
+  iconSrc,
   title,
   body,
 }: {
-  icon: ComponentType<SVGProps<SVGSVGElement>>;
+  iconSrc: string;
   title: string;
   body: string;
 }) {
   return (
     <article className="style-lab-question-card">
       <div className="style-lab-question-orbit" aria-hidden="true">
-        <Icon />
+        <Image src={iconSrc} alt="" width={286} height={170} />
       </div>
       <h2>{title}</h2>
       <p>{body}</p>

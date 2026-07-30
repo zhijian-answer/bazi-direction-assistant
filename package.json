@@ -11,6 +11,10 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:ziwei": "vitest run src/lib/ziwei/__tests__",
+    "qa:mobile-chat": "node scripts/verify-mobile-chat.mjs",
+    "qa:product-flow": "node scripts/verify-product-flow-polish.mjs",
+    "eval:copy": "npx --yes promptfoo@0.121.19 eval -c evals/narrative/promptfooconfig.yaml",
+    "eval:copy:view": "npx --yes promptfoo@0.121.19 view",
     "check": "npm run lint && npm run test && npm run build",
     "smoke": "node scripts/smoke.mjs",
     "backup": "node scripts/backup-data.mjs"
@@ -28,7 +32,8 @@
     "openai": "^6.42.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "recharts": "^3.9.1"
+    "recharts": "^3.9.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

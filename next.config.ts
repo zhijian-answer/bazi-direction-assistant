@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  devIndicators: false,
   assetPrefix: process.env.NEXT_PUBLIC_ASSET_PREFIX || undefined,
   allowedDevOrigins: ["127.0.0.1"],
   serverExternalPackages: ["bazi-calculator-by-alvamind"],

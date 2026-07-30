@@ -1,5 +1,5 @@
-import { BaziReportPage } from "@/components/mobile/BaziReportPage";
+import FigmaV22App from "@/components/figma-v22/App";
 
 export default function StaticReportIndexPage() {
-  return <BaziReportPage initialTab="bazi" />;
+  return <FigmaV22App initialScreen="report-hub" />;
 }

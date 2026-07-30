@@ -1,5 +1,5 @@
-import { MobileProfilePage } from "@/components/mobile/MobileProfilePage";
+import FigmaV22App from "@/components/figma-v22/App";
 
 export default function StaticProfilePage() {
-  return <MobileProfilePage />;
+  return <FigmaV22App initialScreen="profile" />;
 }

@@ -30,8 +30,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN" className="h-full">
-      <body className="min-h-full flex flex-col antialiased">{children}</body>
+    <html lang="zh-CN" className="h-full" data-scroll-behavior="smooth">
+      <body className="min-h-full flex flex-col antialiased">
+        {children}
+      </body>
     </html>
   );
 }

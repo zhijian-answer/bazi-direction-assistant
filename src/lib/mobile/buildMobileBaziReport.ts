@@ -1,7 +1,6 @@
 import { Solar } from "lunar-javascript";
 import { buildBaziChart, elementLabels } from "../bazi";
 import type { ChartPosition, ElementKey } from "../types";
-import { mockBaziReport } from "./mockBaziReport";
 import type { ElementDatum, FeatureTileData, InsightCardData, MobileProfile, ShareInsightData } from "./types";
 
 const elementColors: Record<ElementKey, string> = { wood: "#6F8F65", fire: "#C96858", earth: "#B38B5E", metal: "#8F918D", water: "#62899B" };
@@ -45,17 +44,20 @@ export function buildMobileBaziReport(profile: MobileProfile) {
     timeUnknown: !profile.birthTimeKnown,
     isLeapMonth: profile.isLeapMonth,
     gender: profile.gender,
+    birthPlace: profile.birthPlace,
+    latitude: profile.latitude,
+    longitude: profile.longitude,
+    timezone: profile.timezone,
   });
   const dayElement = chart.dayMaster.element;
   const style = elementStyle[dayElement];
   const strongest = chart.wuxing.strongest[0] || dayElement;
   const weakest = chart.wuxing.weakest[0] || dayElement;
-  const weighted = chart.engine?.weightedBalance;
   const total = Object.values(chart.wuxing.balance).reduce((sum, value) => sum + value, 0) || 1;
   const elements = (Object.keys(chart.wuxing.balance) as ElementKey[]).map((key) => ({
     key,
     label: elementLabels[key],
-    value: Math.round(weighted?.[key] ?? (chart.wuxing.balance[key] / total) * 100),
+    value: Math.round((chart.wuxing.balance[key] / total) * 100),
     color: elementColors[key],
     meaning: elementMeaning[key],
   })) satisfies ElementDatum[];
@@ -120,11 +122,16 @@ export function buildMobileBaziReport(profile: MobileProfile) {
     reading("month-pillar", "你进入环境后的适应方式", `月柱为${chart.pillars.month}，你会先辨认环境的主要规则`, "月柱用于观察成长环境和进入群体后的适应节奏。", `你的月柱十神是${chart.tenGods.month}。进入新环境时，先确认关键人物、反馈方式和责任边界，会比立刻证明自己更省力。`),
     reading("career", "什么样的工作更容易让你发挥", `${style.strength}能让复杂事情逐渐变清楚`, "这里看工作偏好，不限定具体职业。", `命盘以${strongestLabel}为重心，适合把${elementMeaning[strongest]}转化为可积累的能力。职业选择仍需结合经验、机会和现实成本。`),
     reading("relationship", "你在关系里最在意什么", style.relationship, "关系倾向描述互动习惯，不代表固定结局。", `你的核心方式是${style.decision}。关系里把感受和请求说清楚，再观察回应是否持续，会比反复猜测更有帮助。`),
-    reading("annual", "最近更适合主动，还是先稳住", currentAnnual ? `${currentYear} 为${currentAnnual.ganZhi}流年，先守住主线再选择主动点` : "先守住主线，再选择一个值得主动的方向", "流年用于观察阶段节奏，不能替代现实信息。", `当前大运${currentLuck?.ganZhi || "尚待确认"}，流年${currentAnnual?.ganZhi || "尚待确认"}。重要决定仍需结合现实数据和专业意见。`),
+    reading(
+      "annual",
+      "最近更适合主动，还是先稳住",
+      !profile.birthTimeKnown ? "补充出生时辰后，再看完整阶段节奏" : currentAnnual ? `${currentYear} 为${currentAnnual.ganZhi}流年，先守住主线再选择主动点` : "先守住主线，再选择一个值得主动的方向",
+      "流年用于观察阶段节奏，不能替代现实信息。",
+      !profile.birthTimeKnown ? "当前只保留不依赖时柱的观察，不用中午或随机时辰补出大运结论。" : `当前大运${currentLuck?.ganZhi || "尚待确认"}，流年${currentAnnual?.ganZhi || "尚待确认"}。重要决定仍需结合现实数据和专业意见。`,
+    ),
   ];
 
   return {
-    ...mockBaziReport,
     identity,
     elements,
     lightConclusions,
@@ -133,13 +140,28 @@ export function buildMobileBaziReport(profile: MobileProfile) {
     pillars: buildPillars(chart),
     flowColumns: [
       { label: "本命", value: chart.pillars.day, note: `${dayLabel}日主` },
-      { label: "大运", value: currentLuck?.ganZhi || "待确认", note: currentLuck ? `${currentLuck.startAge}–${currentLuck.endAge} 岁` : "阶段资料" },
-      { label: "流年", value: currentAnnual?.ganZhi || "待确认", note: String(currentYear) },
+      { label: "大运", value: currentLuck?.ganZhi || (profile.birthTimeKnown ? "待确认" : "待补时辰"), note: currentLuck ? `${currentLuck.startAge}–${currentLuck.endAge} 岁` : "阶段资料" },
+      { label: "流年", value: currentAnnual?.ganZhi || (profile.birthTimeKnown ? "待确认" : "仅看当年干支"), note: String(currentYear) },
       { label: "流月", value: currentMonth, note: `${new Date().getMonth() + 1} 月` },
     ],
     todayAction,
     shareInsights,
     readings,
+    calculation: {
+      scope: chart.engine?.calculationScope || (profile.birthTimeKnown ? "four-pillar" : "three-pillar"),
+      birthTimeKnown: profile.birthTimeKnown,
+      balanceMethod: chart.engine?.balanceMethod || "visible-stems-branches",
+      engine: chart.engine?.primary || "lunar-javascript",
+      warnings: chart.engine?.uncertainties || [],
+    },
+    evidence: {
+      pillars: chart.pillars,
+      dayMaster: chart.dayMaster,
+      visibleElementBalance: chart.wuxing.balance,
+      strongest: chart.wuxing.strongest,
+      weakest: chart.wuxing.weakest,
+      tenGods: chart.tenGods,
+    },
   };
 }
 
@@ -148,7 +170,7 @@ function reading(id: string, title: string, highlight: string, term: string, sum
 }
 
 function buildTenGods(chart: ReturnType<typeof buildBaziChart>) {
-  const names = [...Object.values(chart.tenGods), ...Object.values(chart.hiddenTenGods || {}).flat()].filter(Boolean);
+  const names = [...Object.values(chart.tenGods), ...Object.values(chart.hiddenTenGods || {}).flat()].filter((name) => Boolean(name) && name !== "待补");
   const counts = new Map<string, number>();
   names.forEach((name) => counts.set(name, (counts.get(name) || 0) + 1));
   const total = names.length || 1;
@@ -171,9 +193,9 @@ function buildPillars(chart: ReturnType<typeof buildBaziChart>) {
   return {
     headers: ["项目", "年柱", "月柱", "日柱", "时柱"],
     rows: [
-      ["天干", ...positions.map((position) => chart.stems[position])],
-      ["地支", ...positions.map((position) => chart.branches[position])],
-      ["藏干", ...positions.map((position) => chart.hiddenStems?.[position]?.join("·") || "—")],
+      ["天干", ...positions.map((position) => chart.stems[position] || "待补")],
+      ["地支", ...positions.map((position) => chart.branches[position] || "待补")],
+      ["藏干", ...positions.map((position) => chart.hiddenStems?.[position]?.join("·") || (position === "time" && chart.engine?.birthTimeKnown === false ? "待补" : "—"))],
       ["十神", ...positions.map((position) => chart.tenGods[position])],
       ["纳音", ...positions.map((position) => chart.nayin[position])],
       ["地支关系", ...positions.map(relationCell)],

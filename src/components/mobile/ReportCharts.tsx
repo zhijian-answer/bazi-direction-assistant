@@ -7,9 +7,10 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  LabelList,
-  Pie,
-  PieChart,
+  PolarAngleAxis,
+  PolarGrid,
+  Radar,
+  RadarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -28,7 +29,7 @@ const tooltipStyle = {
 export function FiveElementsChart({ data }: { data: ElementDatum[] }) {
   return (
     <div className="mobile-chart mobile-chart--five" aria-label="五行力量流向图">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
         <BarChart data={data} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
           <XAxis type="number" hide domain={[0, 32]} />
           <YAxis type="category" dataKey="label" width={28} axisLine={false} tickLine={false} tick={{ fill: "#c8b58f", fontSize: 12 }} />
@@ -42,29 +43,24 @@ export function FiveElementsChart({ data }: { data: ElementDatum[] }) {
   );
 }
 
-export function FiveElementsCoverChart({ data }: { data: ElementDatum[] }) {
+export function FiveElementsCoverChart({ data, dayMaster }: { data: ElementDatum[]; dayMaster: { stem: string; elementLabel: string } }) {
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius;
+  const segments = data.map((item, index) => {
+    const consumed = data.slice(0, index).reduce((sum, entry) => sum + (entry.value / 100) * circumference, 0);
+    const length = Math.max(0, (item.value / 100) * circumference - 4.5);
+    return { ...item, length, dashOffset: -consumed };
+  });
+
   return (
     <div className="cover-elements-chart" aria-label="封面五行环形图">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            dataKey="value"
-            nameKey="label"
-            innerRadius="64%"
-            outerRadius="88%"
-            paddingAngle={3}
-            cornerRadius={7}
-            stroke="none"
-            isAnimationActive
-            animationDuration={1100}
-          >
-            {data.map((item) => <Cell key={item.key} fill={item.color} />)}
-          </Pie>
-          <Tooltip contentStyle={tooltipStyle} formatter={(value) => [`${String(value)}%`, "结构占比"]} />
-        </PieChart>
-      </ResponsiveContainer>
-      <div className="cover-elements-center"><small>日主</small><strong>庚</strong><span>阳金</span></div>
+      <svg className="cover-elements-orbit" viewBox="0 0 120 120" role="img" aria-hidden="true">
+        <circle className="cover-elements-orbit__rail" cx="60" cy="60" r="50" />
+        <circle className="cover-elements-orbit__rail cover-elements-orbit__rail--inner" cx="60" cy="60" r="36" />
+        {segments.map((item) => <circle key={item.key} className="cover-elements-orbit__segment" cx="60" cy="60" r={radius} pathLength={circumference} stroke={item.color} strokeDasharray={`${item.length} ${circumference - item.length}`} strokeDashoffset={item.dashOffset} />)}
+        <path className="cover-elements-orbit__axis" d="M60 6V18M60 102v12M6 60h12M102 60h12" />
+      </svg>
+      <div className="cover-elements-center"><small>日主</small><strong>{dayMaster.stem}</strong><span>{"甲丙戊庚壬".includes(dayMaster.stem) ? "阳" : "阴"}{dayMaster.elementLabel}</span></div>
     </div>
   );
 }
@@ -72,7 +68,7 @@ export function FiveElementsCoverChart({ data }: { data: ElementDatum[] }) {
 export function TenGodChart({ data }: { data: Array<{ name: string; value: number; color: string }> }) {
   return (
     <div className="mobile-chart mobile-chart--bars" aria-label="处理人和事的习惯构成图">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
         <BarChart data={data} layout="vertical" margin={{ top: 2, right: 16, bottom: 2, left: 2 }}>
           <CartesianGrid horizontal={false} stroke="rgba(216, 170, 93, 0.12)" />
           <XAxis type="number" hide domain={[0, 30]} />
@@ -90,7 +86,7 @@ export function TenGodChart({ data }: { data: Array<{ name: string; value: numbe
 export function LuckTrendChart({ data }: { data: Array<{ age: string; value: number; keyword: string }> }) {
   return (
     <div className="mobile-chart mobile-chart--trend" aria-label="大运趋势图">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
         <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -24 }}>
           <CartesianGrid vertical={false} stroke="rgba(216, 170, 93, 0.12)" />
           <XAxis dataKey="age" axisLine={false} tickLine={false} tick={{ fill: "#b8a789", fontSize: 10 }} />
@@ -106,23 +102,13 @@ export function LuckTrendChart({ data }: { data: Array<{ age: string; value: num
 export function ZodiacPeakChart({ data }: { data: Array<{ name: string; value: number; color: string }> }) {
   return (
     <div className="mobile-chart mobile-chart--zodiac" aria-label="星座特质亮点图">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 16, right: 8, bottom: 0, left: 8 }}>
-          <defs>
-            <linearGradient id="zodiacEnergy" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#7d8fd1" stopOpacity={0.64} />
-              <stop offset="54%" stopColor="#c693c4" stopOpacity={0.34} />
-              <stop offset="100%" stopColor="#eaf0ff" stopOpacity={0.08} />
-            </linearGradient>
-          </defs>
-          <XAxis dataKey="name" padding={{ left: 18, right: 18 }} axisLine={false} tickLine={false} tick={{ fill: "#66749a", fontSize: 10 }} />
-          <YAxis hide domain={[0, 100]} />
-          <Tooltip contentStyle={{ ...tooltipStyle, color: "#425176" }} formatter={(value) => [String(value), "特质强度"]} />
-          <Area type="monotone" dataKey="value" stroke="#7b8fd0" strokeWidth={11} strokeOpacity={0.13} fill="none" dot={false} isAnimationActive={false} />
-          <Area type="monotone" dataKey="value" stroke="#6479bd" strokeWidth={3} fill="url(#zodiacEnergy)" dot={{ r: 5, fill: "#ffffff", stroke: "#6479bd", strokeWidth: 3 }} activeDot={{ r: 7 }} isAnimationActive animationDuration={1100}>
-            <LabelList dataKey="value" position="top" fill="#6073aa" fontSize={9} />
-          </Area>
-        </AreaChart>
+      <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+        <RadarChart data={data} outerRadius="72%" margin={{ top: 8, right: 12, bottom: 8, left: 12 }}>
+          <PolarGrid gridType="polygon" stroke="rgba(218, 178, 106, 0.36)" radialLines />
+          <PolarAngleAxis dataKey="name" tick={{ fill: "#c7b58f", fontSize: 8 }} tickLine={false} />
+          <Radar dataKey="value" stroke="#74a9d2" strokeWidth={2} fill="#4c8fbd" fillOpacity={0.34} isAnimationActive={false} />
+          <Tooltip contentStyle={{ ...tooltipStyle, color: "#d8c7a8" }} formatter={(value) => [`${String(value)}%`, "特质强度"]} />
+        </RadarChart>
       </ResponsiveContainer>
     </div>
   );

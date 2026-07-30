@@ -1,7 +1,20 @@
 import { Horoscope, Origin } from "circular-natal-horoscope-js";
 import type { ZodiacAspect, ZodiacBodyKey, ZodiacChart, ZodiacEngine, ZodiacEngineInput, ZodiacSignKey } from "./types";
 
-const bodyKeys: ZodiacBodyKey[] = ["sun", "moon", "mercury", "venus", "mars"];
+export const zodiacBodyKeys: ZodiacBodyKey[] = [
+  "sun",
+  "moon",
+  "mercury",
+  "venus",
+  "mars",
+  "jupiter",
+  "saturn",
+  "uranus",
+  "neptune",
+  "pluto",
+];
+const bodyAspectPoints = new Set<string>(zodiacBodyKeys);
+const angleAspectPoints = new Set<string>([...zodiacBodyKeys, "ascendant", "midheaven"]);
 const signKeys = new Set<ZodiacSignKey>([
   "aries", "taurus", "gemini", "cancer", "leo", "virgo",
   "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces",
@@ -28,26 +41,28 @@ export const circularZodiacEngine: ZodiacEngine = {
       origin,
       houseSystem: "whole-sign",
       zodiac: "tropical",
-      aspectPoints: ["sun", "moon", "mercury", "venus", "mars", "ascendant"],
-      aspectWithPoints: ["sun", "moon", "mercury", "venus", "mars", "ascendant"],
+      aspectPoints: ["bodies", "angles"],
+      aspectWithPoints: ["bodies", "angles"],
       aspectTypes: ["major"],
       language: "en",
     });
 
-    const placements = Object.fromEntries(bodyKeys.map((body) => {
+    const placements = Object.fromEntries(zodiacBodyKeys.map((body) => {
       const raw = horoscope.CelestialBodies[body];
       return [body, {
         body,
         sign: normalizeSign(raw.Sign.key),
         degree: Number(raw.ChartPosition.Ecliptic.DecimalDegrees),
-        house: Number(raw.House?.id) || undefined,
+        house: input.includeAngles ? Number(raw.House?.id) || undefined : undefined,
         retrograde: Boolean(raw.isRetrograde),
       }];
     })) as ZodiacChart["placements"];
 
+    const allowedAspectPoints = input.includeAngles ? angleAspectPoints : bodyAspectPoints;
     const aspects: ZodiacAspect[] = horoscope.Aspects.all
-      .filter((aspect: { point1Key?: string; point2Key?: string }) => bodyKeys.includes(aspect.point1Key as ZodiacBodyKey) || bodyKeys.includes(aspect.point2Key as ZodiacBodyKey))
-      .slice(0, 12)
+      .filter((aspect: { point1Key?: string; point2Key?: string }) => allowedAspectPoints.has(String(aspect.point1Key)) && allowedAspectPoints.has(String(aspect.point2Key)))
+      .sort((left: { orb: number }, right: { orb: number }) => Number(left.orb) - Number(right.orb))
+      .slice(0, 48)
       .map((aspect: { point1Key: string; point2Key: string; aspectKey: string; orb: number }) => ({
         point1: aspect.point1Key,
         point2: aspect.point2Key,
@@ -69,6 +84,17 @@ export const circularZodiacEngine: ZodiacEngine = {
         sign: normalizeSign(horoscope.Midheaven.Sign.key),
         degree: Number(horoscope.Midheaven.ChartPosition.Ecliptic.DecimalDegrees),
       } : undefined,
+      houses: input.includeAngles
+        ? horoscope.Houses.map((house: {
+          id: number;
+          Sign: { key: string };
+          ChartPosition: { StartPosition: { Ecliptic: { DecimalDegrees: number } } };
+        }) => ({
+          id: Number(house.id),
+          sign: normalizeSign(house.Sign.key),
+          cusp: Number(house.ChartPosition.StartPosition.Ecliptic.DecimalDegrees),
+        }))
+        : [],
       aspects,
     };
   },

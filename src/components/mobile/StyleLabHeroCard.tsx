@@ -4,12 +4,18 @@ import Image from "next/image";
 export function StyleLabHeroCard() {
   return (
     <section className="style-lab-hero-card" aria-label="今日观察封面">
-      <Image className="style-lab-hero-instrument" src="/mobile/xuanshu-armillary-hero.webp" alt="" width={348} height={398} priority />
+      <Image
+        className="style-lab-hero-instrument"
+        src="/mobile/style-lab-assets/hero-plate-v3.png"
+        alt=""
+        width={1396}
+        height={1127}
+        priority
+      />
       <div className="style-lab-hero-rings" aria-hidden="true" />
       <div className="style-lab-hero-content">
-        <span className="style-lab-hero-kicker">
-          <i />
-          今日观察
+        <span className="style-lab-hero-kicker" aria-hidden="true">
+          <Image src="/mobile/style-lab-assets/hero-marker.png" alt="" width={56} height={60} />
         </span>
         <h1>
           先看今天的你，

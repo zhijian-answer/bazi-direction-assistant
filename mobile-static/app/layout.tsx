@@ -8,6 +8,10 @@ import "../../src/styles/xuanshu-theme.css";
 import "../../src/styles/xuanshu-reports.css";
 import "../../src/styles/xuanshu-motion.css";
 import "../../src/styles/xuanshu-home.css";
+import "../../src/styles/xuanshu-app-final.css";
+import "../../src/styles/xuanshu-expansion.css";
+import "../../src/styles/xuanshu-home-v2.css";
+import "../../src/styles/figma-v22.css";
 
 const basePath = process.env.PAGES_BASE_PATH || "";
 
@@ -21,9 +25,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#030608",
+  themeColor: "#f4f0ff",
 };
 
 export default function StaticRootLayout({ children }: { children: ReactNode }) {
-  return <html lang="zh-CN"><body>{children}</body></html>;
+  return <html lang="zh-CN" data-scroll-behavior="smooth"><body>{children}</body></html>;
 }

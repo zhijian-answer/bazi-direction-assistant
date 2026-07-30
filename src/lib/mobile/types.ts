@@ -96,7 +96,7 @@ export type DailyInsightData = {
 
 export type QuestionInsightData = {
   id: string;
-  context: "home" | "bazi" | "zodiac" | "ziwei";
+  context: "home" | "bazi" | "zodiac" | "ziwei" | "compatibility";
   prompt: string;
   shortLabel: string;
   source: string;

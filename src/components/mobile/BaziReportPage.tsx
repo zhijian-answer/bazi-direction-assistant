@@ -9,13 +9,11 @@ import {
   Gauge,
   HeartHandshake,
   ImageDown,
-  Settings2,
   Sparkles,
   WalletCards,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { trackMobileEvent } from "@/lib/mobile/analytics";
 import { buildMobileBaziReport } from "@/lib/mobile/buildMobileBaziReport";
@@ -23,27 +21,30 @@ import { buildMobileFlowReport } from "@/lib/mobile/buildMobileFlowReport";
 import { insightDataAdapter } from "@/lib/mobile/insightDataAdapter";
 import { useMobileProfile } from "@/lib/mobile/profile";
 import type { QuestionInsightData, SharePosterData } from "@/lib/mobile/types";
+import { useNarrativeCard } from "@/lib/narrative/client";
+import type { NarrativeRequest } from "@/lib/narrative/contracts";
 import { ContinueExploring } from "./ContinueExploring";
 import { ExpandableTextCard } from "./ExpandableTextCard";
-import { MobileSheet } from "./MobileSheet";
 import { MobileShell } from "./MobileShell";
-import { MobileTopBar } from "./MobileTopBar";
+import { ReportBrandBar } from "./ReportBrandBar";
 import { MobileReveal } from "./Reveal";
 import { QuestionInsightSheet } from "./QuestionInsightSheet";
-import { FiveElementsChart, FiveElementsCoverChart, LuckTrendChart, TenGodChart } from "./ReportCharts";
+import { FiveElementsChart, LuckTrendChart, TenGodChart } from "./ReportCharts";
 import { ShareInsightCard } from "./ShareInsightCard";
 import { SharePosterSheet } from "./SharePosterSheet";
 import { StickySegmentTabs } from "./StickySegmentTabs";
 import { useReportPersistence } from "./useReportPersistence";
 import { ProfileSwitcherSheet } from "./ProfileSwitcherSheet";
-import armillaryImage from "../../../public/mobile/xuanshu-armillary-hero.webp";
+import { ReportDataScope } from "./ReportDataScope";
+import { ReportReadingGuide } from "./ReportReadingGuide";
+import { ReportDepthPrompt, ReportReadingModeSwitch, type ReportReadingMode } from "./ReportReadingModeSwitch";
 
 type BaziTab = "bazi" | "flow";
 
 const tabs = [
-  { id: "match", label: "合盘", disabled: true },
   { id: "bazi", label: "生辰" },
   { id: "flow", label: "流盘" },
+  { id: "zodiac", label: "星座", href: "/m/report/zodiac" },
   { id: "ziwei", label: "紫微", href: "/m/report/ziwei" },
 ];
 
@@ -52,25 +53,58 @@ const conclusionIcons = [BriefcaseBusiness, HeartHandshake, WalletCards];
 export function BaziReportPage({ initialTab = "bazi" }: { initialTab?: BaziTab }) {
   const [tab, setTab] = useState<BaziTab>(initialTab);
   const profile = useMobileProfile();
-  const [sheet, setSheet] = useState<"settings" | "coming" | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<QuestionInsightData | null>(null);
   const [posterOpen, setPosterOpen] = useState(false);
   const [profileSwitcherOpen, setProfileSwitcherOpen] = useState(false);
   const [posterIndex, setPosterIndex] = useState(0);
+  const [readingMode, setReadingMode] = useState<ReportReadingMode>("quick");
   const baziReport = useMemo(() => buildMobileBaziReport(profile), [profile]);
   const baziQuestions = useMemo(() => insightDataAdapter.getQuestions("bazi", profile), [profile]);
   const flowReport = useMemo(() => buildMobileFlowReport(profile), [profile]);
+  const baziNarrativeInput = useMemo<NarrativeRequest>(() => ({
+    context: "bazi",
+    slot: "hero",
+    signals: [
+      `dominant:${baziReport.evidence.strongest[0] || "unknown"}`,
+      `weak:${baziReport.evidence.weakest[0] || "unknown"}`,
+    ],
+    facts: [
+      { label: "日主", value: baziReport.identity.dayLabel },
+      { label: "主要力量", value: baziReport.identity.strongestLabel },
+      { label: "需要补充", value: baziReport.identity.weakestLabel },
+      { label: "高频表现", value: baziReport.identity.patternScene },
+    ],
+    fallback: {
+      hook: baziReport.identity.pattern,
+      scene: baziReport.identity.patternScene,
+      misunderstanding: baziReport.identity.coverReading.note,
+      evidenceSummary: baziReport.identity.basis,
+      action: baziReport.todayAction.title,
+      nextQuestion: baziQuestions[0]?.prompt || "什么样的环境更容易让我发挥？",
+    },
+  }), [baziQuestions, baziReport]);
+  const baziNarrative = useNarrativeCard(baziNarrativeInput)!;
   const baziPosters: SharePosterData[] = useMemo(() => baziReport.shareInsights.map((item) => ({
     id: `bazi-${item.id}`,
     category: "personality",
     eyebrow: item.eyebrow,
-    title: item.title,
-    body: item.body,
+    title: item.id === "poster" ? baziNarrative.hook : item.title,
+    body: item.id === "poster" ? baziNarrative.scene : item.body,
     tags: baziReport.identity.tags,
     footer: item.footer,
     tone: item.tone,
-  })), [baziReport]);
+  })), [baziNarrative, baziReport]);
   const activePosters = tab === "flow" ? [flowReport.poster] : baziPosters;
+  const baziUsed = [
+    `${profile.calendarType === "lunar" ? "农历" : "公历"}出生日期`,
+    profile.birthTimeKnown && profile.birthTime ? `出生时间 ${profile.birthTime}` : "三柱结构",
+    profile.gender !== "other" ? "排盘性别" : "",
+  ].filter(Boolean);
+  const baziExcluded = [
+    !profile.birthTimeKnown || !profile.birthTime ? "出生时辰与时柱" : "",
+    "出生地点未做真太阳时换算",
+    "现实经历与个人选择",
+  ].filter(Boolean);
   useReportPersistence(tab === "bazi" ? "bazi" : "liupan", tab === "bazi" ? undefined : flowReport as unknown as Record<string, unknown>, tab === "bazi" ? "market-v1" : flowReport.engineVersion);
 
   useEffect(() => {
@@ -83,41 +117,48 @@ export function BaziReportPage({ initialTab = "bazi" }: { initialTab?: BaziTab }
   }
 
   function handleTab(id: string) {
-    if (id === "match") return setSheet("coming");
     if (id === "bazi" || id === "flow") setTab(id);
   }
 
   return (
     <MobileShell active="bazi" theme="bazi">
-      <MobileTopBar title={profile.name} onProfileClick={() => setProfileSwitcherOpen(true)} onShare={() => openPoster(0)} onSettings={() => setSheet("settings")} />
+      <ReportBrandBar profileName={profile.name} onProfileClick={() => setProfileSwitcherOpen(true)} />
       <StickySegmentTabs tabs={tabs} active={tab} onChange={handleTab} label="生辰报告分类" />
 
-      <div className={`market-report market-report--${tab}`}>
+      <div className={`market-report market-report--${tab}`} data-reading-mode={readingMode}>
       {tab === "bazi" ? (
         <>
-          <section className="bazi-cover-card">
-            <header><span><Fingerprint />玄枢 · 生辰人格封面</span><small>{baziReport.identity.dayPillar}日 · 结构化观察</small></header>
-            <h1>{baziReport.identity.title}</h1>
-            <p className="bazi-cover-lead">{baziReport.identity.subtitle}</p>
-            <div className="bazi-cover-visual">
-              <FiveElementsCoverChart data={baziReport.elements} />
-              <div className="bazi-cover-reading">
-                <small>核心结构</small>
-                <strong>{baziReport.identity.coverReading.title}</strong>
-                <p>{baziReport.identity.coverReading.note}</p>
-              </div>
-            </div>
+          <section id="bazi-summary" className="bazi-cover-card">
+            <header><span><Fingerprint />{baziReport.identity.dayPillar}日 · 行动方式</span><small>生活里的高频表现</small></header>
+            <h1>{baziNarrative.hook}</h1>
+            <p className="bazi-cover-lead">{baziNarrative.scene}</p>
             <div className="bazi-cover-tags">{baziReport.identity.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-            <div className="bazi-cover-basis">{baziReport.identity.basis}</div>
-            <footer><span>让命理，被科学看见</span><small>结构不是结论，理解才是开始</small></footer>
+            <div className="bazi-cover-basis"><small>容易被误解的地方</small><strong>{baziReport.identity.coverReading.title}</strong><p>{baziNarrative.misunderstanding}</p></div>
           </section>
+
+          {baziReport.calculation.warnings.length ? (
+            <section className="report-boundary"><CalendarClock /><p>{baziReport.calculation.warnings.join(" ")}</p></section>
+          ) : null}
 
           <section className="bazi-today-action">
             <small>这对今天意味着什么</small>
-            <h2>{baziReport.todayAction.title}</h2>
+            <h2>{baziNarrative.action}</h2>
             <p>{baziReport.todayAction.note}</p>
             <button type="button" onClick={() => openPoster(2)}><ImageDown />生成今日提醒图</button>
           </section>
+
+          <ReportDataScope used={baziUsed} excluded={baziExcluded} engine={baziReport.calculation.engine} />
+          <ReportReadingModeSwitch mode={readingMode} onChange={setReadingMode} />
+          <ReportReadingGuide reportId={`bazi:${profile.id || "local"}`} sections={[
+            { id: "bazi-summary", label: "总览" },
+            { id: "five-elements", label: "五行" },
+            { id: "luck-trend", label: "阶段" },
+            ...(readingMode === "professional" ? [
+              { id: "bazi-habits", label: "十神" },
+              { id: "reading-bazi", label: "解读" },
+              { id: "professional-chart", label: "盘面" },
+            ] : []),
+          ]} />
 
           <ContinueExploring question={baziQuestions[0]} onSelect={setSelectedQuestion} label="先从环境问题继续" />
 
@@ -129,7 +170,7 @@ export function BaziReportPage({ initialTab = "bazi" }: { initialTab?: BaziTab }
 
           <MobileReveal>
             <section className="bazi-structure-card">
-              <div className="bazi-structure-kicker"><Gauge /><span>格局与喜用 · 白话结论</span></div>
+              <div className="bazi-structure-kicker"><Gauge /><span>可见结构 · 白话结论</span></div>
               <h2>{baziReport.identity.pattern}</h2>
               <p>{baziReport.identity.patternEvidence}</p>
               <p>{baziReport.identity.patternScene}</p>
@@ -184,8 +225,10 @@ export function BaziReportPage({ initialTab = "bazi" }: { initialTab?: BaziTab }
 
           <ContinueExploring question={baziQuestions[2]} onSelect={setSelectedQuestion} label="把趋势落到一个具体选择" />
 
+          {readingMode === "quick" ? <ReportDepthPrompt title="继续查看十神、长文解读和四柱盘面" note="专业内容保留完整，但不会默认占满你的阅读路径。" onOpen={() => setReadingMode("professional")} /> : null}
+
           <MobileReveal>
-            <section className="bazi-section-card">
+            <section id="bazi-habits" className="bazi-section-card report-depth--professional">
               <header className="report-section-heading"><div><small>行为结构</small><h2>你处理人和事的习惯</h2></div><Sparkles /></header>
               <div className="ten-god-top-three">
                 {baziReport.tenGods.slice(0, 3).map((item, index) => <article key={item.name}><small>TOP {index + 1}</small><strong>{item.name}</strong><span>{item.value}%</span><p>{item.note}</p></article>)}
@@ -199,13 +242,13 @@ export function BaziReportPage({ initialTab = "bazi" }: { initialTab?: BaziTab }
 
           <ContinueExploring question={baziQuestions[3]} onSelect={setSelectedQuestion} label="识别最容易消耗你的部分" />
 
-          <section id="reading-bazi" className="report-reading-section">
+          <section id="reading-bazi" className="report-reading-section report-depth--professional">
             <header><small>基础解读</small><h2>先理解术语，再看它与你的关系</h2></header>
             {baziReport.readings.map((item) => <MobileReveal key={item.id}><ExpandableTextCard item={item} /></MobileReveal>)}
           </section>
 
           <MobileReveal>
-            <section id="professional-chart" className="professional-table-section">
+            <section id="professional-chart" className="professional-table-section report-depth--professional">
               <header><div><small>专业命盘</small><h2>四柱结构明细</h2></div><span>左右滑动查看</span></header>
               <details className="professional-table-help"><summary>怎么看这张表</summary><p>先看日柱，它更接近你处理事情的惯用方式；再看月柱，理解你进入环境后的适应节奏。神煞只作传统文化娱乐参考，不作为判断依据。</p></details>
               <div className="professional-table-scroll" tabIndex={0} aria-label="可横向滚动的四柱命盘表">
@@ -228,16 +271,6 @@ export function BaziReportPage({ initialTab = "bazi" }: { initialTab?: BaziTab }
       <SharePosterSheet key={`bazi-poster-${posterOpen}-${posterIndex}-${tab}`} open={posterOpen} onClose={() => setPosterOpen(false)} items={activePosters} initialIndex={posterIndex} />
       <ProfileSwitcherSheet open={profileSwitcherOpen} onClose={() => setProfileSwitcherOpen(false)} />
 
-      <MobileSheet open={sheet === "settings"} title="报告设置" onClose={() => setSheet(null)}>
-        <div className="mobile-settings-list">
-          <Link href="/m/create"><span><Settings2 />修改出生资料</span><ArrowRight /></Link>
-          <button type="button" onClick={() => setSheet("coming")}><span><Sparkles />切换解读偏好</span><ArrowRight /></button>
-        </div>
-      </MobileSheet>
-
-      <MobileSheet open={sheet === "coming"} title="即将开放" onClose={() => setSheet(null)}>
-        <div className="mobile-coming"><Sparkles /><strong>这个功能还在整理中</strong><p>本期先把生辰和星座报告做好，不展示不能使用的假功能。</p></div>
-      </MobileSheet>
     </MobileShell>
   );
 }
@@ -250,7 +283,7 @@ function FlowPanel({ report, onAsk }: { report: ReturnType<typeof buildMobileFlo
   return (
     <section className="flow-page">
       <header className="flow-hero">
-        <Image src={armillaryImage} alt="" aria-hidden="true" priority sizes="390px" />
+        <Image src="/mobile/style-lab-assets/flow-hero-instrument.png" alt="" aria-hidden="true" width={511} height={330} priority sizes="220px" />
         <small>{report.dateLabel}</small>
         <h1>{titleLead}{titleFocus ? "，" : ""}<br />{titleFocus ? <span>{focusLead}<strong>{focusKeyword}</strong></span> : null}</h1>
         <p>{report.summary}</p>

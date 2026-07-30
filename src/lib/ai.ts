@@ -11,7 +11,8 @@ function getOpenAIClient() {
   }
   if (!client) {
     client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: aiConfig.apiKey,
+      baseURL: aiConfig.baseURL,
       timeout: aiConfig.openaiTimeoutMs,
     });
   }

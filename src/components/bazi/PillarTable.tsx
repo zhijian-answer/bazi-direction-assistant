@@ -8,7 +8,7 @@ export function PillarTable({ chart, timeUnknown }: { chart: BaziChart; timeUnkn
     <section className="panel overflow-hidden" aria-labelledby="pillar-title">
       <div className="border-b border-[var(--line)] px-5 py-4 sm:px-6">
         <div className="section-kicker">基础命盘</div>
-        <h3 id="pillar-title" className="mt-1 font-display text-xl">四柱八字</h3>
+        <h3 id="pillar-title" className="mt-1 font-display text-xl">{timeUnknown ? "三柱结构（时柱待补）" : "四柱八字"}</h3>
       </div>
       <div className="overflow-x-auto">
         <table className="bazi-table min-w-[640px]">
@@ -16,7 +16,7 @@ export function PillarTable({ chart, timeUnknown }: { chart: BaziChart; timeUnkn
             <tr><th>命盘信息</th>{positions.map((position) => <th key={position}>{labels[position]}</th>)}</tr>
           </thead>
           <tbody>
-            <tr className="pillar-main"><th>干支</th>{positions.map((position) => <td key={position}>{position === "time" && timeUnknown ? "参考" : chart.pillars[position]}</td>)}</tr>
+            <tr className="pillar-main"><th>干支</th>{positions.map((position) => <td key={position}>{position === "time" && timeUnknown ? "待补" : chart.pillars[position]}</td>)}</tr>
             <tr><th>天干十神</th>{positions.map((position) => <td key={position}>{chart.tenGods[position] || "日主"}</td>)}</tr>
             <tr><th>藏干</th>{positions.map((position) => <td key={position}>{chart.hiddenStems?.[position]?.join(" · ") || "—"}</td>)}</tr>
             <tr><th>藏干十神</th>{positions.map((position) => <td key={position}>{chart.hiddenTenGods?.[position]?.join(" · ") || "—"}</td>)}</tr>
@@ -24,7 +24,7 @@ export function PillarTable({ chart, timeUnknown }: { chart: BaziChart; timeUnkn
           </tbody>
         </table>
       </div>
-      {timeUnknown && <p className="border-t border-[var(--line)] bg-[var(--soft)] px-5 py-3 text-xs leading-5 text-[var(--muted)]">出生时间未知，时柱暂按中午生成，仅用于了解页面结构；涉及时柱的内容请谨慎参考。</p>}
+      {timeUnknown && <p className="border-t border-[var(--line)] bg-[var(--soft)] px-5 py-3 text-xs leading-5 text-[var(--muted)]">出生时间未知，当前只展示年、月、日三柱。系统不会使用中午或随机时辰补出时柱与大运结论。</p>}
     </section>
   );
 }

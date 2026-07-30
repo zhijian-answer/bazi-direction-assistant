@@ -5,7 +5,7 @@ const labels: Record<ElementKey, string> = { wood: "木", fire: "火", earth: "�
 const notes: Record<ElementKey, string> = { wood: "生长与规划", fire: "表达与行动", earth: "稳定与承接", metal: "规则与取舍", water: "观察与积累" };
 
 export function FiveElementsCard({ chart }: { chart: BaziChart }) {
-  const balance = chart.engine?.weightedBalance || chart.wuxing.balance;
+  const balance = chart.wuxing.balance;
   const total = Object.values(balance).reduce((sum, value) => sum + value, 0) || 1;
 
   return (
@@ -15,7 +15,7 @@ export function FiveElementsCard({ chart }: { chart: BaziChart }) {
           <div className="section-kicker">能量结构</div>
           <h3 id="wuxing-title" className="mt-1 font-display text-xl">五行分布</h3>
         </div>
-        <span className="text-xs text-[var(--muted)]">{chart.engine?.weightedBalance ? "综合藏干权重" : "八字字数统计"}</span>
+        <span className="text-xs text-[var(--muted)]">{chart.engine?.birthTimeKnown === false ? "三柱可见五行统计" : "四柱可见五行统计"}</span>
       </div>
       <div className="mt-5 space-y-4">
         {order.map((key) => {

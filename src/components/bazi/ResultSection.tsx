@@ -78,7 +78,7 @@ export function ResultSection({ profile, report, onAsk }: { profile: BirthProfil
           <div className="report-ten-gods-grid">
             {(["year", "month", "day", "time"] as const).map((position, index) => (
               <article key={position}>
-                <div><span>{["年柱", "月柱", "日柱", "时柱"][index]}</span><strong>{position === "time" && profile.timeUnknown ? "参考" : chart.pillars[position]}</strong></div>
+                <div><span>{["年柱", "月柱", "日柱", "时柱"][index]}</span><strong>{position === "time" && profile.timeUnknown ? "待补" : chart.pillars[position]}</strong></div>
                 <p><small>天干十神</small><b>{chart.tenGods[position]}</b></p>
                 <p><small>藏干十神</small><b>{(chart.hiddenTenGods?.[position] || []).join(" · ") || "暂无"}</b></p>
               </article>

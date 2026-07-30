@@ -12,7 +12,17 @@ export type ZodiacSignKey =
   | "aquarius"
   | "pisces";
 
-export type ZodiacBodyKey = "sun" | "moon" | "mercury" | "venus" | "mars";
+export type ZodiacBodyKey =
+  | "sun"
+  | "moon"
+  | "mercury"
+  | "venus"
+  | "mars"
+  | "jupiter"
+  | "saturn"
+  | "uranus"
+  | "neptune"
+  | "pluto";
 
 export type ZodiacPlacement = {
   body: ZodiacBodyKey;
@@ -27,6 +37,12 @@ export type ZodiacAspect = {
   point2: string;
   type: string;
   orb: number;
+};
+
+export type ZodiacHouse = {
+  id: number;
+  sign: ZodiacSignKey;
+  cusp: number;
 };
 
 export type ZodiacEngineInput = {
@@ -48,6 +64,7 @@ export type ZodiacChart = {
   placements: Record<ZodiacBodyKey, ZodiacPlacement>;
   ascendant?: { sign: ZodiacSignKey; degree: number };
   midheaven?: { sign: ZodiacSignKey; degree: number };
+  houses: ZodiacHouse[];
   aspects: ZodiacAspect[];
 };
 

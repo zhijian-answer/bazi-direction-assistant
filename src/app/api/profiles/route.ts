@@ -74,6 +74,10 @@ export async function POST(request: Request) {
         timeUnknown: Boolean(body.timeUnknown),
         isLeapMonth,
         gender,
+        birthPlace,
+        latitude: optionalCoordinate(body.latitude),
+        longitude: optionalCoordinate(body.longitude),
+        timezone,
       }),
     };
     await addProfileWithLimit(profile, appLimits.maxProfilesPerUser);

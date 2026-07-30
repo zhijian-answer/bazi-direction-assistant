@@ -47,6 +47,10 @@ export function buildMobileFlowReport(profile: MobileProfile, at = new Date()) {
     timeUnknown: !profile.birthTimeKnown,
     isLeapMonth: profile.isLeapMonth,
     gender: profile.gender,
+    birthPlace: profile.birthPlace,
+    latitude: profile.latitude,
+    longitude: profile.longitude,
+    timezone: profile.timezone,
   });
   const dayElement = chart.dayMaster.element;
   const current = flowGanZhi(at);
@@ -120,8 +124,16 @@ export function buildMobileFlowReport(profile: MobileProfile, at = new Date()) {
     months,
     poster,
     question,
-    evidence: { dayPillar: chart.pillars.day, annual: current.year, monthly: current.month, daily: current.day, generatedAt: at.toISOString() },
-    engineVersion: "lunar-javascript-stage-v1",
+    evidence: {
+      dayPillar: chart.pillars.day,
+      annual: current.year,
+      monthly: current.month,
+      daily: current.day,
+      generatedAt: at.toISOString(),
+      calculationScope: chart.engine?.calculationScope || (profile.birthTimeKnown ? "four-pillar" : "three-pillar"),
+      warnings: chart.engine?.uncertainties || [],
+    },
+    engineVersion: "lunar-javascript-stage-v2",
   };
 }
 

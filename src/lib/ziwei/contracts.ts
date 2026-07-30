@@ -138,6 +138,14 @@ export type NormalizedZiweiInsight = {
     shenGong?: string;
     majorStars: string[];
     mutagens: string[];
+    palaces: Array<{
+      name: string;
+      heavenlyStem: string;
+      earthlyBranch: string;
+      majorStars: string[];
+      isBodyPalace: boolean;
+      isOriginalPalace: boolean;
+    }>;
     rawFieldsUsed: string[];
     rulesApplied: string[];
   };

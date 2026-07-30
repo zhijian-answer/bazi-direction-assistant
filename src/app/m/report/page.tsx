@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import FigmaV22App from "@/components/figma-v22/App";
 
 export default function MobileReportPage() {
-  redirect("/m/report/bazi");
+  return <FigmaV22App initialScreen="report-hub" />;
 }

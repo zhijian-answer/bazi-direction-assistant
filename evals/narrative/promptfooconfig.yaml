@@ -1,0 +1,43 @@
+description: 玄枢中文叙事文案横向评测
+
+prompts:
+  - file://prompt.txt
+
+providers:
+  - id: openai:chat:{{ env.AI_MODEL }}
+    label: "{{ env.AI_PROVIDER }} / {{ env.AI_MODEL }}"
+    config:
+      apiBaseUrl: "{{ env.AI_BASE_URL }}"
+      apiKeyEnvar: AI_API_KEY
+      temperature: 0.72
+      max_tokens: 420
+      response_format:
+        type: json_object
+
+defaultTest:
+  assert:
+    - type: is-json
+    - type: javascript
+      value: |
+        const value = JSON.parse(output);
+        return ['hook', 'scene', 'action', 'nextQuestion'].every((key) => typeof value[key] === 'string' && value[key].trim().length >= 6);
+    - type: javascript
+      value: |
+        const value = JSON.parse(output);
+        return value.hook.length <= 36 && value.scene.length <= 110 && value.action.length <= 64 && value.nextQuestion.length <= 40;
+    - type: javascript
+      value: |
+        const banned = ['结构化观察','当前阶段','行动建议','环境适配','反应路径','模型','参数','注定','必然会','一定会','准确率','命中率','大师'];
+        return !banned.some((word) => output.includes(word));
+    - type: javascript
+      value: |
+        const value = JSON.parse(output);
+        return /？$/.test(value.nextQuestion);
+    - type: llm-rubric
+      value: 文案第一句像在描述一个真实的人；正文包含具体生活场景；语言自然克制；读完会想继续探索；没有营销腔、翻译腔或命理术语堆砌。
+
+tests: file://tests.yaml
+
+outputPath:
+  - ../../output/narrative-eval/results.json
+  - ../../output/narrative-eval/results.html

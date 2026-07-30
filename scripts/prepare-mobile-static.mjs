@@ -1,4 +1,4 @@
-import { cp, readdir } from "node:fs/promises";
+import { cp, mkdir, readdir } from "node:fs/promises";
 import path from "node:path";
 
 const outputRoot = path.resolve("mobile-static/out");
@@ -27,4 +27,8 @@ async function walk(directory) {
 }
 
 await walk(outputRoot);
-console.log(`Prepared ${copies} static RSC fallback files.`);
+const mobileAssetSource = path.resolve("public/mobile");
+const mobileAssetTarget = path.join(outputRoot, "mobile");
+await mkdir(mobileAssetTarget, { recursive: true });
+await cp(mobileAssetSource, mobileAssetTarget, { recursive: true, force: true });
+console.log(`Prepared ${copies} static RSC fallback files and synchronized mobile visual assets.`);

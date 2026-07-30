@@ -18,7 +18,7 @@ function getHour(input: BaziChartInput) {
 export function buildValidatedBaziChart(input: BaziChartInput): BaziChart {
   const chart = buildBaziChart(input);
   const { year, month, day } = splitDate(chart.solarText.slice(0, 10));
-  if (year < 1930 || year > 2048) return chart;
+  if (input.timeUnknown || (input.gender !== "male" && input.gender !== "female") || year < 1930 || year > 2048) return chart;
 
   try {
     const calculator = new BaziCalculator(
@@ -37,6 +37,7 @@ export function buildValidatedBaziChart(input: BaziChartInput): BaziChart {
     return {
       ...chart,
       engine: {
+        ...chart.engine,
         primary: "lunar-javascript",
         validator: "bazi-calculator-by-alvamind",
         validationStatus: matchedPillars === 4 ? "matched" : "different",
@@ -54,6 +55,7 @@ export function buildValidatedBaziChart(input: BaziChartInput): BaziChart {
     return {
       ...chart,
       engine: {
+        ...chart.engine,
         primary: "lunar-javascript",
         validator: "bazi-calculator-by-alvamind",
         validationStatus: "unavailable",

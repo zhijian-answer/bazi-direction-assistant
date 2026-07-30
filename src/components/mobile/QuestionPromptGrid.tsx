@@ -1,6 +1,19 @@
 "use client";
 
-import { ArrowRight, ArrowUpRight, BriefcaseBusiness, Coins, Heart, MessageCircleMore, UserRound } from "lucide-react";
+import {
+  Activity,
+  ArrowRight,
+  ArrowUpRight,
+  BriefcaseBusiness,
+  Coins,
+  Compass,
+  Flower2,
+  Heart,
+  HeartHandshake,
+  MessageCircleMore,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { startMobileTiming, trackMobileEvent } from "@/lib/mobile/analytics";
@@ -14,6 +27,14 @@ const homeQuestionPresentation: Record<string, { title: string; note: string; ic
   "home-energy": { title: "为什么最近总觉得累？", note: "看见消耗，重新分配精力", icon: UserRound },
   "home-choice": { title: "两个选择先看什么？", note: "先看成本、边界和回报", icon: Coins },
   "home-today": { title: "今天最该先做哪件事？", note: "把状态落成一个动作", icon: UserRound },
+};
+
+const zodiacQuestionPresentation: Record<string, { title: string; note: string; icon: typeof BriefcaseBusiness }> = {
+  "zodiac-attraction": { title: "会喜欢谁", note: "你容易被怎样的人吸引", icon: HeartHandshake },
+  "zodiac-fear": { title: "关系里怕什么", note: "什么会让你收回自己", icon: ShieldCheck },
+  "zodiac-hot-cold": { title: "为何忽冷忽热", note: "看见情绪反复的底层原因", icon: Activity },
+  "zodiac-relax": { title: "谁让我放松", note: "和谁一起更像真实的自己", icon: Flower2 },
+  "zodiac-initiative": { title: "主动还是被动", note: "看清关系里的行动节奏", icon: Compass },
 };
 
 export function QuestionPromptGrid({ questions, onSelect, title = "今天你想先问哪件事", compact = false }: { questions: QuestionInsightData[]; onSelect: (question: QuestionInsightData) => void; title?: string; compact?: boolean }) {
@@ -31,6 +52,18 @@ export function QuestionPromptGrid({ questions, onSelect, title = "今天你想�
       <div className="question-prompt-grid">
         {visibleQuestions.map((question) => {
           if (compact) {
+            const presentation = zodiacQuestionPresentation[question.id];
+            if (presentation) {
+              const Icon = presentation.icon;
+              return (
+                <motion.button className="question-prompt-card--zodiac" key={question.id} type="button" onClick={() => selectQuestion(question)} whileTap={{ scale: 0.98 }}>
+                  <span className="question-prompt-compact-icon" aria-hidden="true"><Icon /></span>
+                  <span className="question-prompt-compact-copy"><strong>{presentation.title}</strong><small>{presentation.note}</small></span>
+                  <ArrowUpRight className="question-prompt-compact-arrow" />
+                </motion.button>
+              );
+            }
+
             return (
               <motion.button key={question.id} type="button" onClick={() => selectQuestion(question)} whileTap={{ scale: 0.98 }}>
                 <span>{question.shortLabel}</span><ArrowUpRight />

@@ -6,6 +6,7 @@ import {
   ChevronRight,
   CircleDotDashed,
   CircleHelp,
+  Compass,
   Cloud,
   CloudOff,
   Download,
@@ -15,6 +16,7 @@ import {
   LogIn,
   Pencil,
   Plus,
+  Settings2,
   Trash2,
   UserX,
   UserRound,
@@ -25,12 +27,14 @@ import {
   deleteMobileProfile,
   saveMobileProfile,
   setActiveMobileProfile,
-  useMobileProfile,
+  useMobileProfileState,
   useMobileProfiles,
 } from "@/lib/mobile/profile";
 import { useShareImageHistory } from "@/lib/mobile/shareHistory";
 import { trackMobileEvent } from "@/lib/mobile/analytics";
 import { MobileShell } from "./MobileShell";
+import { DemoProfileBanner, ProfileRouteGuard } from "./ProfileRouteGuard";
+import { MobileSheet } from "./MobileSheet";
 
 const shareTypeLabel = {
   personality: "生辰人格",
@@ -46,7 +50,7 @@ function formatRecordTime(value: string) {
 
 export function MobileProfilePage() {
   const isStaticPreview = process.env.NEXT_PUBLIC_MOBILE_STATIC === "1";
-  const profile = useMobileProfile();
+  const { profile, hasProfile } = useMobileProfileState();
   const profiles = useMobileProfiles();
   const shareHistory = useShareImageHistory(profile.id);
   const [account, setAccount] = useState<{ name: string; email: string } | null>(null);
@@ -55,6 +59,8 @@ export function MobileProfilePage() {
   const [syncing, setSyncing] = useState(false);
   const [syncConflict, setSyncConflict] = useState(false);
   const [accountBusy, setAccountBusy] = useState(false);
+  const [profileToDelete, setProfileToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [accountDeleteOpen, setAccountDeleteOpen] = useState(false);
 
   useEffect(() => {
     if (isStaticPreview) {
@@ -101,13 +107,14 @@ export function MobileProfilePage() {
     }
   }
 
-  function removeProfile(profileId: string, name: string) {
-    if (!window.confirm(`确认删除“${name}”的本地档案吗？此操作不会删除已经保存到相册的图片。`)) return;
-    deleteMobileProfile(profileId);
+  function removeProfile() {
+    if (!profileToDelete) return;
+    deleteMobileProfile(profileToDelete.id);
+    setProfileToDelete(null);
   }
 
   async function deleteCloudAccount() {
-    if (!window.confirm("确认永久删除云端账号、档案、报告、问题和分享记录吗？本机档案会保留为仅本地状态。")) return;
+    setAccountDeleteOpen(false);
     setAccountBusy(true);
     setSyncMessage("");
     try {
@@ -125,23 +132,32 @@ export function MobileProfilePage() {
     }
   }
 
+  if (!hasProfile) return <ProfileRouteGuard requirement="profile"><></></ProfileRouteGuard>;
+
   return (
-    <MobileShell active="profile" theme="home">
+    <>{profile.isDemo ? <DemoProfileBanner /> : null}<MobileShell active="profile" theme="home">
       <div className="market-profile-page">
-        <header className="profile-page-header">
-          <small>我的玄枢</small>
-          <h1>档案、报告与分享记录</h1>
-          <p>当前内容保存在这台设备。登录只用于跨设备同步，不影响游客继续使用。</p>
-        </header>
+        <header className="profile-page-topbar"><h1>我的档案</h1><button type="button" onClick={() => document.querySelector(".profile-menu")?.scrollIntoView({ behavior: "smooth", block: "start" })}><Settings2 />设置</button></header>
 
         <section className="profile-account-card">
           <span>{profile.name.slice(0, 1) || "自"}</span>
           <div>
             <small>{profile.isDemo ? "示例档案" : "当前档案"}</small>
             <strong>{profile.name || "自己"}</strong>
+            <p>{profile.birthDate} · {profile.birthTimeKnown ? (profile.birthTime || "待补充") : "时辰不确定"} · {profile.birthPlace || "地点待补充"}</p>
             <em>{profile.syncStatus === "synced" ? <><Cloud />已同步到云端</> : <><CloudOff />仅保存在本机</>}</em>
           </div>
-          <Link href="/m/create" aria-label="编辑出生档案"><Pencil /></Link>
+          <Link href={profile.isDemo ? "/m/create?mode=new" : "/m/create?mode=edit"} aria-label={profile.isDemo ? "根据示例创建我的档案" : "编辑出生档案"}><Pencil /></Link>
+        </section>
+
+        <section className="profile-report-shortcuts">
+          <header><small>我的报告</small><strong>从已经建立的结构继续看</strong></header>
+          <div>
+            <Link href="/m/report/bazi"><span><CalendarRange /></span><small>生辰报告</small></Link>
+            <Link href="/m/report/bazi?tab=flow"><span><Compass /></span><small>流盘节奏</small></Link>
+            <Link href="/m/report/zodiac"><span><UserRound /></span><small>星座人格</small></Link>
+            <Link href="/m/report/ziwei"><span><CircleDotDashed /></span><small>紫微领域</small></Link>
+          </div>
         </section>
 
         <section className="profile-data-card">
@@ -165,7 +181,7 @@ export function MobileProfilePage() {
                     <div><strong>{item.name}</strong><small>{item.birthDate} · {item.birthTimeKnown ? item.birthTime : "时辰未知"}</small></div>
                     <em>{active ? "当前" : "切换"}</em>
                   </button>
-                  {item.id ? <button type="button" className="profile-delete-button" onClick={() => removeProfile(item.id!, item.name)} aria-label={`删除${item.name}档案`}><Trash2 /></button> : null}
+                  {item.id ? <button type="button" className="profile-delete-button" onClick={() => setProfileToDelete({ id: item.id!, name: item.name })} aria-label={`删除${item.name}档案`}><Trash2 /></button> : null}
                 </article>
               );
             })}
@@ -186,7 +202,7 @@ export function MobileProfilePage() {
         {account && !isStaticPreview ? (
           <section className="profile-account-data-actions">
             <a href="/api/me/export"><Download />导出我的云端数据</a>
-            <button type="button" onClick={deleteCloudAccount} disabled={accountBusy}><UserX />{accountBusy ? "正在删除" : "永久删除云端账号"}</button>
+            <button type="button" onClick={() => setAccountDeleteOpen(true)} disabled={accountBusy}><UserX />{accountBusy ? "正在删除" : "永久删除云端账号"}</button>
           </section>
         ) : null}
 
@@ -206,9 +222,6 @@ export function MobileProfilePage() {
         </section>
 
         <nav className="profile-menu" aria-label="报告与设置">
-          <Link href="/m/report/bazi"><span><FileText />我的生辰与流盘</span><ChevronRight /></Link>
-          <Link href="/m/report/zodiac"><span><UserRound />我的星座报告</span><ChevronRight /></Link>
-          <Link href="/m/report/ziwei"><span><CircleDotDashed />我的紫微报告</span><ChevronRight /></Link>
           <Link href="/privacy"><span><LockKeyhole />隐私与本地数据说明</span><ChevronRight /></Link>
           <Link href="/terms"><span><FileText />用户协议与内容边界</span><ChevronRight /></Link>
           <Link href="/about"><span><CircleHelp />关于玄枢</span><ChevronRight /></Link>
@@ -219,6 +232,12 @@ export function MobileProfilePage() {
           <p>玄枢提供传统文化、娱乐与自我探索内容。涉及健康、法律、投资或重大人生决定时，请结合现实信息和专业意见。</p>
         </section>
       </div>
-    </MobileShell>
+      <MobileSheet open={Boolean(profileToDelete)} title="删除本地档案" onClose={() => setProfileToDelete(null)}>
+        <div className="profile-confirm-sheet"><Trash2 /><strong>删除“{profileToDelete?.name}”吗？</strong><p>这会移除当前浏览器里的出生档案，不会删除已经保存到相册的图片。</p><button type="button" className="is-danger" onClick={removeProfile}>确认删除</button><button type="button" onClick={() => setProfileToDelete(null)}>先保留</button></div>
+      </MobileSheet>
+      <MobileSheet open={accountDeleteOpen} title="删除云端账号" onClose={() => setAccountDeleteOpen(false)}>
+        <div className="profile-confirm-sheet"><UserX /><strong>永久删除云端数据吗？</strong><p>云端账号、档案、报告、问题和分享记录会被删除；本机档案仍保留为仅本地状态。</p><button type="button" className="is-danger" onClick={deleteCloudAccount}>确认永久删除</button><button type="button" onClick={() => setAccountDeleteOpen(false)}>取消</button></div>
+      </MobileSheet>
+    </MobileShell></>
   );
 }

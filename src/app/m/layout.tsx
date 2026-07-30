@@ -9,6 +9,11 @@ import "@/styles/xuanshu-reports.css";
 import "@/styles/xuanshu-motion.css";
 import "@/styles/xuanshu-home.css";
 import "@/styles/xuanshu-style-lab-home.css";
+import "@/styles/xuanshu-app-final.css";
+import "@/styles/xuanshu-expansion.css";
+import "@/styles/xuanshu-home-v2.css";
+import "@/styles/xuanshu-figma-redesign.css";
+import "@/styles/figma-v22.css";
 
 export const metadata: Metadata = {
   title: "玄枢｜生辰、星座与紫微报告",
@@ -19,7 +24,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#030608",
+  themeColor: "#f4f0ff",
 };
 
 export default function MobileLayout({ children }: { children: ReactNode }) {

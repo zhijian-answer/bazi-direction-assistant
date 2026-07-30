@@ -1,5 +1,5 @@
-import { ZiweiReportPage } from "@/components/mobile/ZiweiReportPage";
+import FigmaV22App from "@/components/figma-v22/App";
 
 export default function MobileZiweiReportPage() {
-  return <ZiweiReportPage />;
+  return <FigmaV22App initialScreen="ziwei" />;
 }

@@ -42,6 +42,19 @@ describe("mobile bazi report", () => {
     expect(second.identity.dayPillar).not.toBe(first.identity.dayPillar);
     expect(second.identity.title).not.toBe(first.identity.title);
   });
+
+  it("does not invent an hour pillar or luck cycle when birth time is unknown", () => {
+    const report = buildMobileBaziReport({ ...baseProfile, birthTime: "", birthTimeKnown: false });
+    const visibleCount = Object.values(report.evidence.visibleElementBalance).reduce((sum, value) => sum + value, 0);
+
+    expect(report.calculation.scope).toBe("three-pillar");
+    expect(report.pillars.rows[0][4]).toBe("待补");
+    expect(report.pillars.rows[1][4]).toBe("待补");
+    expect(report.luckTrend).toEqual([]);
+    expect(report.flowColumns[1].value).toBe("待补时辰");
+    expect(report.calculation.warnings.join(" ")).toContain("不生成时柱与大运结论");
+    expect(visibleCount).toBe(6);
+  });
 });
 
 describe("mobile flow report", () => {

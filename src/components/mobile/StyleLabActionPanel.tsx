@@ -1,18 +1,18 @@
-import { Crosshair, ShieldCheck, Target } from "lucide-react";
+import { Crosshair, Diamond, ScanFace, ShieldCheck } from "lucide-react";
 
 const items = [
   {
-    icon: ShieldCheck,
+    Icon: ShieldCheck,
     title: "结构化观察",
     body: "数据化分析，拆解命理信息，层层有据",
   },
   {
-    icon: Crosshair,
+    Icon: Crosshair,
     title: "不做绝对预测",
     body: "不贴标签，不下定论，只提供趋势参考",
   },
   {
-    icon: Target,
+    Icon: ScanFace,
     title: "仅供自我观察",
     body: "帮助你理解自己，做出更好的选择",
   },
@@ -22,21 +22,20 @@ export function StyleLabActionPanel() {
   return (
     <section className="style-lab-action-panel" aria-label="我们如何与众不同">
       <header>
-        <span aria-hidden="true">◇</span>
+        <Diamond aria-hidden="true" />
         <h2>我们如何与众不同</h2>
-        <span aria-hidden="true">◇</span>
+        <Diamond aria-hidden="true" />
       </header>
       <div className="style-lab-action-grid">
-        {items.map((item) => {
-          const Icon = item.icon;
+        {items.map(({ Icon, title, body }) => {
           return (
-            <article key={item.title}>
+            <article key={title}>
               <div className="style-lab-action-icon" aria-hidden="true">
                 <Icon />
               </div>
               <div>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
+                <h3>{title}</h3>
+                <p>{body}</p>
               </div>
             </article>
           );

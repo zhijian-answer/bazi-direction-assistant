@@ -57,7 +57,18 @@ export async function POST(request: Request) {
       timezone: String(input.timezone || "Asia/Shanghai"),
       timeUnknown,
       createdAt: String(input.createdAt || new Date().toISOString()),
-      chart: buildValidatedBaziChart({ calendarType, birthDate, birthTime, timeUnknown, isLeapMonth, gender }),
+      chart: buildValidatedBaziChart({
+        calendarType,
+        birthDate,
+        birthTime,
+        timeUnknown,
+        isLeapMonth,
+        gender,
+        birthPlace,
+        latitude: optionalCoordinate(input.latitude),
+        longitude: optionalCoordinate(input.longitude),
+        timezone: String(input.timezone || "Asia/Shanghai"),
+      }),
     };
 
     const db = await readDb();

@@ -1,6 +1,5 @@
-import { BaziReportPage } from "@/components/mobile/BaziReportPage";
+import FigmaV22App from "@/components/figma-v22/App";
 
-export default async function MobileBaziReportPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
-  const { tab } = await searchParams;
-  return <BaziReportPage initialTab={tab === "flow" ? "flow" : "bazi"} />;
+export default function MobileBaziReportPage() {
+  return <FigmaV22App initialScreen="bazi" />;
 }

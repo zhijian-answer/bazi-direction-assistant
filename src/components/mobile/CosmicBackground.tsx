@@ -8,7 +8,7 @@ type CosmicBackgroundProps = {
 export function CosmicBackground({ variant = "home" }: CosmicBackgroundProps) {
   return (
     <div className={`cosmic-background cosmic-background--${variant}`} aria-hidden="true">
-      <Image className="cosmic-background__instrument" src={armillaryImage} alt="" priority={variant !== "home"} sizes="390px" />
+      <Image className="cosmic-background__instrument" src={armillaryImage} alt="" sizes="390px" />
       <svg viewBox="0 0 430 1180" preserveAspectRatio="xMidYMin slice">
         <g className="cosmic-background__orbits" fill="none">
           <ellipse className="cosmic-background__orbit" pathLength="1" cx="350" cy="164" rx="232" ry="92" transform="rotate(-24 350 164)" />

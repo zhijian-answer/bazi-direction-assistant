@@ -1,13 +1,12 @@
-import { CircleDotDashed, Fingerprint, Orbit, Sparkles } from "lucide-react";
+import Image from "next/image";
 import { forwardRef } from "react";
 import type { SharePosterData } from "@/lib/mobile/types";
 
 export const SharePoster = forwardRef<HTMLDivElement, { data: SharePosterData; exportMode?: boolean }>(function SharePoster({ data, exportMode = false }, ref) {
-  const Icon = data.category === "zodiac" ? Orbit : data.category === "ziwei" ? CircleDotDashed : data.category === "question" ? Sparkles : Fingerprint;
   return (
     <div ref={ref} className={`share-poster share-poster--${data.tone} ${exportMode ? "share-poster--export" : ""}`} data-category={data.category} data-testid={exportMode ? "share-poster-export" : "share-poster-preview"}>
       <header>
-        <span><Icon />玄枢</span>
+        <span><Image src="/mobile/style-lab-assets/brand-mark.png" alt="" aria-hidden="true" width={24} height={24} />玄枢</span>
         <small>{data.eyebrow}</small>
       </header>
       <svg className="share-poster-orbits" viewBox="0 0 240 240" aria-hidden="true">
@@ -16,6 +15,7 @@ export const SharePoster = forwardRef<HTMLDivElement, { data: SharePosterData; e
         <ellipse cx="120" cy="120" rx="96" ry="36" transform="rotate(-31 120 120)" fill="none" stroke="currentColor" strokeWidth="0.7" />
         <circle cx="181" cy="71" r="4" fill="currentColor" />
       </svg>
+      <div className="share-poster-instrument" aria-hidden="true" />
       <div className="share-poster-mark" aria-hidden="true">玄</div>
       <main>
         <span className="share-poster-kicker">让命理，被科学看见</span>

@@ -1,0 +1,59 @@
+.figma-v22-app {
+  width: 100%;
+  min-height: 100dvh;
+  color: #28253d;
+  color-scheme: light;
+}
+
+.figma-v22-app,
+.figma-v22-app * {
+  box-sizing: border-box;
+  letter-spacing: 0;
+}
+
+.figma-v22-app button,
+.figma-v22-app input,
+.figma-v22-app textarea,
+.figma-v22-app select {
+  font: inherit;
+}
+
+.figma-v22-app button {
+  min-height: 44px;
+}
+
+.figma-v22-shell {
+  border-radius: 0;
+}
+
+@media (max-width: 380px) {
+  .figma-v22-elements {
+    gap: 8px !important;
+  }
+
+  .figma-v22-element-card {
+    gap: 6px !important;
+    padding: 8px !important;
+  }
+
+  .figma-v22-element-card > div:last-child > div {
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 700px) {
+  .figma-v22-shell {
+    border-radius: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figma-v22-app *,
+  .figma-v22-app *::before,
+  .figma-v22-app *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

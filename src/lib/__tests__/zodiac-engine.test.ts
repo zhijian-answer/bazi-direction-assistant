@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { buildMobileZodiacReport } from "../mobile/buildMobileZodiacReport";
 import type { MobileProfile } from "../mobile/types";
 import { resolveBirthPlace } from "../zodiac/birthPlaceCatalog";
+import { buildCurrentTransitChart, buildProfileZodiacChart } from "../astrology/profileChart";
 
 const guangzhouProfile: MobileProfile = {
   id: "fixture-guangzhou-1990",
@@ -91,5 +92,39 @@ describe("birth place catalog", () => {
     expect(resolveBirthPlace("广州")?.id).toBe("guangzhou");
     expect(resolveBirthPlace("我出生在广东省广州市")?.id).toBe("guangzhou");
     expect(resolveBirthPlace("未收录的小镇")).toBeNull();
+  });
+});
+
+describe("complete astrology chart", () => {
+  it("keeps ten major bodies, twelve houses and filtered major aspects", () => {
+    const result = buildProfileZodiacChart(guangzhouProfile);
+
+    expect(Object.keys(result.chart.placements)).toHaveLength(10);
+    expect(result.chart.houses).toHaveLength(12);
+    expect(result.chart.ascendant).toBeDefined();
+    expect(result.chart.midheaven).toBeDefined();
+    expect(result.chart.aspects.length).toBeGreaterThan(0);
+    expect(result.chart.aspects.some((item) => item.point1 === "sirius" || item.point2 === "sirius")).toBe(false);
+  });
+
+  it("does not create houses or angles when birth time is unknown", () => {
+    const result = buildProfileZodiacChart({ ...guangzhouProfile, birthTimeKnown: false, birthTime: "" });
+
+    expect(result.isPartial).toBe(true);
+    expect(result.chart.houses).toEqual([]);
+    expect(result.chart.ascendant).toBeUndefined();
+    expect(Object.values(result.chart.placements).every((placement) => placement.house === undefined)).toBe(true);
+    expect(result.chart.aspects.some((aspect) => [aspect.point1, aspect.point2].includes("ascendant") || [aspect.point1, aspect.point2].includes("midheaven"))).toBe(false);
+    expect(result.warnings.join(" ")).toContain("出生时辰不确定");
+  });
+
+  it("keeps current sky data free of personal houses and angles", () => {
+    const chart = buildCurrentTransitChart(guangzhouProfile, new Date("2026-07-21T12:00:00+08:00"));
+
+    expect(chart.houses).toEqual([]);
+    expect(chart.ascendant).toBeUndefined();
+    expect(chart.midheaven).toBeUndefined();
+    expect(Object.values(chart.placements).every((placement) => placement.house === undefined)).toBe(true);
+    expect(chart.aspects.some((aspect) => [aspect.point1, aspect.point2].includes("ascendant") || [aspect.point1, aspect.point2].includes("midheaven"))).toBe(false);
   });
 });

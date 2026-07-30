@@ -50,6 +50,103 @@ final result: passed
 
 ---
 
+# 星座首屏聊天生成稿复刻 2026-07-11
+
+## 对照对象
+
+- 视觉真值：`output/market-delivery-pack-2026-07-05/01_高清设计图/星座命理报告界面设计.png`
+- 最终实现：`output/playwright/market-screen/zodiac-chat-production-final-390x844.png`
+- 最终并排：`output/playwright/zodiac-chat-final-comparison.png`
+- 响应式：`zodiac-chat-production-final-375x812.png`、`390x844.png`、`430x932.png`
+
+## Findings
+
+- 无 P0、P1、P2 问题。
+- 构图：顶部人格封面、星座能量图、三张核心星体卡和五个关系问题入口已收进同一黄铜仪器框，阅读顺序与生成稿一致。
+- 视觉：报告胶囊、天体仪、星体资产、黄铜细边和深青黑背景均使用本地资产及项目组件，没有使用占位图。
+- 内容：保留真实档案生成的太阳、月亮、上升与关系文案；卡片展示使用短摘要，完整内容仍可进入解读区查看。
+- 交互：三张核心卡均可展开阅读，五个关系问题使用独立语义图标并继续打开原问题弹层。
+- 移动端：375、390、430 三档无横向溢出、控制台无错误，可见点击目标均不小于 44px。
+
+## Follow-up Polish
+
+- P3：生成稿使用固定“上升金牛”内容，当前实现按真实档案显示“上升狮子”，因此文字换行不做逐字一致。
+- P3：生成稿画布按宽度等比后约 690px 高，真实手机视口为 812-932px，底部导航位置按实际视口固定。
+
+final result: passed
+
+---
+
+# 全 App A 风格成品细化 2026-07-11
+
+## 范围
+
+- 页面：`/m`、`/m/create`、`/m/generating`、`/m/report/bazi`、流盘、`/m/report/zodiac`、`/m/report/ziwei`、`/m/profile`。
+- 交互层：问题解读弹层、分享图弹层、档案切换、底部导航。
+- 首页视觉实验：`/m/style-lab/home` 保持独立，不接业务数据。
+
+## 视觉修正
+
+- 统一四项底栏为居中的仪器图标，移除多余朱砂选中线和透明图片暗块。
+- 将星轨背景改为真正透明的光点/轨道资产，清除裁图残字、黑色矩形和竖向硬边。
+- 全局卡片使用低对比黄铜外边、暖色内线和深墨青材质；Hero 顶边改为渐入，不再硬切。
+- 创建、生成、三类报告、流盘和我的页统一宋体字重、按钮材质、顶部栏与体系标签。
+- 问题弹层、分享弹层和档案弹层统一为深色星轨层，保留真实交互与生成逻辑。
+
+## 证据
+
+- 全 App 生产联系表：`output/playwright/app-final-production-contact-sheet.png`。
+- 首页最终对照：`output/playwright/market-screen/style-lab-final-reference-vs-production.png`。
+- 问题弹层：`output/playwright/app-final-v4-question-sheet.png`。
+- 真实分享图弹层：`output/playwright/app-final-production-share-generated.png`，生成图片为 1080 × 1920 PNG。
+- 375 × 812、390 × 844、430 × 932 共 24 个页面/视口组合：横向溢出 0，控制台错误 0，可见操作区小于 44px 的数量 0。
+
+## 工程结果
+
+- `npm run lint`：通过。
+- `npm run test`：8 个测试文件、34 个测试通过。
+- `npm run build`：通过。
+- `npm run build:mobile-static`：通过，15 个静态页面导出并补齐 22 个 RSC fallback 文件。
+
+current result: implementation complete; awaiting user visual acceptance, not self-marked passed
+
+---
+
+# Style Lab 首页精确比例复刻 2026-07-11
+
+## 对照对象
+
+- 视觉真值：`output/playwright/market-screen/style-lab-reference-home.png`（941 × 1672）。
+- 精确等比实现：`output/playwright/market-screen/style-lab-sol-production-v9-390x693.png`。
+- 精确并排：`output/playwright/market-screen/style-lab-sol-exact-aspect-final-v9.png`。
+- 真实手机比例：`style-lab-sol-production-v8-375x812.png`、`style-lab-sol-production-v9-390x844.png`、`style-lab-sol-production-v8-430x932.png`。
+
+## 本轮修正
+
+- 按 390 / 941 = 0.41445 重算全部纵向坐标，Hero 顶部 81px、高 295px，入口卡顶部 385px、高 142px，说明面板顶部 536px、高 91px。
+- Hero 使用参考图编辑生成的专属无文字天体仪背景，不再依赖旧的竖版通用资产。
+- 品牌标、三张入口卡图形、三枚价值图标和四枚底部导航图标均来自高清参考素材派生资产。
+- 页面字体统一为 Noto Serif SC 体系，减少小字号黑体造成的粗重感。
+- 390 × 693 与参考图宽高比一致；390 × 844 继续保持响应式底部导航贴底。
+
+## 剩余差距
+
+- 天体仪经过图像编辑重建，环体细节和中央球体位置仍不是逐像素相同。
+- 主按钮为保证 44px 触控区，比参考图等比高度约高 3px。
+- 浏览器宋体抗锯齿与参考设计图的栅格文字存在细微差异。
+- 430px 下按响应式放大内容，不按 390px 画板机械拉伸。
+
+## 检查结果
+
+- 375 / 390 / 430：无横向溢出，smallTargets = 0，控制台无错误。
+- 390 × 693：scrollWidth = 390，scrollHeight = 693。
+- lint：passed。
+- production build：passed。
+
+current result: visually close; waiting for user visual review, not marked passed
+
+---
+
 # 星座报告首屏视觉对照 2026-07-07
 
 ## 对照对象

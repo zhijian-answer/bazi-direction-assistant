@@ -1,32 +1,19 @@
 import Image from "next/image";
-import orbitMark from "../../../public/mobile/xuanshu-orbit-mark.webp";
+import type { NormalizedZiweiInsight } from "@/lib/ziwei/contracts";
 
-const palaces: ReadonlyArray<{ label: string; note: string; position: number; key?: boolean }> = [
-  { label: "兄弟", note: "同辈协作", position: 1 },
-  { label: "夫妻", note: "亲密回应", position: 2, key: true },
-  { label: "子女", note: "创造表达", position: 3 },
-  { label: "财帛", note: "资源方式", position: 4 },
-  { label: "疾厄", note: "身心节奏", position: 5 },
-  { label: "迁移", note: "外部环境", position: 6 },
-  { label: "交友", note: "合作网络", position: 7 },
-  { label: "官禄", note: "工作主线", position: 8, key: true },
-  { label: "田宅", note: "生活基础", position: 9 },
-  { label: "福德", note: "恢复方式", position: 10, key: true },
-  { label: "父母", note: "规则来源", position: 11 },
-  { label: "命宫", note: "底层气质", position: 12, key: true },
-];
+const keyPalaces = new Set(["命宫", "官禄", "夫妻", "福德"]);
 
-export function ZiweiPalaceMap({ mingGong, shenGong }: { mingGong?: string; shenGong?: string }) {
+export function ZiweiPalaceMap({ mingGong, shenGong, palaces }: { mingGong?: string; shenGong?: string; palaces: NormalizedZiweiInsight["evidence"]["palaces"] }) {
   return (
-    <div className="ziwei-palace-map" role="img" aria-label="简化十二宫领域结构图">
-      {palaces.map((palace) => (
-        <div key={palace.label} className={`ziwei-palace-cell ziwei-palace-cell--${palace.position} ${palace.key ? "is-key" : ""}`}>
-          {palace.label}
-          <small>{palace.note}</small>
+    <div className="ziwei-palace-map" role="img" aria-label="根据当前档案计算的十二宫结构图">
+      {palaces.map((palace, index) => (
+        <div key={`${palace.name}-${palace.earthlyBranch}`} className={`ziwei-palace-cell ziwei-palace-cell--${index + 1} ${keyPalaces.has(palace.name) ? "is-key" : ""} ${palace.isBodyPalace || palace.isOriginalPalace ? "is-merged" : ""}`}>
+          {palace.name}
+          <small>{palace.majorStars.slice(0, 2).join("·") || `${palace.heavenlyStem}${palace.earthlyBranch}`}</small>
         </div>
       ))}
       <div className="ziwei-palace-center">
-        <Image className="ziwei-palace-center__orbit" src={orbitMark} alt="" aria-hidden="true" />
+        <Image className="ziwei-palace-center__orbit" src="/mobile/style-lab-assets/ziwei-palace-center-alpha.png" alt="" aria-hidden="true" width={377} height={341} />
         <span>十二宫</span>
         <strong>人生领域结构</strong>
         <div className="ziwei-palace-points">

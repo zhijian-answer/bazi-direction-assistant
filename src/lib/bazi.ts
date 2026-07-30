@@ -108,7 +108,7 @@ const punishmentGroups = ["寅巳申", "丑未戌"];
 const selfPunishments = ["辰", "午", "酉", "亥"];
 
 function getEarthlyRelations(branches: Record<ChartPosition, string>): EarthlyRelation[] {
-  const entries = Object.entries(branches) as Array<[ChartPosition, string]>;
+  const entries = (Object.entries(branches) as Array<[ChartPosition, string]>).filter(([, branch]) => Boolean(branch));
   const relations: EarthlyRelation[] = [];
 
   for (let left = 0; left < entries.length; left += 1) {
@@ -174,11 +174,18 @@ export type BaziChartInput = {
   timeUnknown?: boolean;
   isLeapMonth?: boolean;
   gender?: Gender;
+  birthPlace?: string;
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
 };
 
 export function buildBaziChart(input: BaziChartInput): BaziChart {
   const { year, month, day } = splitDate(input.birthDate);
-  const { hour, minute } = splitTime(input.timeUnknown ? "12:00" : input.birthTime);
+  const birthTimeKnown = !input.timeUnknown;
+  // Noon is only an internal neutral point for converting the calendar date.
+  // Time-dependent output is removed below when the birth time is unknown.
+  const { hour, minute } = splitTime(birthTimeKnown ? input.birthTime : "12:00");
 
   const lunar =
     input.calendarType === "lunar"
@@ -188,18 +195,20 @@ export function buildBaziChart(input: BaziChartInput): BaziChart {
   const solar = lunar.getSolar();
   const eightChar = lunar.getEightChar();
 
-  const stems = {
+  const rawStems = {
     year: eightChar.getYearGan(),
     month: eightChar.getMonthGan(),
     day: eightChar.getDayGan(),
     time: eightChar.getTimeGan(),
   };
-  const branches = {
+  const rawBranches = {
     year: eightChar.getYearZhi(),
     month: eightChar.getMonthZhi(),
     day: eightChar.getDayZhi(),
     time: eightChar.getTimeZhi(),
   };
+  const stems = { ...rawStems, time: birthTimeKnown ? rawStems.time : "" };
+  const branches = { ...rawBranches, time: birthTimeKnown ? rawBranches.time : "" };
 
   const balance: ElementBalance = {
     wood: 0,
@@ -210,10 +219,12 @@ export function buildBaziChart(input: BaziChartInput): BaziChart {
   };
 
   Object.values(stems).forEach((stem) => {
-    balance[stemElement[stem]] += 1;
+    const element = stemElement[stem];
+    if (element) balance[element] += 1;
   });
   Object.values(branches).forEach((branch) => {
-    balance[branchElement[branch]] += 1;
+    const element = branchElement[branch];
+    if (element) balance[element] += 1;
   });
 
   const dayElement = stemElement[stems.day];
@@ -221,16 +232,19 @@ export function buildBaziChart(input: BaziChartInput): BaziChart {
     year: eightChar.getYearHideGan(),
     month: eightChar.getMonthHideGan(),
     day: eightChar.getDayHideGan(),
-    time: eightChar.getTimeHideGan(),
+    time: birthTimeKnown ? eightChar.getTimeHideGan() : [],
   };
   const hiddenTenGods = {
     year: eightChar.getYearShiShenZhi(),
     month: eightChar.getMonthShiShenZhi(),
     day: eightChar.getDayShiShenZhi(),
-    time: eightChar.getTimeShiShenZhi(),
+    time: birthTimeKnown ? eightChar.getTimeShiShenZhi() : [],
   };
-  const yun = eightChar.getYun(input.gender === "female" ? 0 : 1, 2);
-  const allLuckCycles = yun.getDaYun(9);
+  const hasDirectionGender = input.gender === "male" || input.gender === "female";
+  const canCalculateLuck = birthTimeKnown && hasDirectionGender;
+  const allLuckCycles = canCalculateLuck
+    ? eightChar.getYun(input.gender === "female" ? 0 : 1, 2).getDaYun(9)
+    : [];
   const luckCycles = allLuckCycles
     .filter((cycle) => cycle.getGanZhi())
     .slice(0, 8)
@@ -251,11 +265,17 @@ export function buildBaziChart(input: BaziChartInput): BaziChart {
     year: eightChar.getYear(),
     month: eightChar.getMonth(),
     day: eightChar.getDay(),
-    time: eightChar.getTime(),
+    time: birthTimeKnown ? eightChar.getTime() : "待补时辰",
   };
+  const uncertainties = [
+    ...(!birthTimeKnown ? ["出生时辰未知：仅计算年、月、日三柱，不生成时柱与大运结论。"] : []),
+    ...(!hasDirectionGender ? ["排盘所需性别未明确：不生成大运顺逆与相关阶段结论。"] : []),
+    ...(!input.timezone ? ["未提供出生地时区：当前按输入的当地日期和时间直接排盘。"] : []),
+    ...(Number.isFinite(input.longitude) ? ["当前八字主引擎尚未应用真太阳时修正。"] : []),
+  ];
 
   return {
-    solarText: solar.toYmdHms(),
+    solarText: birthTimeKnown ? solar.toYmdHms() : `${solar.toYmdHms().slice(0, 10)} 时辰未知`,
     lunarText: lunar.toString(),
     pillars,
     stems,
@@ -264,7 +284,7 @@ export function buildBaziChart(input: BaziChartInput): BaziChart {
       year: eightChar.getYearWuXing(),
       month: eightChar.getMonthWuXing(),
       day: eightChar.getDayWuXing(),
-      time: eightChar.getTimeWuXing(),
+      time: birthTimeKnown ? eightChar.getTimeWuXing() : "待补",
       balance,
       strongest: rankElements(balance, "max"),
       weakest: rankElements(balance, "min"),
@@ -273,19 +293,28 @@ export function buildBaziChart(input: BaziChartInput): BaziChart {
       year: eightChar.getYearShiShenGan(),
       month: eightChar.getMonthShiShenGan(),
       day: eightChar.getDayShiShenGan(),
-      time: eightChar.getTimeShiShenGan(),
+      time: birthTimeKnown ? eightChar.getTimeShiShenGan() : "待补",
     },
     hiddenStems,
     hiddenTenGods,
     relations: getEarthlyRelations(branches),
     luckCycles,
     annualLuck,
-    engine: { primary: "lunar-javascript", validationStatus: "unavailable" },
+    engine: {
+      primary: "lunar-javascript",
+      validationStatus: "unavailable",
+      calculationScope: birthTimeKnown ? "four-pillar" : "three-pillar",
+      birthTimeKnown,
+      balanceMethod: "visible-stems-branches",
+      timezone: input.timezone,
+      locationApplied: false,
+      uncertainties,
+    },
     nayin: {
       year: eightChar.getYearNaYin(),
       month: eightChar.getMonthNaYin(),
       day: eightChar.getDayNaYin(),
-      time: eightChar.getTimeNaYin(),
+      time: birthTimeKnown ? eightChar.getTimeNaYin() : "待补",
     },
     dayMaster: {
       stem: stems.day,

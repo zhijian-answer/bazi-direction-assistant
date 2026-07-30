@@ -3,10 +3,31 @@
 import { useMemo, useSyncExternalStore } from "react";
 import type { MobileProfile } from "./types";
 import { resolveBirthPlace } from "../zodiac/birthPlaceCatalog";
+import { getMobileProfileKind } from "./profileCapabilities";
+
+export const emptyMobileProfile: MobileProfile = {
+  id: undefined,
+  name: "",
+  gender: "other",
+  calendarType: "solar",
+  birthDate: "",
+  birthTime: "",
+  birthTimeKnown: true,
+  isLeapMonth: false,
+  birthPlace: "",
+  latitude: undefined,
+  longitude: undefined,
+  timezone: undefined,
+  birthPlaceResolution: "unknown",
+  isDemo: false,
+  isLocalOnly: true,
+  completeness: 0,
+  syncStatus: "local",
+};
 
 export const defaultMobileProfile: MobileProfile = {
   id: "demo-profile",
-  name: "自己",
+  name: "示例：小玄",
   gender: "female",
   calendarType: "solar",
   birthDate: "1990-06-18",
@@ -28,31 +49,35 @@ const profilesKey = "xuanshu-mobile-profiles-v1";
 const profileEvent = "xuanshu-mobile-profile-change";
 const emptyProfileSnapshot = "__xuanshu_empty_profile__";
 
-export function loadMobileProfile(): MobileProfile {
-  if (typeof window === "undefined") return defaultMobileProfile;
+export function loadMobileProfile(): MobileProfile | null {
+  if (typeof window === "undefined") return null;
   try {
     const stored = window.localStorage.getItem(profileKey);
-    return stored ? normalizeMobileProfile(JSON.parse(stored)) : defaultMobileProfile;
+    return stored ? normalizeMobileProfile(JSON.parse(stored)) : null;
   } catch {
-    return defaultMobileProfile;
+    return null;
   }
 }
 
 export function normalizeMobileProfile(value: Partial<MobileProfile>): MobileProfile {
-  const merged = { ...defaultMobileProfile, ...value };
+  const source = value.isDemo
+    ? { ...defaultMobileProfile, createdAt: value.createdAt, updatedAt: value.updatedAt }
+    : value;
+  const merged = { ...emptyMobileProfile, ...source };
   const catalogLocation = resolveBirthPlace(merged.birthPlace);
-  const hasSavedCoordinates = Boolean(merged.birthPlace.trim()) && Number.isFinite(value.latitude) && Number.isFinite(value.longitude);
+  const hasSavedCoordinates = Boolean(merged.birthPlace.trim()) && Number.isFinite(source.latitude) && Number.isFinite(source.longitude);
   return {
     ...merged,
-    latitude: hasSavedCoordinates ? Number(value.latitude) : catalogLocation?.latitude,
-    longitude: hasSavedCoordinates ? Number(value.longitude) : catalogLocation?.longitude,
-    timezone: hasSavedCoordinates ? value.timezone : catalogLocation?.timezone,
+    latitude: hasSavedCoordinates ? Number(source.latitude) : catalogLocation?.latitude,
+    longitude: hasSavedCoordinates ? Number(source.longitude) : catalogLocation?.longitude,
+    timezone: hasSavedCoordinates ? source.timezone : catalogLocation?.timezone,
     birthPlaceResolution: catalogLocation ? "catalog" : hasSavedCoordinates ? "coordinates" : "unknown",
-    isDemo: Boolean(value.isDemo),
+    isDemo: Boolean(source.isDemo),
   };
 }
 
-export function saveMobileProfile(profile: MobileProfile) {
+export function upsertMobileProfile(profile: MobileProfile, options: { activate?: boolean } = {}) {
+  const { activate = true } = options;
   const now = new Date().toISOString();
   const resolvedLocation = resolveBirthPlace(profile.birthPlace);
   const hasSavedCoordinates = Boolean(profile.birthPlace.trim()) && Number.isFinite(profile.latitude) && Number.isFinite(profile.longitude);
@@ -69,11 +94,16 @@ export function saveMobileProfile(profile: MobileProfile) {
     timezone: resolvedLocation?.timezone ?? (hasSavedCoordinates ? profile.timezone : undefined),
     birthPlaceResolution: resolvedLocation ? "catalog" : hasSavedCoordinates ? "coordinates" : "unknown",
   };
-  window.localStorage.setItem(profileKey, JSON.stringify(persisted));
   const profiles = loadMobileProfiles();
   const nextProfiles = [persisted, ...profiles.filter((item) => item.id !== persisted.id)];
   window.localStorage.setItem(profilesKey, JSON.stringify(nextProfiles));
+  if (activate) window.localStorage.setItem(profileKey, JSON.stringify(persisted));
   window.dispatchEvent(new Event(profileEvent));
+  return persisted;
+}
+
+export function saveMobileProfile(profile: MobileProfile) {
+  return upsertMobileProfile(profile, { activate: true });
 }
 
 export function loadMobileProfiles(): MobileProfile[] {
@@ -101,7 +131,7 @@ export function deleteMobileProfile(profileId: string) {
   const profiles = loadMobileProfiles().filter((item) => item.id !== profileId);
   window.localStorage.setItem(profilesKey, JSON.stringify(profiles));
   const active = loadMobileProfile();
-  if (active.id === profileId) {
+  if (active?.id === profileId) {
     const next = profiles[0];
     if (next) window.localStorage.setItem(profileKey, JSON.stringify(next));
     else window.localStorage.removeItem(profileKey);
@@ -141,12 +171,14 @@ export function useMobileProfileState() {
   return useMemo(() => {
     const hasProfile = serialized !== emptyProfileSnapshot;
     try {
+      const profile = hasProfile ? normalizeMobileProfile(JSON.parse(serialized)) : emptyMobileProfile;
       return {
-        profile: hasProfile ? normalizeMobileProfile(JSON.parse(serialized)) : defaultMobileProfile,
+        profile,
         hasProfile,
+        kind: getMobileProfileKind(profile, hasProfile),
       };
     } catch {
-      return { profile: defaultMobileProfile, hasProfile: false };
+      return { profile: emptyMobileProfile, hasProfile: false, kind: "empty" as const };
     }
   }, [serialized]);
 }
