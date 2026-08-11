@@ -34,6 +34,7 @@ jobs:
       - name: Build isolated standalone package
         env:
           NEXT_PUBLIC_ASSET_PREFIX: /xuanshu-assets
+          NEXT_PUBLIC_SITE_URL: https://xuanshu.fjzxhc.cn
         run: |
           npm run build
           mkdir -p .next/standalone/.next
@@ -72,6 +73,8 @@ jobs:
             'AI_FALLBACK_ON_ERROR=true' \
             'RATE_LIMIT_CHAT_DAILY=10' \
             'RATE_LIMIT_CHAT_WRITE=12' \
+            'APP_URL=https://xuanshu.fjzxhc.cn' \
+            'NEXT_PUBLIC_SITE_URL=https://xuanshu.fjzxhc.cn' \
             > /tmp/xuanshu-mobile.env
           scp \
             -o IPQoS=none \
@@ -114,6 +117,6 @@ jobs:
       - name: Public HTTPS checks
         run: |
           for path in / /m /m/report/bazi /m/report/zodiac /m/chart/natal /m/chart/transit /api/health; do
-            curl --retry 8 --retry-delay 5 --retry-all-errors -fsS -o /dev/null "https://zzj-superstaff.duckdns.org${path}"
+            curl --retry 8 --retry-delay 5 --retry-all-errors -fsS -o /dev/null "https://xuanshu.fjzxhc.cn${path}"
           done
-          curl -fsS https://zzj-superstaff.duckdns.org/m | grep -q '/xuanshu-assets/_next/'
+          curl -fsS https://xuanshu.fjzxhc.cn/m | grep -q '/xuanshu-assets/_next/'

@@ -7,9 +7,13 @@ set -Eeuo pipefail
 APP=/opt/xuanshu-mobile-preview
 RELEASE="$APP/releases/$RELEASE_SHA"
 PORT=3210
-NGINX_SITE=/etc/nginx/sites-available/superstaff-duckdns
+DOMAIN=xuanshu.fjzxhc.cn
+NGINX_SITE=/etc/nginx/sites-available/xuanshu-fjzxhc-cn
+NGINX_ENABLED=/etc/nginx/sites-enabled/xuanshu-fjzxhc-cn
 SERVICE=/etc/systemd/system/xuanshu-mobile-preview.service
 SHARED_ENV="$APP/shared/app.env"
+ACME_ROOT=/var/www/xuanshu-acme
+CERT_DIR="/etc/letsencrypt/live/$DOMAIN"
 
 if ss -ltn | awk '{print $4}' | grep -Eq "(^|:)${PORT}$" && ! systemctl is-active --quiet xuanshu-mobile-preview.service; then
   echo "Port $PORT is already used by another service" >&2
@@ -17,7 +21,6 @@ if ss -ltn | awk '{print $4}' | grep -Eq "(^|:)${PORT}$" && ! systemctl is-activ
 fi
 
 test -f "$ARTIFACT"
-test -f "$NGINX_SITE"
 mkdir -p "$APP/releases"
 rm -rf "$RELEASE"
 mkdir -p "$RELEASE"
@@ -27,7 +30,7 @@ chown -R www-data:www-data "$RELEASE"
 
 cat > "$SERVICE" <<EOF
 [Unit]
-Description=Xuanshu mobile preview
+Description=Xuanshu mobile app
 After=network.target
 
 [Service]
@@ -66,87 +69,81 @@ for attempt in $(seq 1 20); do
   sleep 2
 done
 
-BACKUP="$NGINX_SITE.bak.$(date +%Y%m%d%H%M%S)"
-cp "$NGINX_SITE" "$BACKUP"
+mkdir -p "$ACME_ROOT"
+if [ ! -f "$CERT_DIR/fullchain.pem" ]; then
+  if ! command -v certbot >/dev/null 2>&1; then
+    apt-get update
+    apt-get install -y certbot
+  fi
 
-python3 - "$NGINX_SITE" <<'PY'
-from pathlib import Path
-import re
-import sys
+  cat > "$NGINX_SITE" <<EOF
+server {
+    listen 80;
+    listen [::]:80;
+    server_name $DOMAIN;
 
-path = Path(sys.argv[1])
-text = path.read_text(encoding="utf-8")
-start = "    # BEGIN XUANSHU_MOBILE_PREVIEW\n"
-end = "    # END XUANSHU_MOBILE_PREVIEW\n"
-
-if start in text:
-    text = re.sub(
-        re.escape(start) + r".*?" + re.escape(end),
-        "",
-        text,
-        flags=re.DOTALL,
-    )
-
-anchor = "    location / {\n"
-if text.count(anchor) != 1:
-    raise SystemExit("Expected exactly one root location in the DuckDNS server block")
-
-block = """    # BEGIN XUANSHU_MOBILE_PREVIEW
-    location = /m {
-        proxy_pass http://127.0.0.1:3210;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+    location ^~ /.well-known/acme-challenge/ {
+        root $ACME_ROOT;
     }
 
-    location ^~ /m/ {
-        proxy_pass http://127.0.0.1:3210;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+    location / {
+        return 302 https://\$host\$request_uri;
     }
-
-    location ~ ^/api/(analytics|health|mobile-chat|report-narratives|auth/(login|logout|register)|me|sync/profiles)$ {
-        proxy_pass http://127.0.0.1:3210;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location ^~ /xuanshu-assets/_next/ {
-        rewrite ^/xuanshu-assets(/_next/.*)$ $1 break;
-        proxy_pass http://127.0.0.1:3210;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-    # END XUANSHU_MOBILE_PREVIEW
-
-"""
-
-path.write_text(text.replace(anchor, block + anchor), encoding="utf-8")
-PY
-
-if ! nginx -t; then
-  cp "$BACKUP" "$NGINX_SITE"
+}
+EOF
+  ln -sfn "$NGINX_SITE" "$NGINX_ENABLED"
   nginx -t
-  exit 1
+  systemctl reload nginx
+  certbot certonly \
+    --webroot \
+    --webroot-path "$ACME_ROOT" \
+    --domain "$DOMAIN" \
+    --non-interactive \
+    --agree-tos \
+    --register-unsafely-without-email
 fi
 
+cat > "$NGINX_SITE" <<EOF
+server {
+    listen 80;
+    listen [::]:80;
+    server_name $DOMAIN;
+    return 301 https://\$host\$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name $DOMAIN;
+
+    ssl_certificate $CERT_DIR/fullchain.pem;
+    ssl_certificate_key $CERT_DIR/privkey.pem;
+
+    location = / {
+        return 302 /m;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:$PORT;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+EOF
+
+ln -sfn "$NGINX_SITE" "$NGINX_ENABLED"
+nginx -t
 systemctl reload nginx
-curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/
-curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/m
-curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/m/report/bazi
-curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/m/report/zodiac
-curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/m/chart/natal
-curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/m/chart/transit
-curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/api/health
+
+for path in / /m /m/report/bazi /m/report/zodiac /m/chart/natal /m/chart/transit /api/health; do
+  curl --retry 5 --retry-delay 2 --retry-all-errors -fsS -o /dev/null "https://$DOMAIN${path}"
+done
 
 find "$APP/releases" -mindepth 1 -maxdepth 1 -type d ! -path "$RELEASE" -printf '%T@ %p\n' \
   | sort -nr \
@@ -155,4 +152,4 @@ find "$APP/releases" -mindepth 1 -maxdepth 1 -type d ! -path "$RELEASE" -printf 
   | xargs -r rm -rf
 rm -f "$ARTIFACT"
 
-echo "Xuanshu mobile preview deployed at release $RELEASE_SHA"
+echo "Xuanshu mobile app deployed at release $RELEASE_SHA on https://$DOMAIN"
