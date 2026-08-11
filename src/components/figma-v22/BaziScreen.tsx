@@ -62,10 +62,10 @@ function SegmentedControl({ tabs, active, onChange }: {
 
 // ─── Four-pillar strip ────────────────────────────────────────────────────────
 const FALLBACK_PILLARS: FigmaPillar[] = [
-  { label: "年柱", stem: "甲", branch: "辰", stemColor: "#6BBFA0", note: "根" },
-  { label: "月柱", stem: "壬", branch: "午", stemColor: "#7BBDE0", note: "势" },
-  { label: "日柱", stem: "癸", branch: "卯", stemColor: "#E8816A", note: "我" },
-  { label: "时柱", stem: "丙", branch: "子", stemColor: "#E9C97E", note: "向" },
+  { label: "年柱", stem: "甲", branch: "辰", stemColor: "#6BBFA0", note: "早年" },
+  { label: "月柱", stem: "壬", branch: "午", stemColor: "#7BBDE0", note: "环境" },
+  { label: "日柱", stem: "癸", branch: "卯", stemColor: "#E8816A", note: "自己" },
+  { label: "时柱", stem: "丙", branch: "子", stemColor: "#E9C97E", note: "后续" },
 ];
 
 function FourPillars({ pillars = FALLBACK_PILLARS }: { pillars?: FigmaPillar[] }) {

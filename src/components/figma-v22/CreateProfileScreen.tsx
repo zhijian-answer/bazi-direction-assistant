@@ -16,6 +16,7 @@ export interface ProfileFormData {
 interface CreateProfileProps {
   onBack: () => void;
   onComplete: (data: ProfileFormData) => void;
+  initialData?: Partial<ProfileFormData>;
 }
 
 const SHICHEN = [
@@ -87,18 +88,18 @@ function SelectBox({
   );
 }
 
-export default function CreateProfileScreen({ onBack, onComplete }: CreateProfileProps) {
+export default function CreateProfileScreen({ onBack, onComplete, initialData }: CreateProfileProps) {
   const [step, setStep] = useState(0);
-  const [name, setName] = useState("");
-  const [gender, setGender] = useState<"未选" | "女" | "男">("未选");
-  const [calType, setCalType] = useState<"公历" | "农历">("公历");
-  const [year, setYear] = useState(1995);
-  const [month, setMonth] = useState(6);
-  const [day, setDay] = useState(15);
-  const [shichen, setShichen] = useState(-1);
-  const [uncertain, setUncertain] = useState(false);
-  const [city, setCity] = useState("");
-  const [citySkipped, setCitySkipped] = useState(false);
+  const [name, setName] = useState(initialData?.name || "");
+  const [gender, setGender] = useState<"未选" | "女" | "男">(initialData?.gender || "未选");
+  const [calType, setCalType] = useState<"公历" | "农历">(initialData?.calType || "公历");
+  const [year, setYear] = useState(initialData?.year || 1995);
+  const [month, setMonth] = useState(initialData?.month || 6);
+  const [day, setDay] = useState(initialData?.day || 15);
+  const [shichen, setShichen] = useState(initialData?.shichen ?? -1);
+  const [uncertain, setUncertain] = useState((initialData?.shichen ?? -1) < 0);
+  const [city, setCity] = useState(initialData?.city || "");
+  const [citySkipped, setCitySkipped] = useState(initialData?.citySkipped || false);
 
   function handleBack() {
     if (step === 0) onBack();
@@ -121,7 +122,7 @@ export default function CreateProfileScreen({ onBack, onComplete }: CreateProfil
     step === 1 ? (uncertain || shichen >= 0) :
     (citySkipped || city.trim().length > 0);
 
-  const primaryLabel = step === 2 ? "建立我的观察档案" : "下一步";
+  const primaryLabel = step === 2 ? "保存出生资料" : "下一步";
 
   return (
     <div style={{
@@ -152,7 +153,7 @@ export default function CreateProfileScreen({ onBack, onComplete }: CreateProfil
           <div style={{
             fontSize: 16, fontFamily: "'Noto Serif SC', serif",
             fontWeight: 600, color: "#28253D",
-          }}>建立观察档案</div>
+          }}>填写出生资料</div>
           <div style={{ fontSize: 11.5, color: "#9088A8", marginTop: 1 }}>
             {step === 0 ? "基本信息" : step === 1 ? "出生时间" : "出生地点"}
           </div>
@@ -234,7 +235,7 @@ export default function CreateProfileScreen({ onBack, onComplete }: CreateProfil
               border: "1px solid rgba(233,201,126,0.28)",
               fontSize: 12, color: "#7B6530", lineHeight: 1.65,
             }}>
-              所有信息仅在你的设备上处理，不会上传或储存在任何服务器上。
+              出生资料会保存在当前设备。生成在线解读时，只发送完成本次分析所需的信息，不会在页面中公开展示。
             </div>
           </div>
         )}

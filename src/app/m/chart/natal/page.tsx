@@ -1,5 +1,5 @@
-import { FullAstrologyPage } from "@/components/mobile/FullAstrologyPage";
+import FigmaV22App from "@/components/figma-v22/App";
 
 export default function MobileNatalChartPage() {
-  return <FullAstrologyPage initialMode="natal" transitSeed={new Date().toISOString()} />;
+  return <FigmaV22App initialScreen="natal" />;
 }

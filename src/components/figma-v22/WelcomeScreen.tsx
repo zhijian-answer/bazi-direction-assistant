@@ -1,6 +1,8 @@
 // ─── WelcomeScreen ────────────────────────────────────────────────────────────
 
 // Original static orbit instrument — no animation, no copied assets
+import { svgNumber } from "./svgMath";
+
 function WelcomeInstrument() {
   const CX = 90, CY = 90;
   const R_OUTER = 78, R_MID = 58, R_INNER = 40, R_CENTER = 24;
@@ -33,12 +35,12 @@ function WelcomeInstrument() {
         return (
           <g key={b}>
             <circle
-              cx={CX + dotR * Math.cos(a)} cy={CY + dotR * Math.sin(a)}
+              cx={svgNumber(CX + dotR * Math.cos(a))} cy={svgNumber(CY + dotR * Math.sin(a))}
               r={isCard ? 2.8 : 1.8}
               fill={isCard ? "#E8816A" : "rgba(192,172,222,0.52)"} />
             {isCard && (
               <text
-                x={CX + lblR * Math.cos(a)} y={CY + lblR * Math.sin(a)}
+                x={svgNumber(CX + lblR * Math.cos(a))} y={svgNumber(CY + lblR * Math.sin(a))}
                 textAnchor="middle" dominantBaseline="middle"
                 fontSize={10} fontFamily="'Noto Serif SC', serif"
                 fill="rgba(107,96,136,0.60)">{b}</text>
@@ -55,10 +57,10 @@ function WelcomeInstrument() {
       {/* 8 spoke ticks from mid to inner */}
       {Array.from({ length: 8 }, (_, i) => {
         const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
-        const x1 = CX + (R_INNER + 2) * Math.cos(a);
-        const y1 = CY + (R_INNER + 2) * Math.sin(a);
-        const x2 = CX + (R_MID - 4) * Math.cos(a);
-        const y2 = CY + (R_MID - 4) * Math.sin(a);
+        const x1 = svgNumber(CX + (R_INNER + 2) * Math.cos(a));
+        const y1 = svgNumber(CY + (R_INNER + 2) * Math.sin(a));
+        const x2 = svgNumber(CX + (R_MID - 4) * Math.cos(a));
+        const y2 = svgNumber(CY + (R_MID - 4) * Math.sin(a));
         return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
           stroke="rgba(192,172,222,0.28)" strokeWidth={0.8} />;
       })}
@@ -77,8 +79,8 @@ function WelcomeInstrument() {
         const a = deg * Math.PI / 180;
         return (
           <line key={deg}
-            x1={CX - R_CENTER * Math.cos(a)} y1={CY - R_CENTER * Math.sin(a)}
-            x2={CX + R_CENTER * Math.cos(a)} y2={CY + R_CENTER * Math.sin(a)}
+            x1={svgNumber(CX - R_CENTER * Math.cos(a))} y1={svgNumber(CY - R_CENTER * Math.sin(a))}
+            x2={svgNumber(CX + R_CENTER * Math.cos(a))} y2={svgNumber(CY + R_CENTER * Math.sin(a))}
             stroke="rgba(233,201,126,0.35)" strokeWidth={0.8} />
         );
       })}
@@ -159,7 +161,7 @@ export default function WelcomeScreen({ onCreateProfile, onViewDemo }: WelcomePr
             fontSize: 13.5, fontFamily: "'Noto Sans SC', sans-serif",
             color: "#4A4168", lineHeight: 1.72,
           }}>
-            玄枢把这些结构翻译成你可以直接观察到的行为习惯和日常判断。它不做预测，帮你把自己看得更清楚一点。
+            不需要先懂八字或星盘。玄枢会先说清楚你在生活里常遇到的样子，再把背后的依据留给你慢慢看。
           </div>
         </div>
       </div>

@@ -5,8 +5,8 @@ import { House, Orbit, Telescope, UserRound } from "lucide-react";
 import Link from "next/link";
 
 const navItems = [
-  { id: "home", label: "首页", href: "/m", icon: House },
-  { id: "report", label: "观测", href: "/m/report", icon: Orbit },
+  { id: "home", label: "今日", href: "/m", icon: House },
+  { id: "report", label: "报告", href: "/m/report", icon: Orbit },
   { id: "tools", label: "工具", href: "/m/tools", icon: Telescope },
   { id: "profile", label: "我的", href: "/m/profile", icon: UserRound },
 ] as const;

@@ -1,5 +1,5 @@
-import { CompatibilityHome } from "@/components/mobile/CompatibilityHome";
+import { CompatibilityV4App } from "@/components/figma-v22/compatibility-v4/CompatibilityV4App";
 
 export default function MobileCompatibilityPage() {
-  return <CompatibilityHome />;
+  return <CompatibilityV4App initialScreen="home" />;
 }

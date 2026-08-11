@@ -24,7 +24,7 @@ export function PillarTable({ chart, timeUnknown }: { chart: BaziChart; timeUnkn
           </tbody>
         </table>
       </div>
-      {timeUnknown && <p className="border-t border-[var(--line)] bg-[var(--soft)] px-5 py-3 text-xs leading-5 text-[var(--muted)]">出生时间未知，当前只展示年、月、日三柱。系统不会使用中午或随机时辰补出时柱与大运结论。</p>}
+      {timeUnknown && <p className="border-t border-[var(--line)] bg-[var(--soft)] px-5 py-3 text-xs leading-5 text-[var(--muted)]">出生时间未知，当前只展示年、月、日三柱，也不会使用中午或随机时辰补出时柱与大运结论。</p>}
     </section>
   );
 }

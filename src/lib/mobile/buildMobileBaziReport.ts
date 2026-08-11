@@ -2,6 +2,7 @@ import { Solar } from "lunar-javascript";
 import { buildBaziChart, elementLabels } from "../bazi";
 import type { ChartPosition, ElementKey } from "../types";
 import type { ElementDatum, FeatureTileData, InsightCardData, MobileProfile, ShareInsightData } from "./types";
+import { baziNarrativeByElement } from "../../content/mobile-copy";
 
 const elementColors: Record<ElementKey, string> = { wood: "#6F8F65", fire: "#C96858", earth: "#B38B5E", metal: "#8F918D", water: "#62899B" };
 const elementMeaning: Record<ElementKey, string> = {
@@ -51,6 +52,7 @@ export function buildMobileBaziReport(profile: MobileProfile) {
   });
   const dayElement = chart.dayMaster.element;
   const style = elementStyle[dayElement];
+  const narrative = baziNarrativeByElement[dayElement];
   const strongest = chart.wuxing.strongest[0] || dayElement;
   const weakest = chart.wuxing.weakest[0] || dayElement;
   const total = Object.values(chart.wuxing.balance).reduce((sum, value) => sum + value, 0) || 1;
@@ -83,33 +85,33 @@ export function buildMobileBaziReport(profile: MobileProfile) {
     dayLabel,
     strongestLabel,
     weakestLabel,
-    title: `${dayLabel}日出生的你，${style.decision}`,
-    subtitle: `你的命盘重心更偏${strongestLabel}，说明${elementMeaning[strongest]}更容易成为主要发力方式；${weakestLabel}相对较少，适合通过环境和习惯补足。`,
+    title: `${dayLabel}日主的你，${narrative.hook}`,
+    subtitle: narrative.scene,
     dayMaster: style.decision,
-    tags: [style.tag, `${strongestLabel}是主要力量`, `${weakestLabel}需要补充`],
+    tags: narrative.tags,
     basis: `依据：${dayLabel}日主 · ${strongestLabel}为结构重心 · ${tenGods[0]?.name || "十神"}更突出`,
-    pattern: `你更容易通过${style.strength}建立稳定感`,
-    patternEvidence: `从命盘结构看，${strongestLabel}承担了更多力量，${elementMeaning[strongest]}会成为高频倾向；${weakestLabel}较少意味着相关能力更依赖后天环境。`,
-    patternScene: `当环境允许你${style.strength}时，更容易持续投入；遇到${style.pressure}时，消耗会明显增加。`,
+    pattern: "什么样的环境，会让你更像自己",
+    patternEvidence: `当环境允许你${style.strength}，而且目标与回应都比较清楚时，你通常越做越稳。`,
+    patternScene: `如果长期遇到${style.pressure}，你会把很多力气花在确认和防守上；那种累未必是能力不够，而是环境没有给你合适的落点。`,
     patternBoundary: "这里描述的是结构倾向，不是固定命运。现实经验、关系质量和具体选择仍然会改变结果。",
     coverReading: {
-      title: style.strength,
-      note: `${style.decision}。目标和反馈越清楚，这种力量越容易稳定发挥。`,
+      title: narrative.misunderstanding,
+      note: `这部分与${dayLabel}日主、${strongestLabel}较突出有关。目标和反馈越清楚，你越容易稳定发挥。`,
     },
     supportElements: [strongestLabel, weakestLabel],
   };
 
   const lightConclusions: FeatureTileData[] = [
-    { eyebrow: "适合方向", title: `把${style.strength}变成长期能力`, value: `${strongestLabel}的力量更容易被调用`, note: `选择能持续积累、反馈明确的环境，更容易让你的${strongestLabel}优势变成结果。`, highlight: "先看能否形成积累" },
-    { eyebrow: "关系倾向", title: "先把需要说清楚，再观察回应", value: style.relationship, note: `你的核心方式是“${style.decision}”。关系里不必只靠猜测，把感受、事实和请求分开表达，会更容易看见对方是否愿意持续回应。`, highlight: `${style.tag}，也要看真实行动` },
-    { eyebrow: "资源节奏", title: `用${weakestLabel}补足长期稳定性`, value: "适合可复盘、可持续的安排", note: `在涉及时间、金钱和精力时，为${weakestLabel}对应的能力预留空间，能减少只靠单一优势硬撑。`, highlight: "平衡比追涨重要" },
+    { eyebrow: "适合你的环境", title: "不需要反复证明，也能把事情做深", value: `更容易发挥${strongestLabel}带来的优势`, note: `目标清楚、反馈真实、可以持续积累的环境，更容易让你把${style.strength}变成长期能力。`, highlight: "清楚比热闹重要" },
+    { eyebrow: "关系里的需要", title: "不用解释太多，也不用一直猜", value: style.relationship, note: "真正舒服的关系，不只让你感到被需要，也允许你直接说出自己的需要。回应是否稳定，比一时热烈更值得看。", highlight: "看行动，也说需要" },
+    { eyebrow: "时间与金钱", title: "看得懂的安排，才更容易坚持", value: "适合可复盘、可持续的节奏", note: `涉及时间、钱和精力时，先留出${weakestLabel}对应的余地。比起跟着短期热度走，你更适合知道投入最后会留下什么。`, highlight: "先算长期成本" },
   ];
 
   const shareInsights: ShareInsightData[] = [
-    { id: "poster", eyebrow: "一句话人格结论", title: identity.title, body: identity.subtitle, footer: `${dayLabel}日主 · 结构观察`, tone: "ink" },
-    { id: "zones", eyebrow: "我的稳定区 / 消耗区", title: `${style.strength}让你稳定，${style.pressure}让你消耗`, body: `稳定区来自${strongestLabel}的高频支持；消耗区常出现在${weakestLabel}相关条件长期不足时。`, footer: "先识别环境，再决定投入", tone: "warm" },
-    { id: "today", eyebrow: "今天更适合怎么做", title: `先完成一件能发挥${strongestLabel}优势的小事`, body: `把最想推进的事缩小到 30 分钟内可以完成的一步，完成后再决定是否加速。`, footer: "今日行动提醒", tone: "sage" },
-    { id: "signature", eyebrow: "这张盘最有辨识度的地方", title: `${dayLabel}的核心方式，遇上${strongestLabel}的主要力量`, body: `${style.decision}。真正能让你稳定发挥的，是能持续调用${style.strength}的环境。`, footer: "让命理，被科学看见", tone: "coral" },
+    { id: "poster", eyebrow: "关于我", title: narrative.hook, body: narrative.scene, footer: `${dayLabel}日主 · ${strongestLabel}较突出`, tone: "ink" },
+    { id: "zones", eyebrow: "让我自在 / 让我疲惫", title: `能${style.strength}时，你会越来越稳`, body: `如果长期面对${style.pressure}，你会需要更多独处和确定感，才能慢慢恢复。`, footer: "先看环境，再决定投入", tone: "warm" },
+    { id: "today", eyebrow: "今天可以怎么做", title: narrative.action, body: "不需要一次改变全部。只做第一步，也算把事情重新交回自己手里。", footer: "给今天的一句提醒", tone: "sage" },
+    { id: "signature", eyebrow: "这张盘最像你的地方", title: narrative.misunderstanding, body: `从${dayLabel}日主和${strongestLabel}较突出的表现看，你更重视一件事是否值得、是否有落点。`, footer: "让命理，被科学看见", tone: "coral" },
   ];
 
   const todayAction = {
@@ -118,10 +120,10 @@ export function buildMobileBaziReport(profile: MobileProfile) {
   };
 
   const readings: InsightCardData[] = [
-    reading("day-master", "你做决定的方式", style.decision, `日主是${dayLabel}，代表你处理外界事情时最常用的方式。`, `${style.decision}。这会在工作选择、关系判断和日常安排中反复出现。这里描述的是高频方式，不代表你只能这样做。`),
+    reading("day-master", "你通常怎么做决定", narrative.hook, `日主是${dayLabel}，常用来观察你处理外界事情时最熟悉的方式。`, `${narrative.scene}这会在工作选择、关系判断和日常安排中反复出现，但不代表你只能这样做。`),
     reading("month-pillar", "你进入环境后的适应方式", `月柱为${chart.pillars.month}，你会先辨认环境的主要规则`, "月柱用于观察成长环境和进入群体后的适应节奏。", `你的月柱十神是${chart.tenGods.month}。进入新环境时，先确认关键人物、反馈方式和责任边界，会比立刻证明自己更省力。`),
-    reading("career", "什么样的工作更容易让你发挥", `${style.strength}能让复杂事情逐渐变清楚`, "这里看工作偏好，不限定具体职业。", `命盘以${strongestLabel}为重心，适合把${elementMeaning[strongest]}转化为可积累的能力。职业选择仍需结合经验、机会和现实成本。`),
-    reading("relationship", "你在关系里最在意什么", style.relationship, "关系倾向描述互动习惯，不代表固定结局。", `你的核心方式是${style.decision}。关系里把感受和请求说清楚，再观察回应是否持续，会比反复猜测更有帮助。`),
+    reading("career", "什么样的工作让你越做越有底气", `${style.strength}会让你慢慢进入状态`, "这里看的是工作偏好，不限定具体职业。", `命盘以${strongestLabel}为重心，适合把${elementMeaning[strongest]}变成可以积累的能力。真正要看的，不是职位名字，而是这份工作能不能让你的能力留下来。`),
+    reading("relationship", "在关系里，你真正想确认什么", style.relationship, "关系倾向描述互动习惯，不代表固定结局。", "你更需要的是不用反复猜测的关系。把感受和请求说清楚，再看对方是否持续回应，会比只盯着一时的热烈更有帮助。"),
     reading(
       "annual",
       "最近更适合主动，还是先稳住",

@@ -3,7 +3,7 @@ import type { NarrativeRequest, NarrativeResponse } from "./contracts";
 import { buildLocalNarrative } from "./local";
 import { narrativePromptVersion } from "./prompt";
 import { generateNarrativeWithApi } from "./provider";
-import { inspectNarrativeCard, normalizeNarrativeCard } from "./quality";
+import { inspectNarrativeCard, inspectNarrativeContext, normalizeNarrativeCard } from "./quality";
 
 const cache = new Map<string, NarrativeResponse>();
 const maxCacheEntries = 240;
@@ -28,22 +28,29 @@ export async function resolveNarrative(input: NarrativeRequest): Promise<Narrati
 
   const localCard = buildLocalNarrative(input);
   try {
-    const generated = await generateNarrativeWithApi(input);
+    let generated = await generateNarrativeWithApi(input);
     if (!generated) {
       return cacheResult(key, { card: localCard, source: "catalog", promptVersion, issues: [] });
     }
 
-    const card = normalizeNarrativeCard({ ...generated.card, evidenceSummary: input.fallback.evidenceSummary });
-    const issues = inspectNarrativeCard(card);
+    let card = normalizeNarrativeCard({ ...generated.card, evidenceSummary: input.fallback.evidenceSummary });
+    let issues = [...inspectNarrativeCard(card), ...inspectNarrativeContext(card, input.context)];
+    for (let attempt = 0; issues.length && attempt < 2; attempt += 1) {
+      const revised = await generateNarrativeWithApi(input, issues);
+      if (!revised) break;
+      generated = revised;
+      card = normalizeNarrativeCard({ ...revised.card, evidenceSummary: input.fallback.evidenceSummary });
+      issues = [...inspectNarrativeCard(card), ...inspectNarrativeContext(card, input.context)];
+    }
     if (issues.length) {
-      return cacheResult(key, {
+      return {
         card: localCard,
         source: "fallback",
         provider: generated.provider,
         model: generated.model,
         promptVersion,
-        issues,
-      });
+        issues: [...new Set(issues)],
+      };
     }
 
     return cacheResult(key, {

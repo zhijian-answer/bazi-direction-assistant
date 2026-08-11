@@ -78,7 +78,7 @@ export function PublicHome({ busy, error, onRegister, onLogin }: Props) {
           <div className="product-step-grid">
             {[
               ["01", "填写出生信息", "选择阳历或农历，填写出生日期、时间、地点和性别。", "约 1 分钟"],
-              ["02", "生成命盘结构", "系统计算四柱、五行、十神、关系和大运流年。", "即时生成"],
+              ["02", "生成命盘结构", "根据出生资料排出四柱、五行、十神和大运流年。", "即时生成"],
               ["03", "阅读并保存报告", "按章节阅读，复制重点或生成适合手机保存的分享图。", "随时回来查看"],
             ].map(([number, title, body, meta], index) => (
               <Reveal key={number} className={`product-delay-${index + 1}`}><article className="product-step"><span>{number}</span><div><h3>{title}</h3><p>{body}</p><small>{meta}</small></div>{index < 2 && <ArrowRight aria-hidden="true" />}</article></Reveal>
@@ -153,4 +153,3 @@ export function PublicHome({ busy, error, onRegister, onLogin }: Props) {
     </main>
   );
 }
-

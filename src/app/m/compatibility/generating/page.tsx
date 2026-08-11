@@ -1,5 +1,5 @@
-import { CompatibilityGeneratingScreen } from "@/components/mobile/CompatibilityGeneratingScreen";
+import { CompatibilityV4App } from "@/components/figma-v22/compatibility-v4/CompatibilityV4App";
 
 export default function MobileCompatibilityGeneratingPage() {
-  return <CompatibilityGeneratingScreen />;
+  return <CompatibilityV4App initialScreen="generating" />;
 }

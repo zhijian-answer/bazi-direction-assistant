@@ -50,7 +50,7 @@ export function trackMobileEvent(event: MobileAnalyticsEventName, metadata: Even
   ) return;
   const payload = {
     event,
-    appVersion: process.env.NEXT_PUBLIC_APP_VERSION || "0.1.0",
+    appVersion: process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0",
     ruleVersion: "market-v1",
     occurredAt: new Date().toISOString(),
     route: window.location.pathname,

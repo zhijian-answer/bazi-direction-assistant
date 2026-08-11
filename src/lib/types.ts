@@ -151,7 +151,7 @@ export type GuidanceQuestion = {
   answer: string;
   createdAt: string;
   usage: {
-    source: "openai" | "local" | "fallback";
+    source: "openai" | "api" | "local" | "fallback";
     model?: string;
     estimatedTokens: number;
     error?: string;

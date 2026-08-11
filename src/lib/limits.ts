@@ -19,6 +19,9 @@ export const appLimits = {
   rateLimitLogin: readPositiveInt("RATE_LIMIT_LOGIN", 20),
   rateLimitProfileWrite: readPositiveInt("RATE_LIMIT_PROFILE_WRITE", 20),
   rateLimitQuestionWrite: readPositiveInt("RATE_LIMIT_QUESTION_WRITE", 30),
+  rateLimitChatWrite: readPositiveInt("RATE_LIMIT_CHAT_WRITE", 12),
+  rateLimitChatDaily: readPositiveInt("RATE_LIMIT_CHAT_DAILY", 10),
+  rateLimitDayWindowMs: readPositiveInt("RATE_LIMIT_DAY_WINDOW_MS", 86_400_000),
   rateLimitCheckinWrite: readPositiveInt("RATE_LIMIT_CHECKIN_WRITE", 40),
 };
 

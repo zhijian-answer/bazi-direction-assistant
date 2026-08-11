@@ -1,5 +1,5 @@
-import { CompatibilityHistoryPage } from "@/components/mobile/CompatibilityHistoryPage";
+import { CompatibilityV4App } from "@/components/figma-v22/compatibility-v4/CompatibilityV4App";
 
 export default function MobileCompatibilityHistoryRoute() {
-  return <CompatibilityHistoryPage />;
+  return <CompatibilityV4App initialScreen="history" />;
 }

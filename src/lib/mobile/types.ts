@@ -88,6 +88,11 @@ export type DailyInsightData = {
   keyword: string;
   title: string;
   summary: string;
+  workNote: string;
+  relationshipNote: string;
+  oneAction: string;
+  evidenceLabel: string;
+  shareLine: string;
   suitable: string;
   avoid: string;
   action: string;

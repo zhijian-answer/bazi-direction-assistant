@@ -3,8 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   applicationName: "玄枢",
-  title: "玄枢｜免费八字排盘与结构化命盘报告",
-  description: "免费的中文八字排盘工具，提供四柱八字、五行、十神、地支关系、大运流年的结构化参考。",
+  title: "玄枢｜看懂自己，也看清眼前的选择",
+  description: "用更容易看懂的方式，阅读生辰、星盘、紫微与关系报告。",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/app-icon.svg",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
   other: {
     "mobile-web-app-capable": "yes",
-    "theme-color": "#0f1114",
+    "theme-color": "#f4f0ff",
   },
 };
 

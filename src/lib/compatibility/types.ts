@@ -45,6 +45,15 @@ export type CompatibilityReport = {
   dimensions: CompatibilityDimension[];
   sections: CompatibilitySection[];
   warnings: string[];
+  shareLine?: string;
+  narrativeQuestions?: string[];
+  delivery?: {
+    source: "api" | "fallback";
+    provider?: string;
+    model?: string;
+    promptVersion: string;
+    generatedAt: string;
+  };
   engine: {
     name: string;
     version: string;

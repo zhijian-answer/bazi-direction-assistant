@@ -35,14 +35,19 @@ BACKUP_RETENTION=30
 如果要启用真实 AI 回答：
 
 ```bash
-OPENAI_API_KEY=你的 OpenAI API Key
-OPENAI_MODEL=gpt-4.1-mini
-OPENAI_TIMEOUT_MS=20000
+AI_PROVIDER=deepseek
+DEEPSEEK_API_KEY=你的 DeepSeek API Key
+AI_BASE_URL=https://api.deepseek.com
+AI_MODEL=deepseek-chat
+AI_TIMEOUT_MS=30000
+NARRATIVE_AI_ENABLED=true
+CHAT_AI_ENABLED=true
+NEXT_PUBLIC_NARRATIVE_API_ENABLED=true
 AI_FORCE_LOCAL=false
 AI_FALLBACK_ON_ERROR=true
 ```
 
-不配置 `OPENAI_API_KEY` 时，系统会使用本地规则引擎，适合早期免费测试和服务器联调。
+不配置 `DEEPSEEK_API_KEY` 时，系统会使用本地规则引擎，适合早期免费测试和服务器联调。密钥只配置在服务器端，禁止使用 `NEXT_PUBLIC_` 前缀。
 
 如果希望控制成本，可以设置：
 

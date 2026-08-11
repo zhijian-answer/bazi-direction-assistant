@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { releaseFeatures } from "@/lib/mobile/releaseFeatures";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ReportCategory = "全部" | "生辰" | "星盘" | "紫微" | "合盘" | "流盘";
@@ -276,8 +277,6 @@ export default function ReportHubScreen({
   onGoToCombinedInsight,
   profileName,
   baziSummary,
-  natalSummary,
-  ziweiSummary,
   hasExactTime,
 }: Props) {
   const [activeTab, setActiveTab] = useState<ReportCategory>("全部");
@@ -290,10 +289,10 @@ export default function ReportHubScreen({
       category: "生辰",
       iconKey: "bazi",
       title: "生辰八字",
-      summary: baziSummary,
-      status: "已解读",
+      summary: "看懂你做决定、与人相处，以及适合怎样发展",
+      status: "继续看",
       statusColor: "#6BBFA0",
-      updatedAt: "当前档案",
+      updatedAt: "个人报告",
       onNavigate: onGoToBazi,
     },
     {
@@ -301,10 +300,10 @@ export default function ReportHubScreen({
       category: "星盘",
       iconKey: "natal",
       title: "本命星盘",
-      summary: natalSummary,
-      status: "已生成",
+      summary: "看看情绪需要、关系反应和表达方式如何连在一起",
+      status: "继续看",
       statusColor: "#7BBDE0",
-      updatedAt: "当前档案",
+      updatedAt: "个人报告",
       onNavigate: onGoToNatal,
     },
     {
@@ -312,10 +311,10 @@ export default function ReportHubScreen({
       category: "紫微",
       iconKey: "ziwei",
       title: "紫微斗数",
-      summary: ziweiSummary,
-      status: hasExactTime ? "已排盘" : "待补资料",
+      summary: hasExactTime ? "看看工作、关系与人生重心最近落在哪里" : "补充出生时间后，才能继续排列十二宫",
+      status: hasExactTime ? "继续看" : "补充时间",
       statusColor: "#E9C97E",
-      updatedAt: hasExactTime ? "当前档案" : "资料不足",
+      updatedAt: hasExactTime ? "个人报告" : "还差出生时间",
       onNavigate: onGoToZiwei,
     },
     {
@@ -323,10 +322,10 @@ export default function ReportHubScreen({
       category: "合盘",
       iconKey: "compat",
       title: "两人合盘",
-      summary: "选择两份真实档案后，查看关系结构",
-      status: "去创建",
+      summary: "看懂为什么互相吸引，又为什么总在同一处误会",
+      status: "去看看",
       statusColor: "#6BBFA0",
-      updatedAt: "尚无记录",
+      updatedAt: "还没有记录",
       onNavigate: onGoToComp,
     },
     {
@@ -334,10 +333,10 @@ export default function ReportHubScreen({
       category: "流盘",
       iconKey: "liupan",
       title: `流盘 · ${new Date().getFullYear()} 年`,
-      summary: `当前阶段与 ${new Date().getFullYear()} 年度节奏观察`,
-      status: "可查看",
+      summary: `看看 ${new Date().getFullYear()} 年更适合推进、等待，还是先收尾`,
+      status: "看看近期",
       statusColor: "#C0ACDE",
-      updatedAt: "今日",
+      updatedAt: "本月",
       onNavigate: onGoToFlow,
     },
   ];
@@ -456,7 +455,7 @@ export default function ReportHubScreen({
             fontSize: 12, fontFamily: "'Noto Sans SC', sans-serif",
             color: "#7B6E90", marginBottom: 14,
           }}>
-            从当前档案的生辰结构继续阅读
+            从上次停下的地方继续，不用重新找
           </div>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
@@ -537,7 +536,7 @@ export default function ReportHubScreen({
       </div>
 
       {/* ── 高阶合参 entry ── */}
-      <div style={{ padding: "0 18px 16px" }}>
+      {releaseFeatures.combinedInsight && <div style={{ padding: "0 18px 16px" }}>
         <button type="button" onClick={onGoToCombinedInsight} style={{
           borderRadius: 20, padding: "16px 18px",
           background: "linear-gradient(140deg, rgba(255,255,255,0.82), rgba(238,233,248,0.76))",
@@ -560,7 +559,7 @@ export default function ReportHubScreen({
               高阶合参
             </div>
             <div style={{ fontSize: 11.5, fontFamily: "'Noto Sans SC', sans-serif", color: "#7B6E90" }}>
-              八字、紫微证据已具备 · 奇门与权重引擎接入中
+              从不同角度看同一个问题，结论和分歧都会说明
             </div>
           </div>
           <span style={{
@@ -568,9 +567,9 @@ export default function ReportHubScreen({
             fontSize: 10.5, fontFamily: "'Noto Sans SC', sans-serif",
             color: "#8060C0", background: "rgba(192,172,222,0.16)",
             border: "1px solid rgba(192,172,222,0.32)",
-          }}>了解进度 →</span>
+          }}>了解高阶合参 →</span>
         </button>
-      </div>
+      </div>}
 
       {/* ── Recent Section ── */}
       <div style={{ padding: "4px 18px 28px" }}>
@@ -586,7 +585,7 @@ export default function ReportHubScreen({
           fontSize: 12, fontFamily: "'Noto Sans SC', sans-serif",
           color: "#7B6E90", lineHeight: 1.7,
         }}>
-          当前报告在本地按档案即时生成。历史生成时间与阅读进度尚未接入，因此这里不展示推测的记录。
+          这些报告会保存在这台设备，下次打开可以接着看。
         </div>
       </div>
 

@@ -1,5 +1,5 @@
-import { FullAstrologyPage } from "@/components/mobile/FullAstrologyPage";
+import TransitChartApp from "@/components/figma-v22/TransitChartApp";
 
 export default function MobileTransitChartPage() {
-  return <FullAstrologyPage initialMode="transit" transitSeed={new Date().toISOString()} />;
+  return <TransitChartApp />;
 }

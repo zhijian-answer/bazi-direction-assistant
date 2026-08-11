@@ -1,5 +1,6 @@
 import OpenAI from "openai";
-import { aiConfig, getCompatibleAiSettings } from "../ai-config";
+import { getCompatibleAiSettings } from "../ai-config";
+import { buildNarrativeAppContentBrief, renderAppContentSystemPrompt } from "./appContentProtocol";
 import type { NarrativeCard, NarrativeRequest } from "./contracts";
 import { narrativeSystemPrompt } from "./prompt";
 import { generatedNarrativeSchema } from "./schema";
@@ -15,14 +16,14 @@ function getClient() {
     client = new OpenAI({
       apiKey: settings.apiKey,
       baseURL: settings.baseURL,
-      timeout: aiConfig.openaiTimeoutMs,
+      timeout: settings.timeoutMs,
     });
     clientKey = nextKey;
   }
   return { client, settings };
 }
 
-export async function generateNarrativeWithApi(input: NarrativeRequest): Promise<{
+export async function generateNarrativeWithApi(input: NarrativeRequest, revisionIssues: string[] = []): Promise<{
   card: Omit<NarrativeCard, "evidenceSummary">;
   provider: string;
   model: string;
@@ -36,13 +37,18 @@ export async function generateNarrativeWithApi(input: NarrativeRequest): Promise
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: narrativeSystemPrompt },
+      { role: "system", content: renderAppContentSystemPrompt(buildNarrativeAppContentBrief(input)) },
       {
         role: "user",
         content: JSON.stringify({
           context: input.context,
           slot: input.slot,
+          appContentBrief: buildNarrativeAppContentBrief(input),
           facts: input.facts,
           existingCopy: input.fallback,
+          revision: revisionIssues.length
+            ? `上一版没有符合当前 App 页面要求，请改正：${revisionIssues.join("；")}`
+            : undefined,
         }),
       },
     ],

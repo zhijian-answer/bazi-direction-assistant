@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
-  Smartphone, ChevronRight, FileText, Users, Share2,
-  FlaskConical, Shield, FileWarning, Info, Sparkles, ChevronsUpDown, Layers,
+  Smartphone, ChevronRight, FileText, Users,
+  Shield, FileWarning, Info, Sparkles, ChevronsUpDown,
 } from "lucide-react";
 import type { MobileProfile } from "@/lib/mobile/types";
 
@@ -9,7 +9,12 @@ interface ProfileScreenProps {
   onOpenSwitcher: () => void;
   onOpenLoginInfo: () => void;
   onWelcome: () => void;
-  onUIStates: () => void;
+  onGoToReports: () => void;
+  onGoToCompatibilityHistory: () => void;
+  onGoToPrivacy: () => void;
+  onGoToTerms: () => void;
+  onGoToAbout: () => void;
+  accountName?: string;
   profile: MobileProfile;
 }
 
@@ -121,18 +126,29 @@ function CompletenessBar({ value }: { value: number }) {
 }
 
 // ── ProfileScreen ─────────────────────────────────────────────────────────────
-export default function ProfileScreen({ onOpenSwitcher, onOpenLoginInfo, onWelcome, onUIStates, profile }: ProfileScreenProps) {
+export default function ProfileScreen({
+  onOpenSwitcher,
+  onOpenLoginInfo,
+  onWelcome,
+  onGoToReports,
+  onGoToCompatibilityHistory,
+  onGoToPrivacy,
+  onGoToTerms,
+  onGoToAbout,
+  accountName,
+  profile,
+}: ProfileScreenProps) {
   const profileColor = "#6BBFA0";
   const profileInitial = profile.name.trim().slice(0, 1) || "档";
   const completeness = profile.completeness ?? Math.round(([profile.name, profile.birthDate, profile.birthPlace, profile.birthTimeKnown ? profile.birthTime : "未知时辰"].filter(Boolean).length / 4) * 100);
-  const storageLabel = profile.syncStatus === "synced" ? "已同步" : profile.syncStatus === "pending" ? "等待同步" : "仅本机";
+  const storageLabel = profile.syncStatus === "synced" ? "已同步" : profile.syncStatus === "pending" ? "正在同步" : "未同步";
   const canViewZiwei = profile.birthTimeKnown && Boolean(profile.birthTime) && profile.gender !== "other";
-  const storageTitle = profile.syncStatus === "synced" ? "当前档案已同步保存" : profile.syncStatus === "pending" ? "当前档案正在等待同步" : "当前档案只保存在这台设备";
+  const storageTitle = profile.syncStatus === "synced" ? "出生资料已经同步保存" : profile.syncStatus === "pending" ? "出生资料正在同步" : "出生资料目前只保存在这台设备";
   const storageDescription = profile.syncStatus === "synced"
-    ? "本机仍保留一份档案，并可在登录设备间恢复。"
+    ? "这台设备仍保留一份资料，换设备登录后也能继续查看。"
     : profile.syncStatus === "pending"
       ? "同步完成前请不要清理浏览器数据；失败时可以重新尝试。"
-      : "报告在本地生成；清理浏览器数据前，请先导出或登录同步。";
+      : "如果准备清理浏览器数据，记得先登录同步，避免出生资料和记录一起消失。";
 
   const [welcomePressed, setWelcomePressed] = useState(false);
 
@@ -305,30 +321,16 @@ export default function ProfileScreen({ onOpenSwitcher, onOpenLoginInfo, onWelco
             <RowItem
               icon={<FileText size={16} color="#7BBDE0" />}
               label="最近报告"
-              sub="生辰、星盘、紫微按当前档案生成"
+              sub="继续查看生辰、星盘和紫微报告"
               accent="#7BBDE0"
-              onTap={() => {}}
+              onTap={onGoToReports}
             />
             <RowItem
               icon={<Users size={16} color="#6BBFA0" />}
               label="合盘记录"
-              sub="建立关系档案后在这里查看"
+              sub="回看两个人的相处方式与建议"
               accent="#6BBFA0"
-              onTap={() => {}}
-            />
-            <RowItem
-              icon={<Share2 size={16} color="#C0ACDE" />}
-              label="分享记录"
-              sub="暂无分享记录"
-              accent="#C0ACDE"
-              onTap={() => {}}
-            />
-            <RowItem
-              icon={<FlaskConical size={16} color="#E9C97E" />}
-              label="测试记录"
-              sub="暂无记录"
-              accent="#E9C97E"
-              onTap={() => {}}
+              onTap={onGoToCompatibilityHistory}
               last
             />
           </Card>
@@ -355,12 +357,12 @@ export default function ProfileScreen({ onOpenSwitcher, onOpenLoginInfo, onWelco
                   <div style={{
                     fontSize: 14, fontFamily: "'Noto Serif SC', serif",
                     fontWeight: 500, color: "#28253D", marginBottom: 6,
-                  }}>登录后可跨设备恢复与管理多个档案</div>
+                  }}>{accountName ? `已登录：${accountName}` : "登录后可跨设备恢复与管理多个档案"}</div>
                   <div style={{
                     fontSize: 12.5, fontFamily: "'Noto Sans SC', sans-serif",
                     color: "#5A5272", lineHeight: 1.65, marginBottom: 14,
                   }}>
-                    换机时不丢失档案，在多台设备上查看报告。你可以随时选择登录。
+                    {accountName ? "当前档案可以主动同步到云端，本机内容仍会保留。" : "换机时不丢失档案，在多台设备上查看报告。你可以随时选择登录。"}
                   </div>
                   <button onClick={onOpenLoginInfo} style={{
                     display: "inline-flex", alignItems: "center", gap: 5,
@@ -371,7 +373,7 @@ export default function ProfileScreen({ onOpenSwitcher, onOpenLoginInfo, onWelco
                     fontSize: 12.5, fontFamily: "'Noto Sans SC', sans-serif",
                     color: "#6B5A9A", fontWeight: 500,
                   }}>
-                    了解保存方式
+                    {accountName ? "管理同步" : "了解保存方式"}
                     <ChevronRight size={12} color="#9074C4" />
                   </button>
                 </div>
@@ -388,27 +390,20 @@ export default function ProfileScreen({ onOpenSwitcher, onOpenLoginInfo, onWelco
               icon={<Shield size={16} color="#6BBFA0" />}
               label="数据与隐私"
               accent="#6BBFA0"
-              onTap={() => {}}
+              onTap={onGoToPrivacy}
             />
             <RowItem
               icon={<FileWarning size={16} color="#E9C97E" />}
               label="免责声明"
               accent="#E9C97E"
-              onTap={() => {}}
+              onTap={onGoToTerms}
             />
             <RowItem
               icon={<Info size={16} color="#7BBDE0" />}
               label="关于玄枢"
-              sub="版本 0.1.0"
+              sub="版本 1.0.0"
               accent="#7BBDE0"
-              onTap={() => {}}
-            />
-            <RowItem
-              icon={<Layers size={16} color="#C0ACDE" />}
-              label="状态预览"
-              sub="界面异常与恢复路径检查"
-              accent="#C0ACDE"
-              onTap={onUIStates}
+              onTap={onGoToAbout}
               last
             />
           </Card>
@@ -442,7 +437,7 @@ export default function ProfileScreen({ onOpenSwitcher, onOpenLoginInfo, onWelco
               <div style={{
                 fontSize: 13, fontFamily: "'Noto Sans SC', sans-serif",
                 color: "#7B6E94",
-              }}>重新查看首开体验</div>
+              }}>重新查看使用介绍</div>
             </div>
             <ChevronRight size={14} color="#C0ACDE" />
           </button>
@@ -454,7 +449,7 @@ export default function ProfileScreen({ onOpenSwitcher, onOpenLoginInfo, onWelco
           fontSize: 11, fontFamily: "'Noto Sans SC', sans-serif",
           color: "#C0B8D8", lineHeight: 1.6,
         }}>
-          玄枢仅提供命理结构参考，不构成预测或建议。<br />所有内容仅供个人自我观察使用。
+          玄枢提供一种理解自己与关系的角度。<br />重要决定仍请结合现实信息与专业意见。
         </div>
       </div>
     </div>

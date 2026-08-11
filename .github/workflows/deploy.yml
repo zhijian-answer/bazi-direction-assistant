@@ -2,6 +2,9 @@ name: Deploy isolated mobile preview
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 concurrency:
   group: xuanshu-mobile-preview
@@ -48,6 +51,42 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p "${{ secrets.DEPLOY_SSH_PORT || '22' }}" "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
 
+      - name: Upload private runtime configuration
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          test -n "$DEEPSEEK_API_KEY"
+          umask 077
+          printf '%s\n' \
+            'AI_PROVIDER=deepseek' \
+            "DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY" \
+            'AI_BASE_URL=https://api.deepseek.com' \
+            'AI_MODEL=deepseek-chat' \
+            'AI_TIMEOUT_MS=30000' \
+            'NARRATIVE_MODEL=deepseek-chat' \
+            'NARRATIVE_AI_ENABLED=true' \
+            'CHAT_MODEL=deepseek-chat' \
+            'CHAT_AI_ENABLED=true' \
+            'NEXT_PUBLIC_NARRATIVE_API_ENABLED=true' \
+            'AI_FORCE_LOCAL=false' \
+            'AI_FALLBACK_ON_ERROR=true' \
+            'RATE_LIMIT_CHAT_DAILY=10' \
+            'RATE_LIMIT_CHAT_WRITE=12' \
+            > /tmp/xuanshu-mobile.env
+          scp \
+            -o IPQoS=none \
+            -o BatchMode=yes \
+            -P "${{ secrets.DEPLOY_SSH_PORT || '22' }}" \
+            /tmp/xuanshu-mobile.env \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/tmp/xuanshu-mobile.env"
+          ssh \
+            -o IPQoS=none \
+            -o BatchMode=yes \
+            -p "${{ secrets.DEPLOY_SSH_PORT || '22' }}" \
+            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+            "umask 077; mkdir -p /opt/xuanshu-mobile-preview/shared; install -m 600 /tmp/xuanshu-mobile.env /opt/xuanshu-mobile-preview/shared/app.env; rm -f /tmp/xuanshu-mobile.env"
+          rm -f /tmp/xuanshu-mobile.env
+
       - name: Upload standalone package
         run: |
           scp \
@@ -74,7 +113,7 @@ jobs:
 
       - name: Public HTTPS checks
         run: |
-          for path in / /m /m/report/bazi /m/report/zodiac; do
+          for path in / /m /m/report/bazi /m/report/zodiac /m/chart/natal /m/chart/transit /api/health; do
             curl --retry 8 --retry-delay 5 --retry-all-errors -fsS -o /dev/null "https://zzj-superstaff.duckdns.org${path}"
           done
           curl -fsS https://zzj-superstaff.duckdns.org/m | grep -q '/xuanshu-assets/_next/'

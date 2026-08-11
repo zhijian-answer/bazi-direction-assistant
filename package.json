@@ -1,6 +1,6 @@
 {
   "name": "bazi-direction-assistant",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "postinstall": "node scripts/prepare-alvamind.mjs",
@@ -13,6 +13,7 @@
     "test:ziwei": "vitest run src/lib/ziwei/__tests__",
     "qa:mobile-chat": "node scripts/verify-mobile-chat.mjs",
     "qa:product-flow": "node scripts/verify-product-flow-polish.mjs",
+    "qa:release": "node scripts/verify-release-client.mjs",
     "eval:copy": "npx --yes promptfoo@0.121.19 eval -c evals/narrative/promptfooconfig.yaml",
     "eval:copy:view": "npx --yes promptfoo@0.121.19 view",
     "check": "npm run lint && npm run test && npm run build",

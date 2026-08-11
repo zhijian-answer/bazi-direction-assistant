@@ -187,7 +187,7 @@ export default function ProfileSwitcherSheet({
               <div style={{
                 fontSize: 11.5, color: "#B0A8C8",
                 fontFamily: "'Noto Sans SC', sans-serif", marginTop: 2,
-              }}>为另一个人建立独立观察档案</div>
+              }}>为家人或朋友填写一份出生资料</div>
             </div>
           </button>
         </div>

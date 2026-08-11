@@ -15,7 +15,7 @@ export async function GET() {
   const today = new Date().toISOString().slice(0, 10);
   const todayQuestions = db.questions.filter((question) => question.createdAt.slice(0, 10) === today);
   const localQuestions = db.questions.filter((question) => question.usage.source === "local").length;
-  const openaiQuestions = db.questions.filter((question) => question.usage.source === "openai").length;
+  const openaiQuestions = db.questions.filter((question) => ["openai", "api"].includes(question.usage.source)).length;
 
   return NextResponse.json({
     users: db.users.length,

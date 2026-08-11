@@ -1,5 +1,5 @@
-import { MobileInsightChat } from "@/components/mobile/MobileInsightChat";
+import { ChatV6App } from "@/components/figma-v22/chat-v6/ChatV6App";
 
 export default function MobileChatPage() {
-  return <MobileInsightChat />;
+  return <ChatV6App />;
 }

@@ -30,14 +30,14 @@ function pruneExpired(now: number) {
   }
 }
 
-export function checkRateLimit(request: Request, scope: string, limit: number) {
+export function checkRateLimit(request: Request, scope: string, limit: number, windowMs = appLimits.rateLimitWindowMs) {
   const now = Date.now();
   pruneExpired(now);
   const key = `${scope}:${getClientIp(request)}`;
   const current = buckets.get(key);
 
   if (!current || current.resetAt <= now) {
-    const resetAt = now + appLimits.rateLimitWindowMs;
+    const resetAt = now + windowMs;
     buckets.set(key, { count: 1, resetAt });
     return {
       ok: true,

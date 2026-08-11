@@ -1,40 +1,10 @@
 import type { NarrativeCard, NarrativeRequest } from "./contracts";
 import { inspectNarrativeCard, normalizeNarrativeCard } from "./quality";
+import { baziNarrativeByElement } from "../../content/mobile-copy";
 
 type LocalCopy = Pick<NarrativeCard, "hook" | "scene" | "misunderstanding" | "action">;
 
-const baziElementCopy: Record<string, LocalCopy> = {
-  wood: {
-    hook: "只要还能往前长，你就愿意多走一段",
-    scene: "工作里看得见学习空间、关系里能一起进步时，你通常很有耐心；真正让你泄气的，是长期停在原地。",
-    misunderstanding: "别人有时觉得你总想换方向，其实你在确认这条路还有没有继续投入的价值。",
-    action: "今天找一件停滞的事，只补一个能让它继续往前的信息。",
-  },
-  fire: {
-    hook: "事情有回应时，你的状态会很快被点亮",
-    scene: "目标清楚、结果有人接住时，你推进得很快；只有投入却迟迟没有反馈，才是最容易消耗你的部分。",
-    misunderstanding: "你在意回应，不等于急着被肯定；你只是需要知道这份投入有没有落点。",
-    action: "今天先推进一件能在当天得到反馈的小事。",
-  },
-  earth: {
-    hook: "生活越有秩序，你越能把重要的事接稳",
-    scene: "安排清楚、责任稳定时，你很能扛事；计划反复变化、所有人都临时找你时，耐心会被一点点磨掉。",
-    misunderstanding: "你看起来谨慎，是因为不愿意轻易答应一件最后无法负责到底的事。",
-    action: "今天只重新排好一件最影响节奏的事。",
-  },
-  metal: {
-    hook: "标准说清楚以后，你做决定其实很快",
-    scene: "你不怕事情难，怕的是要求一直变、边界说不清。完成标准明确时，你反而是最能快速收拢局面的人。",
-    misunderstanding: "别人可能把你的边界感看成挑剔，但你只是希望彼此都知道什么算做好。",
-    action: "今天先把一件事的完成标准写成一句话。",
-  },
-  water: {
-    hook: "信息还没看全时，你通常不会急着下结论",
-    scene: "你习惯先观察人和局面，再决定怎么投入。连续被催着表态，往往比事情本身更让你疲惫。",
-    misunderstanding: "沉默不代表没有想法，你通常是在把零散信息拼成一个更完整的判断。",
-    action: "今天给一个重要决定补齐最缺的那条信息。",
-  },
-};
+const baziElementCopy: Record<string, LocalCopy> = baziNarrativeByElement;
 
 const zodiacSunCopy: Record<string, LocalCopy> = {
   aries: { hook: "你愿意先迈出那一步，但不喜欢一直等回应", scene: "有明确目标时，你通常边做边调整；真正让你烦躁的，是话说了一半、事情迟迟没有下一步。", misunderstanding: "反应快不代表没有分寸，你只是更愿意用行动确认答案。", action: "今天挑一件想了很久的事，先完成最小的一步。" },

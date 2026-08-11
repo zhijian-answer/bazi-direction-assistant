@@ -7,7 +7,7 @@ export type MobileChatTurn =
   | { id: string; role: "user"; content: string; createdAt: string }
   | { id: string; role: "assistant"; answer: MobileChatAnswer; createdAt: string };
 
-const historyPrefix = "xuanshu-mobile-chat-v1:";
+const historyPrefix = "xuanshu-mobile-chat-v2:";
 const historyEvent = "xuanshu-mobile-chat-change";
 
 function key(profileId: string) {

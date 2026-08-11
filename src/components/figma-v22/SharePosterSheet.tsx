@@ -27,22 +27,22 @@ export type PosterContent = {
 // ── Poster content catalogue ─────────────────────────────────────────────────
 const POSTER_CONTENT: Record<PosterContentType, PosterContent> = {
   "今日提醒": {
-    title: "今天是一个往前推一步的好时机",
-    body: "木气当令，判断力清晰。那件一直拖着的事，今天开口谈往往比你预期的顺。",
-    tags: ["木命", "流年甲辰", "行动节律"],
+    title: "我不是没有方向，只是该把力气收回来一点。",
+    body: "今天先完成一件已经开始的事。做出一个结果，再决定要不要继续开新的方向。",
+    tags: ["先做完", "少分心", "今天的重点"],
     accent: "#6BBFA0",
     accentLight: "rgba(107,191,160,0.15)",
   },
   "人格结论": {
-    title: "你的感受总比别人早一步",
-    body: "伤官格赋予你对细节的极度敏感。这不是想太多，而是一种真实的内在信号系统。",
-    tags: ["伤官格", "感知力 88", "关系模式"],
+    title: "你不是想太多，只是总会先把局面看完整。",
+    body: "很多别人还没注意到的变化，你已经先感觉到了。真正需要练习的，是分清直觉和担心。",
+    tags: ["感受很细", "先观察", "需要确定"],
     accent: "#C0ACDE",
     accentLight: "rgba(192,172,222,0.15)",
   },
   "流盘观察": {
-    title: "先看当前时间结构，再决定推进速度",
-    body: "流盘只描述时间结构与本命方式的关系，不保证具体事件。",
+    title: "最近不必每件事都用力，先看哪一件真的值得。",
+    body: "有些事适合推进，有些事需要再等一个现实回应。把力气用对地方，比一味加速更重要。",
     tags: ["流年", "流月", "行动节奏"],
     accent: "#E8816A",
     accentLight: "rgba(232,129,106,0.15)",
@@ -64,7 +64,7 @@ const POSTER_CONTENT: Record<PosterContentType, PosterContent> = {
   "问题解读": {
     title: "那个直觉其实是对的",
     body: "你不是想得太多，是还没有找到合适的边界。说清楚才能真正放下。",
-    tags: ["自我观察", "边界", "今日命题"],
+    tags: ["说清楚", "看行动", "今日命题"],
     accent: "#E8816A",
     accentLight: "rgba(232,129,106,0.15)",
   },
@@ -376,13 +376,13 @@ export default function SharePosterSheet({ open, onClose, defaultType = "今日�
       if (typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ title: posterData.title, text: "玄枢 · 让命理，被科学看见", files: [file] });
         markDelivery("shared");
-        setNotice("系统分享面板已打开。 ");
+        setNotice("分享面板已打开。 ");
       } else {
         setNotice("当前设备不支持直接分享图片，请长按预览图保存。 ");
       }
     } catch (shareError) {
       if (shareError instanceof DOMException && shareError.name === "AbortError") return;
-      setNotice("未能打开系统分享，请长按预览图保存。 ");
+      setNotice("没有打开分享面板，请长按预览图保存。 ");
     }
   }
 

@@ -1,4 +1,4 @@
-import type { NarrativeCard } from "./contracts";
+import type { NarrativeCard, NarrativeContext } from "./contracts";
 
 const forbiddenPhrases = [
   "结构化观察",
@@ -8,6 +8,14 @@ const forbiddenPhrases = [
   "反应路径",
   "建立结构关系",
   "转换成容易理解的内容",
+  "工作主线",
+  "领域分布",
+  "稳定推进",
+  "专注主线",
+  "人生课题",
+  "命运密码",
+  "深度赋能",
+  "全维度",
   "准确率",
   "命中率",
   "注定",
@@ -32,6 +40,24 @@ export function inspectNarrativeCard(card: NarrativeCard) {
     issues.push("首句被专业依据占据");
   }
   if (card.scene === card.hook || card.action === card.hook) issues.push("标题、场景和动作存在重复");
+  return issues;
+}
+
+const contextLeakage: Partial<Record<NarrativeContext, RegExp>> = {
+  bazi: /(太阳星座|月亮星座|上升星座|本命星盘|紫微十二宫|命宫星曜)/,
+  zodiac: /(日主|十神|四柱八字|紫微十二宫|命宫星曜)/,
+  ziwei: /(日主|十神|四柱八字|太阳星座|月亮星座|上升星座)/,
+};
+
+export function inspectNarrativeContext(card: NarrativeCard, context: NarrativeContext) {
+  const joined = [card.hook, card.scene, card.misunderstanding, card.action, card.nextQuestion]
+    .filter(Boolean)
+    .join("\n");
+  const issues: string[] = [];
+  if (contextLeakage[context]?.test(joined)) issues.push("文案混入了当前页面之外的命理体系");
+  if (context === "flow" && /(天生|一生|这辈子|终身)/.test(joined)) {
+    issues.push("近期节奏被写成了长期人格或人生定论");
+  }
   return issues;
 }
 

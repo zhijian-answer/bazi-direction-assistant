@@ -26,10 +26,10 @@ for (const viewport of viewports) {
   page.on("pageerror", (error) => errors.push(error.message));
 
   await page.goto(`${origin}/m/`, { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(500);
-  if (await page.locator(".home-welcome").count()) {
-    await page.locator(".home-welcome button").click();
-    await page.locator(".today-status-card").waitFor();
+  await page.locator(".home-welcome, .home-v2").first().waitFor();
+  if (await page.locator(".home-welcome").isVisible()) {
+    await page.getByRole("button", { name: /先看示例/ }).click();
+    await page.locator(".home-v2").waitFor();
   }
 
   await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });

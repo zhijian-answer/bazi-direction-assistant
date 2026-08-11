@@ -135,13 +135,13 @@ export function getZiweiEditorialStory(insight: NormalizedZiweiInsight): Editori
     title: insight.identity.title,
     summary: withoutBoundary(insight.identity.summary),
     tags: [insight.identity.tags[0] || "先看结构", insight.identity.tags[1] || "重视真实反馈", insight.identity.tags[2] || "需要清楚边界"],
-    othersSee: [`遇到重要的事，会自然拿出${insight.identity.tags[0] || "判断力"}`, "习惯先看清局面，再决定怎么投入", "别人需要回应时，往往愿意多做一步"],
+    othersSee: ["遇到重要的事，会先把局面看清楚", "确认值得以后，往往比预想中更能坚持", "别人需要回应时，通常愿意多做一步"],
     realNeeds: [stable[0] || "目标和责任可以说清楚", stable[1] || "重要决定有真实反馈", "不必长期替所有人承担结果"],
     hiddenTitle: `你的${star}力量，不只在于能做，也在于知道何时该做`,
     hiddenBody: "别人容易先看到你能处理事情，却未必知道你一直在判断什么值得承担。真正适合你的状态，是责任清楚、反馈真实，也允许你保留自己的节奏。",
     misunderstandingTitle: "你不是想得太多，只是不愿意让重要问题停在含糊里",
     misunderstandingBody: `${drain[0] || "当边界和回应长期不清楚时，你会花很多精力反复确认"}。先把事实、责任和期待分开，会比一个人继续推演更省力。`,
     actionTitle: insight.today.action,
-    actionNote: `${insight.today.summary.replace(/\s*先做一个可以获得真实反馈的小动作，比一次解决所有问题更有效。?$/, "")} 今天只推进一个能得到真实回应的小动作。`,
+    actionNote: insight.today.summary.replace(/\s*先做一个可以获得真实反馈的小动作，比一次解决所有问题更有效。?$/, ""),
   };
 }

@@ -93,7 +93,7 @@ const SYSTEMS_STATUS_LIST = [
   },
 ] as const;
 
-// ─── Evidence data (示例结构 · 待接入真实证据) ────────────────────────────────
+// ─── Evidence data ───────────────────────────────────────────────────────────
 // 紫微与奇门本次不纳入，无证据条目
 interface EvidenceItem {
   id: string; conclusion: string; basis: string;
@@ -181,7 +181,7 @@ function PressCard({ children, onClick, style }: {
   );
 }
 
-function MockBadge() {
+function EvidenceScopeBadge() {
   return (
     <div style={{
       display: "inline-flex", alignItems: "center", gap: 5,
@@ -189,7 +189,7 @@ function MockBadge() {
       background: "rgba(233,201,126,0.14)", border: "1px solid rgba(233,201,126,0.32)",
       fontSize: 10, fontFamily: "'Noto Sans SC', sans-serif",
       color: "#A08030", letterSpacing: "0.04em",
-    }}>示例结构 · 待接入真实证据</div>
+    }}>当前仅使用已核对资料</div>
   );
 }
 
@@ -852,7 +852,7 @@ function EvidenceStep({ onBack, onNext, expandedId, setExpandedId, evidenceTab, 
         <div style={{ fontSize: 12.5, fontFamily: "'Noto Sans SC', sans-serif", color: "#9088A8", marginLeft: 44, marginBottom: 12 }}>
           当前可用体系的独立证据
         </div>
-        <div style={{ marginBottom: 18 }}><MockBadge /></div>
+        <div style={{ marginBottom: 18 }}><EvidenceScopeBadge /></div>
 
         {/* Status note on "all" tab */}
         {evidenceTab === "all" && (
@@ -1032,7 +1032,7 @@ function ConsensusStep({ onBack, onNext, scrollRef }: {
         <div style={{ fontSize: 12.5, fontFamily: "'Noto Sans SC', sans-serif", color: "#9088A8", marginLeft: 44, marginBottom: 12 }}>
           基于可用证据整合
         </div>
-        <div style={{ marginBottom: 16 }}><MockBadge /></div>
+        <div style={{ marginBottom: 16 }}><EvidenceScopeBadge /></div>
 
         {/* Insufficient cross-system consensus note */}
         <div style={{
@@ -1120,7 +1120,7 @@ function ReportStep({ onBack, onViewHistory, question, saved, setSaved, scrollRe
         <div style={{ fontSize: 12.5, fontFamily: "'Noto Sans SC', sans-serif", color: "#9088A8", marginLeft: 44, marginBottom: 16 }}>
           高阶合参 · Version 1 · 仅含八字三柱
         </div>
-        <div style={{ marginBottom: 20 }}><MockBadge /></div>
+        <div style={{ marginBottom: 20 }}><EvidenceScopeBadge /></div>
 
         {question.trim().length > 0 && (
           <>
@@ -1269,7 +1269,7 @@ function HistoryStep({ onBack, scrollRef }: {
           </div>
         </div>
         <div style={{ fontSize: 12.5, fontFamily: "'Noto Sans SC', sans-serif", color: "#9088A8", marginLeft: 44, marginBottom: 20 }}>
-          每次证据变化都会生成新版本，旧版本永久保留
+          对照不同资料范围下的分析变化
         </div>
 
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>

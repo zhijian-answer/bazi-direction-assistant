@@ -35,7 +35,7 @@ function ListBlock({ title, items, accent }: { title: string; items: string[]; a
 function toQuestion(flow: MobileFlowReport): Question {
   return {
     id: flow.question.id,
-    source: `${flow.question.source} · 仅供自我观察`,
+    source: flow.question.source,
     title: flow.question.prompt,
     answer: flow.question.interpretation,
     observations: [flow.question.observation],
@@ -120,17 +120,17 @@ export default function LiupanContent({
 
       {flow.evidence.warnings.length > 0 && (
         <div style={{ padding: "12px 14px", borderRadius: 14, background: "rgba(233,201,126,0.10)", border: "1px solid rgba(233,201,126,0.25)", fontSize: 11, color: "#8C7860", lineHeight: 1.65 }}>
-          {flow.evidence.warnings.join(" ")}
+          出生时间如果接近时辰交界，这份内容更适合用来观察近期节奏，不适合判断某件事一定会不会发生。
         </div>
       )}
 
       <div style={{ fontSize: 10.5, color: "#A094B8", lineHeight: 1.65, textAlign: "center" }}>
-        {flow.engineVersion} · 本命 {flow.evidence.dayPillar} · 流年 {flow.evidence.annual} · 流月 {flow.evidence.monthly}
+        参考：本命 {flow.evidence.dayPillar} · 流年 {flow.evidence.annual} · 流月 {flow.evidence.monthly}
       </div>
 
       {onSharePoster && (
         <button onClick={onSharePoster} style={{ width: "100%", padding: "14px 20px", borderRadius: 18, background: "linear-gradient(135deg, rgba(245,196,184,0.30), rgba(255,255,255,0.85))", border: "1.5px solid rgba(232,129,106,0.32)", cursor: "pointer", fontSize: 13.5, fontFamily: "'Noto Serif SC', serif", color: "#28253D" }}>
-          生成当前流盘摘要
+          保存这段时间的提醒
         </button>
       )}
     </div>

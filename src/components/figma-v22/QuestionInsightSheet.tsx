@@ -90,13 +90,19 @@ export default function QuestionInsightSheet({ open, questions, activeIndex, onC
               {q?.source ?? ""}
             </div>
             <button onClick={onClose} style={{
-              width: 30, height: 30, borderRadius: "50%",
-              background: "rgba(238,233,248,0.70)",
-              border: "1px solid rgba(192,172,222,0.28)",
+              width: 44, height: 44,
+              background: "transparent", border: "none",
               cursor: "pointer", fontSize: 14, color: "#9088A8",
               display: "flex", alignItems: "center", justifyContent: "center",
-              lineHeight: 1,
-            }}>×</button>
+              lineHeight: 1, padding: 0,
+            }} aria-label="关闭">
+              <span style={{
+                width: 30, height: 30, borderRadius: "50%",
+                background: "rgba(238,233,248,0.70)",
+                border: "1px solid rgba(192,172,222,0.28)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>×</span>
+            </button>
           </div>
         </div>
 

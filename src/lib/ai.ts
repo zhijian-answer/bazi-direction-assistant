@@ -1,22 +1,24 @@
 import OpenAI from "openai";
-import { aiConfig, getAiMode } from "./ai-config";
+import { aiConfig, getChatAiSettings } from "./ai-config";
 import { elementLabels, getElementAdvice } from "./bazi";
 import type { BirthProfile, GuidanceQuestion, PublicUser, QuestionCategory } from "./types";
 
 let client: OpenAI | null = null;
+let clientKey = "";
 
 function getOpenAIClient() {
-  if (getAiMode() !== "openai") {
-    return null;
-  }
-  if (!client) {
+  const settings = getChatAiSettings();
+  if (!settings.enabled || !settings.apiKey) return null;
+  const nextKey = `${settings.baseURL || "openai"}:${settings.apiKey.slice(-6)}`;
+  if (!client || clientKey !== nextKey) {
     client = new OpenAI({
-      apiKey: aiConfig.apiKey,
-      baseURL: aiConfig.baseURL,
-      timeout: aiConfig.openaiTimeoutMs,
+      apiKey: settings.apiKey,
+      baseURL: settings.baseURL,
+      timeout: settings.timeoutMs,
     });
+    clientKey = nextKey;
   }
-  return client;
+  return { client, settings };
 }
 
 function categoryLabel(category: QuestionCategory) {
@@ -64,10 +66,10 @@ export async function generateGuidance(input: {
   question: string;
   category: QuestionCategory;
 }): Promise<Pick<GuidanceQuestion, "answer" | "usage">> {
-  const openai = getOpenAIClient();
-  const model = aiConfig.model;
+  const active = getOpenAIClient();
+  const model = active?.settings.model || aiConfig.model;
 
-  if (!openai) {
+  if (!active) {
     const answer = buildLocalAnswer(input);
     return {
       answer,
@@ -80,9 +82,9 @@ export async function generateGuidance(input: {
 
   try {
     const chart = input.profile.chart;
-    const response = await openai.responses.create({
+    const response = await active.client.chat.completions.create({
       model,
-      input: [
+      messages: [
         {
           role: "system",
           content:
@@ -108,11 +110,11 @@ export async function generateGuidance(input: {
       ],
     });
 
-    const answer = response.output_text || buildLocalAnswer(input);
+    const answer = response.choices[0]?.message?.content || buildLocalAnswer(input);
     return {
       answer,
       usage: {
-        source: "openai",
+        source: "api",
         model,
         estimatedTokens: Math.ceil(answer.length / 2),
       },
@@ -128,7 +130,7 @@ export async function generateGuidance(input: {
         source: "fallback",
         model,
         estimatedTokens: Math.ceil(answer.length / 2),
-        error: error instanceof Error ? error.message.slice(0, 300) : "OpenAI request failed",
+        error: error instanceof Error ? error.message.slice(0, 300) : "AI request failed",
       },
     };
   }

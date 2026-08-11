@@ -51,12 +51,12 @@ const PALACES: Palace[] = [
   {
     id: "P08", branch: "戌", name: "财帛宫", stars: ["太阴"],
     gridRow: 3, gridCol: 4, tag: "身", tagColor: "#7BBDE0",
-    desc: "财务能力与金钱模式。太阴在财帛宫，财运相对稳定，适合靠专业和服务性工作积累，不太适合冒进型投资。身宫落此，财务健康状态与整体生命能量关联较深。",
+    desc: "金钱与资源的安排方式。太阴在财帛宫，更适合观察自己是否偏好长期积累、是否在意收支可控；这里不判断投资结果。身宫落此，也说明财务安排更容易影响安全感。",
   },
   {
     id: "P09", branch: "寅", name: "疾厄宫", stars: ["巨门", "左辅"],
     gridRow: 4, gridCol: 1,
-    desc: "身体健康与压力反应模式。巨门在此，情绪对消化系统和睡眠的影响较大，压力积累时容易在身体上有所反映；需要建立规律的减压方式，而不是靠硬撑。",
+    desc: "压力与休息方式。巨门在此，更适合观察自己紧张时是否习惯把话留在心里；这里不推断具体健康状况，只提醒你给休息和沟通留出位置。",
   },
   {
     id: "P10", branch: "丑", name: "迁移宫", stars: ["天相", "火星"],
@@ -71,9 +71,33 @@ const PALACES: Palace[] = [
   {
     id: "P12", branch: "亥", name: "事业宫", stars: ["天魁", "天钺"],
     gridRow: 4, gridCol: 4,
-    desc: "职业方向与工作模式。天魁天钺同宫，有贵人相助的结构特征，适合与他人协作的工作方式；在合适的团队和环境里，往往能发挥超出自己预期的能量。",
+    desc: "职业方向与工作模式。天魁天钺同宫，更适合观察自己在协作、获得反馈与借助专业支持时怎样发挥；这里不预测具体机会，也不替你决定职业。",
   },
 ];
+
+const PALACE_FOCUS: Record<string, string> = {
+  命宫: "这里先看你处理事情时最自然的反应，以及别人最先感受到的那一面。",
+  兄弟: "这里观察你与手足、同辈之间怎样分工，也看彼此是否容易把话说开。",
+  夫妻: "这里关注亲密关系里的期待、边界与回应方式，不直接判断一段关系的结局。",
+  子女: "这里也代表你面对创作、作品与需要长期照顾之事时，会怎样投入心力。",
+  财帛: "这里观察你如何取得、安排和看待金钱，不等同于具体收入或理财结论。",
+  疾厄: "这里适合观察压力来临时的身心反应；涉及健康问题，仍应以专业意见为准。",
+  迁移: "这里看你离开熟悉环境以后怎样应对变化，也看陌生场合里的适应方式。",
+  仆役: "这里关注朋友、同事与合作对象，重点是你会把信任交给什么样的人。",
+  交友: "这里关注朋友、同事与合作对象，重点是你会把信任交给什么样的人。",
+  官禄: "这里观察工作中的位置感、责任方式与适合发挥的环境，不替你决定具体职业。",
+  事业: "这里观察工作中的位置感、责任方式与适合发挥的环境，不替你决定具体职业。",
+  田宅: "这里关系到居住、家庭空间与长期积累，也反映什么样的环境更让你安定。",
+  福德: "这里更接近独处时的真实状态，帮助你看清自己靠什么恢复，又为什么容易想多。",
+  父母: "这里观察你与长辈、权威和规则的相处方式，也看哪些支持真正对你有用。",
+};
+
+export function getZiweiPalaceFallback(name: string, stars: string[]) {
+  const focus = PALACE_FOCUS[name] || PALACE_FOCUS[name.replace(/宫$/, "")] || "这里先看这个生活领域里反复出现的习惯。";
+  return stars.length
+    ? `${focus} 当前主星为${stars.join("、")}，先对照最近真实发生的互动，再看这种倾向是否明显。`
+    : `${focus} 当前为空宫，需要结合对宫与三方四正，不用固定星曜替你下结论。`;
+}
 
 function palacesFromViewModel(viewModel: FigmaZiweiViewModel): Palace[] {
   const source = viewModel.insight?.evidence.palaces ?? [];
@@ -88,9 +112,8 @@ function palacesFromViewModel(viewModel: FigmaZiweiViewModel): Palace[] {
       gridCol: layout.gridCol,
       tag: palace.name === "命宫" ? "命" : palace.isBodyPalace ? "身" : palace.isOriginalPalace ? "来因" : undefined,
       tagColor: palace.name === "命宫" ? "#E8816A" : palace.isBodyPalace ? "#7BBDE0" : palace.isOriginalPalace ? "#A887C8" : undefined,
-      desc: palace.majorStars.length
-        ? `${palace.name}见${palace.majorStars.join("、")}。这里先保留当前档案的真实宫位与主星，具体表现需要和三方四正、四化及现实经历一起理解。`
-        : `${palace.name}当前为空宫，需要结合对宫与三方四正观察，不使用固定星曜填充。`,
+      desc: viewModel.palaceNarratives?.[palace.name]
+        || getZiweiPalaceFallback(palace.name, palace.majorStars),
     };
   });
 }
@@ -246,7 +269,7 @@ function TwelvePalaceGrid({ selectedId, onSelect, palaces, profileName, centerLa
           fontSize: 8.5, color: "#8C7860",
           fontFamily: "'Noto Sans SC', sans-serif",
           textAlign: "center", lineHeight: 1.65,
-        }}>{profileName}<br />依据当前档案排盘</div>
+        }}>{profileName}<br />依据出生资料排盘</div>
         <div style={{
           marginTop: 2, padding: "2px 8px", borderRadius: 8,
           background: "rgba(232,129,106,0.12)",
@@ -322,7 +345,7 @@ function ProfessionalBasis({ viewModel }: { viewModel: FigmaZiweiViewModel }) {
   const [open, setOpen] = useState(false);
   const insight = viewModel.insight!;
   const rows = [
-    { label: "排盘体系", value: "紫微斗数 · 结构化观察" },
+    { label: "排盘体系", value: "紫微斗数 · 安星法" },
     { label: "命宫", value: insight.evidence.mingGong || "待识别" },
     { label: "身宫", value: insight.evidence.shenGong || "待识别" },
     { label: "当前阶段", value: insight.stage.rangeLabel },
@@ -477,7 +500,7 @@ function OverviewTab({ onOpenSheet, onSharePoster, viewModel, palaces }: {
         <div style={{
           fontSize: 10, color: "#5A9E80", fontFamily: "'Noto Sans SC', sans-serif",
           fontWeight: 500, marginBottom: 10, letterSpacing: "0.06em",
-        }}>当前关注 · {insight.stage.rangeLabel}</div>
+        }}>最近更值得留意 · {insight.stage.rangeLabel}</div>
         <div style={{
           fontSize: 14.5, fontFamily: "'Noto Serif SC', serif",
           fontWeight: 700, color: "#28253D", marginBottom: 10,
@@ -493,7 +516,7 @@ function OverviewTab({ onOpenSheet, onSharePoster, viewModel, palaces }: {
       {/* 4 human-language cards */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
         <HumanCard
-          title="你的核心观察"
+          title="你真正重视什么"
           icon="◆"
           accent="#E8816A"
           body={viewModel.story?.summary || insight.identity.summary}
@@ -523,12 +546,12 @@ function OverviewTab({ onOpenSheet, onSharePoster, viewModel, palaces }: {
         <div style={{
           fontSize: 12, fontFamily: "'Noto Serif SC', serif",
           fontWeight: 500, color: "#28253D", marginBottom: 13,
-        }}>生活各面向</div>
+        }}>放回生活里看</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 9 }}>
           <DomainCard label="关系" color="#E8816A" body={insight.relationship.summary} />
           <DomainCard label="工作" color="#7BBDE0" body={insight.stage.summary} />
-          <DomainCard label="稳定" color="#E9C97E" body={insight.environment.stableZone.join("；")} />
-          <DomainCard label="消耗" color="#6BBFA0" body={insight.environment.drainZone.join("；")} />
+          <DomainCard label="让你安心" color="#E9C97E" body={insight.environment.stableZone.join("；")} />
+          <DomainCard label="容易累" color="#6BBFA0" body={insight.environment.drainZone.join("；")} />
         </div>
       </Card>
 
@@ -701,11 +724,11 @@ function PhaseTab({ viewModel }: { viewModel: FigmaZiweiViewModel }) {
         <div style={{
           fontSize: 10, color: "#5A9E80", fontFamily: "'Noto Sans SC', sans-serif",
           fontWeight: 500, marginBottom: 8, letterSpacing: "0.06em",
-        }}>当前阶段观察</div>
+        }}>最近这段时间</div>
         <div style={{
           fontSize: 13.5, fontFamily: "'Noto Serif SC', serif",
           fontWeight: 600, color: "#28253D", marginBottom: 8,
-        }}>变动中寻找真实的方向</div>
+        }}>{insight.today.keyword}</div>
         <div style={{
           fontSize: 12.5, fontFamily: "'Noto Sans SC', sans-serif",
           color: "#4A4168", lineHeight: 1.70,
@@ -719,7 +742,7 @@ function PhaseTab({ viewModel }: { viewModel: FigmaZiweiViewModel }) {
         <div style={{
           fontSize: 12, fontFamily: "'Noto Serif SC', serif",
           fontWeight: 500, color: "#28253D", marginBottom: 14,
-        }}>本阶段的结构依据</div>
+        }}>为什么这样看</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {phaseEvidence.map((item, index) => (
             <div key={`${item}-${index}`} style={{
@@ -750,7 +773,7 @@ function PhaseTab({ viewModel }: { viewModel: FigmaZiweiViewModel }) {
           fontSize: 11, fontFamily: "'Noto Sans SC', sans-serif",
           color: "#A094B8", lineHeight: 1.65,
         }}>
-          当前只展示引擎实际返回的阶段范围和依据，不补写尚未计算的前后大限。阶段描述是背景与倾向，不是固定结果。
+          这里只展示现有出生资料能支持的阶段范围，不补写没有依据的前后大限。阶段内容用来理解背景与倾向，不代表固定结果。
         </div>
       </Card>
     </div>
@@ -939,7 +962,7 @@ export default function ZiweiScreen({ onBack, onOpenSheet, onSharePoster, onComp
           <Card style={{ padding: "28px 24px", textAlign: "center" }}>
             <div style={{ fontSize: 22, marginBottom: 12 }}>◎</div>
             <div style={{ fontFamily: "'Noto Serif SC', serif", fontWeight: 700, color: "#28253D", marginBottom: 8 }}>正在整理十二宫结构</div>
-            <div style={{ fontSize: 12.5, color: "#6B607E", lineHeight: 1.7 }}>排盘只在当前设备进行，不使用默认时辰补齐结果。</div>
+            <div style={{ fontSize: 12.5, color: "#6B607E", lineHeight: 1.7 }}>正在根据你的出生时间排列十二宫；不知道的资料不会替你猜。</div>
           </Card>
         </div>
       ) : viewModel.status === "insufficient_input" ? (

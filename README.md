@@ -31,8 +31,8 @@
 - 支持 PWA manifest 和手机桌面图标，方便添加到手机桌面
 - 提供本地 JSON 数据备份脚本，方便免费运营早期做灾备
 - 每个用户每日免费提问限制，默认 5 次
-- 无 `OPENAI_API_KEY` 时使用本地规则引擎回答
-- 配置 `OPENAI_API_KEY` 后自动改用 OpenAI Responses API
+- 无 AI 密钥时使用本地规则引擎回答
+- 配置 DeepSeek 后，报告首屏和玄枢问答使用在线生成；命盘事实仍由本地算法提供
 - 历史问答保存到本地 JSON
 - 管理员统计后台：用户、命盘、提问、估算 token、最近问题
 - 广告位预留：当前只显示占位，不接广告 SDK
@@ -66,11 +66,16 @@ npm run smoke
 复制 `.env.example` 为 `.env.local` 后按需填写：
 
 ```bash
-OPENAI_API_KEY=
-OPENAI_MODEL=gpt-4.1-mini
-OPENAI_TIMEOUT_MS=20000
+AI_PROVIDER=deepseek
+DEEPSEEK_API_KEY=
+AI_BASE_URL=https://api.deepseek.com
+AI_MODEL=deepseek-chat
+AI_TIMEOUT_MS=30000
 AI_FORCE_LOCAL=false
 AI_FALLBACK_ON_ERROR=true
+NARRATIVE_AI_ENABLED=true
+CHAT_AI_ENABLED=true
+NEXT_PUBLIC_NARRATIVE_API_ENABLED=true
 DAILY_QUESTION_LIMIT=5
 MAX_PROFILES_PER_USER=3
 MAX_QUESTION_CHARS=500
@@ -83,6 +88,7 @@ RATE_LIMIT_REGISTER=10
 RATE_LIMIT_LOGIN=20
 RATE_LIMIT_PROFILE_WRITE=20
 RATE_LIMIT_QUESTION_WRITE=30
+RATE_LIMIT_CHAT_WRITE=12
 RATE_LIMIT_CHECKIN_WRITE=40
 APP_DATA_DIR=./data
 BACKUP_DIR=./data/backups
@@ -90,14 +96,15 @@ BACKUP_RETENTION=30
 ADMIN_EMAILS=
 APP_URL=http://localhost:3000
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
-APP_VERSION=0.1.0
+APP_VERSION=1.0.0
 ```
 
 说明：
 
-- `OPENAI_API_KEY` 不填也能用，系统会走本地规则引擎。
-- `AI_FORCE_LOCAL=true` 可以强制不调用 OpenAI，适合免费运营早期控成本。
-- `AI_FALLBACK_ON_ERROR=true` 会在 OpenAI 失败时自动降级到本地规则回答。
+- `DEEPSEEK_API_KEY` 只放在服务器环境变量中，不使用 `NEXT_PUBLIC_` 前缀。
+- `AI_FORCE_LOCAL=true` 可以强制不调用在线模型，适合免费运营早期控成本。
+- `AI_FALLBACK_ON_ERROR=true` 会在在线接口失败时自动降级到本地规则回答。
+- 玄枢只向在线模型发送已经计算好的证据摘要和最近对话，不发送原始出生日期与地点。
 - `ADMIN_EMAILS` 用英文逗号分隔，例如 `admin@example.com,owner@example.com`。只有这些邮箱注册/登录后才能看到统计后台。
 - `APP_DATA_DIR` 是本地 JSON 数据目录。正式公开运营前建议迁移到数据库，或者至少做好定时备份。
 - `BACKUP_DIR` 是 `npm run backup` 写入备份文件的位置，`BACKUP_RETENTION` 是保留的备份份数。
@@ -132,7 +139,7 @@ SMOKE_BASE_URL=https://你的域名 npm run smoke
 
 ## 上线前建议
 
-- 配置正式 `OPENAI_API_KEY`
+- 配置正式 `DEEPSEEK_API_KEY`
 - 配置 `ADMIN_EMAILS`
 - 配置 HTTPS 和域名
 - 持久化数据目录并设置备份

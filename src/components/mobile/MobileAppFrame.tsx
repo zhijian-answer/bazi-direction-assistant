@@ -1,12 +1,20 @@
 "use client";
 
 import { AnimatePresence, motion, MotionConfig } from "framer-motion";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 export function MobileAppFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const theme = pathname.includes("ziwei") ? "ziwei" : pathname.includes("zodiac") ? "zodiac" : pathname.includes("bazi") ? "bazi" : "home";
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.register("/sw.js", { scope: "/m", updateViaCache: "none" })
+      .then((registration) => registration.update())
+      .catch(() => undefined);
+  }, []);
 
   return (
     <MotionConfig reducedMotion="user">

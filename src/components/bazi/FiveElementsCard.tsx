@@ -33,9 +33,9 @@ export function FiveElementsCard({ chart }: { chart: BaziChart }) {
         })}
       </div>
       <div className="mt-5 border-t border-[var(--line)] pt-4 text-xs leading-6 text-[var(--muted)]">
-        {chart.engine?.validationStatus === "matched" && `已完成双引擎核对，四柱 ${chart.engine.matchedPillars}/4 一致。`}
-        {chart.engine?.validationStatus === "different" && `双引擎核对有 ${chart.engine.matchedPillars}/4 柱一致；不同算法可能存在节气或时辰口径差异，当前以主排盘结果为准。`}
-        {chart.engine?.validationStatus === "unavailable" && "当前出生年份或输入类型不在辅助引擎校验范围内，结果由主排盘引擎生成。"}
+        {chart.engine?.validationStatus === "matched" && "四柱已经完成辅助核对。"}
+        {chart.engine?.validationStatus === "different" && `当前有 ${chart.engine.matchedPillars}/4 柱核对一致；节气或时辰交界处可能存在排盘口径差异，这里展示按当前资料排出的结果。`}
+        {chart.engine?.validationStatus === "unavailable" && "当前资料暂时无法进行辅助核对，这里展示按已填写资料排出的结果。"}
       </div>
     </section>
   );

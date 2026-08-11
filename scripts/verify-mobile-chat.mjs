@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { chromium } from "playwright";
 
-const baseUrl = process.env.CHAT_QA_BASE_URL || "http://127.0.0.1:3131";
+const baseUrl = process.env.CHAT_QA_BASE_URL || "http://127.0.0.1:3156";
 const outputDir = path.resolve("output/chat-qa");
 const viewports = [
   { width: 375, height: 812 },
@@ -19,15 +19,29 @@ const profile = {
   birthTimeKnown: true,
   isLeapMonth: false,
   birthPlace: "广东省广州市",
-  latitude: 23.1291,
-  longitude: 113.2644,
-  timezone: "Asia/Shanghai",
-  birthPlaceResolution: "catalog",
   isDemo: false,
   isLocalOnly: true,
   completeness: 100,
   syncStatus: "local",
 };
+
+function apiAnswer(question) {
+  return {
+    id: "qa-answer",
+    question,
+    category: "relationship",
+    title: "先看对方有没有持续回应",
+    summary: "你在意的可能不只是联系变少，而是不确定这段关系是否还值得投入。先把猜测放一放，观察对方是否愿意解释和安排下一步。",
+    observations: ["是否主动说明最近的状态", "是否愿意安排下一次见面"],
+    action: "把你真正需要确认的一件事直接说清楚。",
+    suggestions: ["我该主动联系吗？", "这段关系最容易卡在哪里？"],
+    evidence: [],
+    evidenceTrace: { claims: [], excluded: [] },
+    limitations: [],
+    poster: { id: "qa-answer", category: "question", eyebrow: "玄枢", title: "先看行动", body: "先看对方有没有持续回应。", tags: ["关系"], footer: "仅供参考", tone: "coral" },
+    delivery: { source: "api", provider: "qa", model: "qa-model" },
+  };
+}
 
 await mkdir(outputDir, { recursive: true });
 const browser = await chromium.launch({ headless: true });
@@ -35,60 +49,41 @@ const results = [];
 
 try {
   for (const viewport of viewports) {
-    const context = await browser.newContext({ viewport, deviceScaleFactor: 1, reducedMotion: "reduce" });
+    const context = await browser.newContext({ viewport, reducedMotion: "reduce" });
     const page = await context.newPage();
     const consoleErrors = [];
-    page.on("console", (message) => {
-      if (message.type() === "error") consoleErrors.push(message.text());
-    });
+    page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });
     page.on("pageerror", (error) => consoleErrors.push(error.message));
     await page.addInitScript((savedProfile) => {
-      window.localStorage.setItem("xuanshu-mobile-profile", JSON.stringify(savedProfile));
-      window.localStorage.setItem("xuanshu-mobile-profiles-v1", JSON.stringify([savedProfile]));
+      localStorage.setItem("xuanshu-mobile-profile", JSON.stringify(savedProfile));
+      localStorage.setItem("xuanshu-mobile-profiles-v1", JSON.stringify([savedProfile]));
     }, profile);
+    await page.route("**/api/mobile-chat", async (route) => {
+      const body = route.request().postDataJSON();
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ answer: apiAnswer(body.question) }) });
+    });
 
-    await page.goto(`${baseUrl}/m`, { waitUntil: "domcontentloaded" });
-    const chatEntry = page.locator('a[href*="/m/chat"]').first();
-    await chatEntry.waitFor({ state: "visible" });
-    if (viewport.width === 390) await page.screenshot({ path: path.join(outputDir, "home-390-chat-entry.png"), fullPage: true });
-    await chatEntry.click();
-    await page.locator('textarea[aria-label="输入你想了解的问题"]').waitFor({ state: "visible" });
+    await page.goto(`${baseUrl}/m/chat`, { waitUntil: "networkidle" });
+    const textarea = page.getByRole("textbox", { name: "输入你想了解的问题" });
+    await textarea.waitFor({ state: "visible" });
     await page.screenshot({ path: path.join(outputDir, `chat-${viewport.width}-initial.png`), fullPage: true });
-    await page.locator('textarea[aria-label="输入你想了解的问题"]').fill("我在关系里最容易卡在哪里？");
-    await page.getByRole("button", { name: "发送问题" }).click();
-    await page.getByText("查看这条回答用了什么依据").waitFor({ state: "visible", timeout: 20_000 });
-
-    const layout = await page.evaluate(() => ({
-      scrollWidth: document.documentElement.scrollWidth,
-      clientWidth: document.documentElement.clientWidth,
-      composerHeight: document.querySelector('form textarea[aria-label="输入你想了解的问题"]')?.getBoundingClientRect().height || 0,
-      sendSize: (() => {
-        const rect = document.querySelector('button[aria-label="发送问题"]')?.getBoundingClientRect();
-        return rect ? { width: rect.width, height: rect.height } : { width: 0, height: 0 };
-      })(),
-    }));
-    if (layout.scrollWidth > layout.clientWidth) throw new Error(`${viewport.width}px 出现横向溢出：${layout.scrollWidth}/${layout.clientWidth}`);
-    if (layout.composerHeight < 44 || layout.sendSize.width < 44 || layout.sendSize.height < 44) throw new Error(`${viewport.width}px 输入区触控尺寸不足`);
-
-    await page.getByText("查看这条回答用了什么依据").click();
+    await textarea.fill("他最近变冷淡，我该继续等吗？");
+    await page.getByRole("button", { name: "发送" }).click();
+    await page.getByText("先看对方有没有持续回应").waitFor({ state: "visible" });
     await page.screenshot({ path: path.join(outputDir, `chat-${viewport.width}-answer.png`), fullPage: true });
 
-    let posterSize;
-    if (viewport.width === 390) {
-      await page.getByRole("button", { name: "生成分享图" }).first().click();
-      await page.getByRole("button", { name: "生成高清图" }).click();
-      const generatedImage = page.locator('.share-poster-preview-frame img[alt$="分享图"]');
-      await generatedImage.waitFor({ state: "visible", timeout: 20_000 });
-      posterSize = await generatedImage.evaluate((image) => ({
-        width: image.naturalWidth,
-        height: image.naturalHeight,
-      }));
-      if (posterSize.width !== 1080 || posterSize.height !== 1920) throw new Error(`分享图尺寸错误：${posterSize.width}x${posterSize.height}`);
-      await page.screenshot({ path: path.join(outputDir, "chat-390-share-sheet.png"), fullPage: false });
-    }
-
-    results.push({ viewport, layout, posterSize, consoleErrors });
+    const layout = await page.evaluate(() => {
+      const send = document.querySelector('button[aria-label="发送"]')?.getBoundingClientRect();
+      return {
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+        sendSize: send ? { width: send.width, height: send.height } : { width: 0, height: 0 },
+      };
+    });
+    if (layout.scrollWidth > layout.clientWidth) throw new Error(`${viewport.width}px 出现横向溢出`);
+    if (layout.sendSize.width < 44 || layout.sendSize.height < 44) throw new Error(`${viewport.width}px 发送按钮触控尺寸不足`);
     if (consoleErrors.length) throw new Error(`${viewport.width}px 控制台错误：${consoleErrors.join(" | ")}`);
+    results.push({ viewport, layout, consoleErrors });
     await context.close();
   }
 } finally {

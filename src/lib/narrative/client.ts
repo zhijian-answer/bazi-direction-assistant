@@ -4,16 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import type { NarrativeCard, NarrativeRequest, NarrativeResponse } from "./contracts";
 import { buildLocalNarrative } from "./local";
 
-const remoteEnabled = process.env.NEXT_PUBLIC_NARRATIVE_API_ENABLED === "true";
+const remoteEnabled = process.env.NEXT_PUBLIC_NARRATIVE_API_ENABLED !== "false";
 const remoteBase = (process.env.NEXT_PUBLIC_NARRATIVE_API_URL || "").replace(/\/$/, "");
 
-export function useNarrativeCard(input: NarrativeRequest | null): NarrativeCard | null {
+export function useNarrativeResponse(input: NarrativeRequest | null): NarrativeResponse | null {
   const serialized = useMemo(() => input ? JSON.stringify(input) : "", [input]);
   const localCard = useMemo(() => serialized ? buildLocalNarrative(JSON.parse(serialized) as NarrativeRequest) : null, [serialized]);
   const [remote, setRemote] = useState<{ key: string; response: NarrativeResponse } | null>(null);
 
   useEffect(() => {
-    if (!remoteEnabled || !serialized) return;
+    if (!remoteEnabled || !serialized || remote?.key === serialized) return;
     const controller = new AbortController();
     const url = `${remoteBase}/api/narratives`;
 
@@ -31,7 +31,17 @@ export function useNarrativeCard(input: NarrativeRequest | null): NarrativeCard 
       .catch(() => undefined);
 
     return () => controller.abort();
-  }, [serialized]);
+  }, [remote?.key, serialized]);
 
-  return remote?.key === serialized ? remote.response.card : localCard;
+  if (remote?.key === serialized) return remote.response;
+  return localCard && input ? {
+    card: localCard,
+    source: "catalog",
+    promptVersion: input.promptVersion || "local",
+    issues: [],
+  } : null;
+}
+
+export function useNarrativeCard(input: NarrativeRequest | null): NarrativeCard | null {
+  return useNarrativeResponse(input)?.card || null;
 }

@@ -150,14 +150,14 @@ export function buildMobileZodiacReport(profile: MobileProfile) {
   ];
 
   const identityTitle = rising && moon
-    ? `太阳${signName(sun.sign)}、月亮${signName(moon.sign)}、上升${signName(rising.sign)}的你：看起来${risingProfile!.impression}，真正靠${sunProfile.strength}保持状态`
+    ? `上升${signName(rising.sign)}的你看起来${risingProfile!.impression}，熟悉以后才会发现你其实很${sunProfile.strength}`
     : moon
-      ? `太阳${signName(sun.sign)}、月亮${signName(moon.sign)}的你：用${sunProfile.strength}向前，也需要${emotionNeed(moonProfile!.emotion)}`
-      : `太阳${signName(sun.sign)}的你：更容易通过${sunProfile.drive}找到状态`;
+      ? `你一边靠${sunProfile.strength}往前走，一边也很需要${emotionNeed(moonProfile!.emotion)}`
+      : `当生活里还能${sunProfile.drive}，你会更容易找回自己`;
 
   const identitySubtitle = moon
-    ? `太阳描述你主动追求的方向，月亮提醒你内在真正需要什么${rising ? `，上升则让别人先感受到你的${risingProfile!.impression}` : ""}。这些是观察角度，不是固定性格。`
-    : `目前只能确认太阳配置。补充准确时辰与出生城市后，才能继续观察月亮、上升和关系配置。`;
+    ? `你主动面对生活时会${sunProfile.drive}，心里真正累的时候却更需要${emotionNeed(moonProfile!.emotion)}${rising ? `。刚认识你的人，通常先看到你的${risingProfile!.impression}` : ""}。`
+    : `目前先能看见你主动面对生活的那一面。补充准确时辰与出生城市后，再看情绪需要和别人眼中的你。`;
 
   const peaks = [
     { name: "行动力", value: scoresFor([mars?.sign ?? sun.sign, moon?.sign ?? sun.sign], "action"), color: peakColors[0] },
@@ -198,9 +198,9 @@ export function buildMobileZodiacReport(profile: MobileProfile) {
   ];
 
   const questions: QuestionInsightData[] = [
-    { id: "zodiac-attraction", context: "zodiac", prompt: "我会喜欢什么样的人？", shortLabel: "会喜欢谁", source: `来自金星${venusProfile.name}${risingProfile ? `、上升${risingProfile.name}` : ""}与太阳${sunProfile.name}的组合观察`, interpretation: `你容易被${venusProfile.attraction}吸引。太阳${sunProfile.name}还会让你在关系里重视${sunProfile.strength}。`, observation: "吸引力说明靠近的起点，稳定回应和现实行动才决定关系能否继续。", action: "除了聊天感觉，也观察对方是否愿意落实一个小约定。", tone: "coral" },
-    { id: "zodiac-fear", context: "zodiac", prompt: "我在关系里最害怕什么？", shortLabel: "关系里怕什么", source: `来自${moonProfile ? `月亮${moonProfile.name}` : "情绪配置待确认"}${risingProfile ? `与上升${risingProfile.name}` : ""}的组合观察`, interpretation: moonProfile ? `你更容易在缺少${emotionNeed(moonProfile.emotion)}时感到不安。` : "出生时辰不足，无法确认月亮位置，因此不对具体情绪模式下结论。", observation: "关系里的安全感需要通过真实沟通和持续行动建立，而不是靠标签保证。", action: "先确认正在发生的事实，再表达你需要的回应。", tone: "violet" },
-    { id: "zodiac-hot-cold", context: "zodiac", prompt: "我为什么有时会忽冷忽热？", shortLabel: "为何忽冷忽热", source: `来自太阳${sunProfile.name}${moonProfile ? `与月亮${moonProfile.name}` : ""}的节奏差异`, interpretation: moonProfile ? `太阳推动你${sunProfile.drive}，月亮却需要${emotionNeed(moonProfile.emotion)}。两种节奏切换时，看起来可能忽近忽远。` : `太阳${sunProfile.name}会让你${sunProfile.drive}；月亮尚待确认，因此这里只解释可见部分。`, observation: "距离变化不等于不在意，也可能是在重新分配注意力和情绪容量。", action: "需要退开时先说明原因，并约定何时继续沟通。", tone: "sky" },
+    { id: "zodiac-attraction", context: "zodiac", prompt: "为什么我总会被同一类人吸引？", shortLabel: "总被谁吸引", source: `来自金星${venusProfile.name}${risingProfile ? `、上升${risingProfile.name}` : ""}与太阳${sunProfile.name}的组合`, interpretation: `你容易被${venusProfile.attraction}吸引。太阳${sunProfile.name}还会让你在关系里重视${sunProfile.strength}。`, observation: "心动只解释了为什么靠近，稳定回应和现实行动才决定关系能不能继续。", action: "除了聊天时的感觉，也看看对方愿不愿意落实一个小约定。", tone: "coral" },
+    { id: "zodiac-fear", context: "zodiac", prompt: "为什么喜欢的人，总让我没有安全感？", shortLabel: "为什么没安全感", source: `来自${moonProfile ? `月亮${moonProfile.name}` : "情绪配置待确认"}${risingProfile ? `与上升${risingProfile.name}` : ""}的组合`, interpretation: moonProfile ? `当关系里缺少${emotionNeed(moonProfile.emotion)}，你会更容易不安，也更想尽快确认对方的态度。` : "出生时辰不足，暂时无法确认月亮位置，因此不对具体情绪需要下结论。", observation: "安全感不是靠一个星座标签保证的，它更需要清楚的沟通和持续的行动。", action: "先确认正在发生的事实，再把你真正需要的回应说出来。", tone: "violet" },
+    { id: "zodiac-hot-cold", context: "zodiac", prompt: "我在关系里为什么容易忽冷忽热？", shortLabel: "为何忽冷忽热", source: `来自太阳${sunProfile.name}${moonProfile ? `与月亮${moonProfile.name}` : ""}的节奏差异`, interpretation: moonProfile ? `太阳推动你${sunProfile.drive}，月亮却需要${emotionNeed(moonProfile.emotion)}。两种需要轮流出现时，别人可能觉得你忽近忽远。` : `太阳${sunProfile.name}会让你${sunProfile.drive}；月亮尚待确认，因此这里只解释能看见的部分。`, observation: "退开一点不一定是不在意，也可能是你需要重新整理注意力和情绪。", action: "需要一点距离时先说明原因，也告诉对方什么时候可以继续聊。", tone: "sky" },
     { id: "zodiac-relax", context: "zodiac", prompt: "什么样的人会让我真正放松？", shortLabel: "谁让我放松", source: `来自${moonProfile ? `月亮${moonProfile.name}` : "太阳配置"}${risingProfile ? `与上升${risingProfile.name}` : ""}的恢复方式`, interpretation: moonProfile ? `能尊重你对${emotionNeed(moonProfile.emotion)}的需要，也允许你${moonProfile.recovery}的人，更容易让你放松。` : `能理解你${sunProfile.drive}，同时不过度要求你持续表现的人，更容易让你放松。`, observation: "真正舒服的关系允许表达，也允许短暂安静。", action: "留意谁能尊重你的节奏，而不是只在你有状态时靠近。", tone: "sage" },
     { id: "zodiac-initiative", context: "zodiac", prompt: "感情里我更适合主动，还是被动？", shortLabel: "主动还是被动", source: `来自火星${marsProfile.name}、金星${venusProfile.name}与关系反馈`, interpretation: `你的行动方式更接近${marsProfile.action}，而吸引模式偏向${venusProfile.attraction}。清楚地主动一次，比持续追逐或完全等待更适合观察真实反馈。`, observation: "主动的价值是获得信息，不是保证关系一定发生。", action: "表达一次具体邀请，再根据对方是否回应决定下一步。", tone: "warm" },
   ];
@@ -220,8 +220,8 @@ export function buildMobileZodiacReport(profile: MobileProfile) {
   return {
     identity: { title: identityTitle, subtitle: identitySubtitle, tags },
     highlight: {
-      title: "最值得关注的配置",
-      statistic: moonProfile ? `你的特别，在于“${sunProfile.strength}”和“${moonProfile.emotion}”同时存在` : `当前最清楚的线索，是太阳${sunProfile.name}的${sunProfile.strength}`,
+      title: "你身上最有意思的地方",
+      statistic: moonProfile ? `一边很${sunProfile.strength}，一边又很需要${emotionNeed(moonProfile.emotion)}` : `你最容易被看见的，是${sunProfile.strength}`,
       note: moonProfile ? `太阳${sunProfile.name}负责${sunProfile.drive}，月亮${moonProfile.name}更需要${emotionNeed(moonProfile.emotion)}${risingProfile ? `，上升${risingProfile.name}让你先显得${risingProfile.impression}` : ""}。` : "补充出生时辰后，才能确认月亮、上升与更完整的关系配置。",
     },
     peaks,
@@ -229,13 +229,13 @@ export function buildMobileZodiacReport(profile: MobileProfile) {
     traits,
     daily: {
       title: `今天适合${mercuryProfile.daily}`,
-      note: `这条提醒来自你的水星${mercuryProfile.name}表达方式与太阳${sunProfile.name}行动倾向，不是实时运势预测。`,
+      note: `不用一下子把所有想法都说完。先让对方听懂最重要的那一句，再慢慢补充。这个提醒结合了水星${mercuryProfile.name}的表达方式与太阳${sunProfile.name}的行动倾向。`,
       luckyColor: ({ 火: "朱砂红", 土: "黄铜金", 风: "雾蓝", 水: "深海青" } as const)[sunProfile.element],
       suitable: `${sunProfile.strength}、${mercuryProfile.expression}、完成一个小闭环`,
     },
     shareInsights,
     readingReminders: [
-      { after: 1, title: moonProfile ? `先照顾对${emotionNeed(moonProfile.emotion)}的需要，再继续处理问题` : "先照顾真实感受，再继续处理问题", note: "结构化观察的价值，是帮你辨认消耗来源，而不是替你决定。" },
+      { after: 1, title: moonProfile ? `先照顾对${emotionNeed(moonProfile.emotion)}的需要，再继续处理问题` : "先照顾真实感受，再继续处理问题", note: "星座能帮你看见自己的习惯，但最后的答案，仍然要回到真实生活里确认。" },
       { after: 3, title: `把${marsProfile.action}用在一件具体事情上`, note: "行动有了边界，星体标签才会变成可验证的生活观察。" },
     ],
     readings,

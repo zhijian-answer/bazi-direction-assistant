@@ -1,7 +1,5 @@
-import { CompatibilityCreateFlow } from "@/components/mobile/CompatibilityCreateFlow";
-import type { CompatibilityMode } from "@/lib/compatibility";
-
+import { CompatibilityV4App } from "@/components/figma-v22/compatibility-v4/CompatibilityV4App";
 export default async function MobileCompatibilityCreatePage({ searchParams }: { searchParams: Promise<{ mode?: string }> }) {
   const { mode } = await searchParams;
-  return <CompatibilityCreateFlow initialMode={(mode === "bazi" ? "bazi" : "astrology") satisfies CompatibilityMode} />;
+  return <CompatibilityV4App initialScreen="create-1" initialChartType={mode === "bazi" ? "birth" : "synastry"} />;
 }

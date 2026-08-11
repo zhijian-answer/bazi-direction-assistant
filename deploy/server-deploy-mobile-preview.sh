@@ -9,6 +9,7 @@ RELEASE="$APP/releases/$RELEASE_SHA"
 PORT=3210
 NGINX_SITE=/etc/nginx/sites-available/superstaff-duckdns
 SERVICE=/etc/systemd/system/xuanshu-mobile-preview.service
+SHARED_ENV="$APP/shared/app.env"
 
 if ss -ltn | awk '{print $4}' | grep -Eq "(^|:)${PORT}$" && ! systemctl is-active --quiet xuanshu-mobile-preview.service; then
   echo "Port $PORT is already used by another service" >&2
@@ -37,6 +38,7 @@ WorkingDirectory=$APP/current
 Environment=NODE_ENV=production
 Environment=PORT=$PORT
 Environment=HOSTNAME=127.0.0.1
+EnvironmentFile=-$SHARED_ENV
 ExecStart=/usr/bin/node server.js
 Restart=always
 RestartSec=5
@@ -108,7 +110,7 @@ block = """    # BEGIN XUANSHU_MOBILE_PREVIEW
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    location = /api/analytics {
+    location ~ ^/api/(analytics|health|mobile-chat|report-narratives|auth/(login|logout|register)|me|sync/profiles)$ {
         proxy_pass http://127.0.0.1:3210;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
@@ -142,6 +144,9 @@ curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/
 curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/m
 curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/m/report/bazi
 curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/m/report/zodiac
+curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/m/chart/natal
+curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/m/chart/transit
+curl -fsS -o /dev/null https://zzj-superstaff.duckdns.org/api/health
 
 find "$APP/releases" -mindepth 1 -maxdepth 1 -type d ! -path "$RELEASE" -printf '%T@ %p\n' \
   | sort -nr \

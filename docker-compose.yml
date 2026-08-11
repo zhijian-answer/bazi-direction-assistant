@@ -10,12 +10,18 @@ services:
     environment:
       NODE_ENV: production
       APP_DATA_DIR: /app/data
-      APP_VERSION: "0.1.0"
+      APP_VERSION: "1.0.0"
       APP_URL: "${APP_URL:-http://localhost:3000}"
       NEXT_PUBLIC_SITE_URL: "${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}"
-      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
-      OPENAI_MODEL: "${OPENAI_MODEL:-gpt-4.1-mini}"
-      OPENAI_TIMEOUT_MS: "${OPENAI_TIMEOUT_MS:-20000}"
+      AI_PROVIDER: "${AI_PROVIDER:-deepseek}"
+      DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
+      RATE_LIMIT_CHAT_DAILY: "${RATE_LIMIT_CHAT_DAILY:-10}"
+      AI_BASE_URL: "${AI_BASE_URL:-https://api.deepseek.com}"
+      AI_MODEL: "${AI_MODEL:-deepseek-chat}"
+      AI_TIMEOUT_MS: "${AI_TIMEOUT_MS:-30000}"
+      NARRATIVE_AI_ENABLED: "${NARRATIVE_AI_ENABLED:-true}"
+      CHAT_AI_ENABLED: "${CHAT_AI_ENABLED:-true}"
+      NEXT_PUBLIC_NARRATIVE_API_ENABLED: "${NEXT_PUBLIC_NARRATIVE_API_ENABLED:-true}"
       AI_FORCE_LOCAL: "${AI_FORCE_LOCAL:-false}"
       AI_FALLBACK_ON_ERROR: "${AI_FALLBACK_ON_ERROR:-true}"
       DAILY_QUESTION_LIMIT: "${DAILY_QUESTION_LIMIT:-5}"

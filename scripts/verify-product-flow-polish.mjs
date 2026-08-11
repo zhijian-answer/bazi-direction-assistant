@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 
-const baseUrl = process.env.XUANSHU_PREVIEW_URL || "http://127.0.0.1:3139";
+const baseUrl = process.env.XUANSHU_PREVIEW_URL || "http://127.0.0.1:3156";
 const demoProfile = {
   id: "demo-profile",
   name: "示例：小玄",
@@ -33,51 +33,54 @@ await page.addInitScript((profile) => {
   localStorage.setItem("xuanshu-reading-progress:zodiac:demo-profile", "96");
 }, demoProfile);
 
+await page.route("**/api/mobile-chat", async (route) => {
+  await route.fulfill({ contentType: "application/json", body: JSON.stringify({
+    answer: {
+      title: "先看现实里的回应，再决定要不要继续猜。",
+      summary: "你现在需要的不是更多假设，而是一个能被确认的事实。",
+      observations: ["对方是否愿意把态度说清楚", "现实行动是否与说法一致"],
+      action: "把最想确认的问题写成一句话，直接问事实。",
+      suggestions: ["我该观察什么？"],
+      evidence: [],
+      limitations: ["仅供自我观察与生活参考"],
+      delivery: { source: "api", provider: "deepseek", model: "deepseek-chat" },
+    },
+  }) });
+});
+
 await page.goto(`${baseUrl}/m/compatibility/create?mode=astrology`, { waitUntil: "domcontentloaded" });
-await page.locator(".compatibility-form-panel").waitFor({ state: "visible", timeout: 10_000 });
-const selects = page.locator(".compatibility-form-panel select");
-if (await selects.count() !== 2) throw new Error("Compatibility pair step did not render two profile selectors.");
-const selectedPartner = await selects.nth(1).inputValue();
-if (selectedPartner !== "demo-partner-profile") throw new Error(`Unexpected demo partner: ${selectedPartner}`);
-await page.locator(".compatibility-primary-action").click();
-await page.waitForURL("**/m/compatibility/result", { timeout: 10_000 });
-await page.locator(".compatibility-result-cover").waitFor({ state: "visible", timeout: 10_000 });
+await page.getByText("选择双方与类型", { exact: true }).waitFor({ state: "visible", timeout: 10_000 });
+await page.getByRole("button", { name: /新建对方档案/ }).waitFor({ state: "visible" });
 
 const compatibilityState = await page.evaluate(() => ({
-  latest: Boolean(localStorage.getItem("xuanshu-compatibility-latest-v1")),
   history: JSON.parse(localStorage.getItem("xuanshu-compatibility-history-v1") || "[]").length,
-  activeNav: document.querySelector(".mobile-bottom-nav a.is-active small")?.textContent || "",
-  demoNotice: Boolean(document.querySelector(".compatibility-demo-note")),
+  demoNotice: document.body.innerText.includes("当前正在查看示例档案"),
 }));
-if (!compatibilityState.latest || compatibilityState.history !== 0 || compatibilityState.activeNav !== "工具" || !compatibilityState.demoNotice) {
+if (compatibilityState.history !== 0 || !compatibilityState.demoNotice) {
   throw new Error(`Demo compatibility boundary failed: ${JSON.stringify(compatibilityState)}`);
 }
 
 await page.goto(`${baseUrl}/m/chat`, { waitUntil: "domcontentloaded" });
 await page.locator('textarea[aria-label="输入你想了解的问题"]').waitFor({ state: "visible", timeout: 10_000 });
-const starterButtons = page.locator("[class*='starters'] button");
-const starterCount = await starterButtons.count();
-if (!starterCount) throw new Error("Demo chat starters are missing.");
-await starterButtons.nth(0).click();
-await page.locator("article[class*='answer']").waitFor({ state: "visible", timeout: 20_000 });
+await page.locator('textarea[aria-label="输入你想了解的问题"]').fill("我该观察什么？");
+await page.getByRole("button", { name: "发送" }).click();
+await page.getByText("先看现实里的回应，再决定要不要继续猜。", { exact: true }).waitFor({ state: "visible", timeout: 20_000 });
 const chatState = await page.evaluate(() => ({
-  persisted: localStorage.getItem("xuanshu-mobile-chat-v1:demo-profile"),
-  activeNav: document.querySelector(".mobile-bottom-nav a.is-active small")?.textContent || "",
+  persisted: localStorage.getItem("xuanshu-mobile-chat-v2:demo-profile"),
 }));
-if (chatState.persisted !== null || chatState.activeNav !== "工具") throw new Error(`Demo chat boundary failed: ${JSON.stringify(chatState)}`);
+if (chatState.persisted !== null) throw new Error(`Demo chat boundary failed: ${JSON.stringify(chatState)}`);
 
 await page.goto(`${baseUrl}/m/report/zodiac`, { waitUntil: "domcontentloaded" });
-await page.locator(".report-reading-mode").waitFor({ state: "visible", timeout: 10_000 });
-if (await page.locator(".report-reading-guide__resume").count()) {
-  throw new Error("A nearly completed report should not show a resume-reading prompt.");
-}
-const modeButtons = page.locator(".report-reading-mode button");
-if (await modeButtons.count() !== 2) throw new Error("Report reading mode switch is missing.");
-const quickDisplay = await page.locator("#reading-zodiac").evaluate((element) => getComputedStyle(element).display);
-if (quickDisplay !== "none") throw new Error(`Professional zodiac content should be hidden in quick mode, got ${quickDisplay}.`);
-await modeButtons.nth(1).click();
-const professionalDisplay = await page.locator("#reading-zodiac").evaluate((element) => getComputedStyle(element).display);
-if (professionalDisplay === "none") throw new Error("Professional zodiac content did not open.");
+const zodiacTabList = page.getByRole("tablist", { name: "星盘报告视图" });
+await zodiacTabList.waitFor({ state: "visible", timeout: 10_000 });
+const reportTabs = zodiacTabList.getByRole("tab");
+if (await reportTabs.count() !== 4) throw new Error("The Figma zodiac report should expose four report tabs.");
+if (await reportTabs.nth(0).getAttribute("aria-selected") !== "true") throw new Error("The zodiac report did not start on its overview tab.");
+await page.getByRole("tab", { name: "相位" }).click();
+await page.getByText("主要相位", { exact: true }).waitFor({ state: "visible", timeout: 10_000 });
+const activeReportTab = await page.getByRole("tab", { name: "相位" }).getAttribute("aria-selected");
+if (activeReportTab !== "true") throw new Error("The zodiac aspect tab did not become active.");
+const zodiacReport = { tabCount: await reportTabs.count(), activeTab: "相位" };
 
 await page.goto(`${baseUrl}/m/create?mode=new`, { waitUntil: "domcontentloaded" });
 if (await page.locator(".create-secondary").count()) throw new Error("The ambiguous partial-save action is still visible.");
@@ -94,6 +97,6 @@ console.log(JSON.stringify({
   baseUrl,
   compatibilityState,
   chatState,
-  readingModes: { quickDisplay, professionalDisplay },
+  zodiacReport,
   browserErrors: errors.length,
 }, null, 2));

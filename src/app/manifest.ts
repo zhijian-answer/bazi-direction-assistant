@@ -1,31 +1,28 @@
 import type { MetadataRoute } from "next";
-import { getSiteUrl } from "@/lib/site";
 
 export default function manifest(): MetadataRoute.Manifest {
-  const siteUrl = getSiteUrl();
-
   return {
     name: "玄枢",
     short_name: "玄枢",
-    description: "免费的中文四柱八字排盘与五行、大运流年参考工具。",
-    id: "/",
-    start_url: "/",
-    scope: "/",
+    description: "用更容易看懂的方式阅读生辰、星盘、紫微与关系报告。",
+    id: "/m",
+    start_url: "/m",
+    scope: "/m",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#0f1114",
-    theme_color: "#0f1114",
+    background_color: "#f4f0ff",
+    theme_color: "#f4f0ff",
     lang: "zh-CN",
     categories: ["lifestyle", "utilities"],
     icons: [
       {
-        src: `${siteUrl}/app-icon.svg`,
+        src: "/app-icon.svg",
         sizes: "any",
         type: "image/svg+xml",
         purpose: "any",
       },
       {
-        src: `${siteUrl}/maskable-icon.svg`,
+        src: "/maskable-icon.svg",
         sizes: "any",
         type: "image/svg+xml",
         purpose: "maskable",

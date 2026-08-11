@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { releaseFeatures, releasedToolIds } from "@/lib/mobile/releaseFeatures";
 import { type ToolStatusData } from "./ToolStatusSheet";
 
 // ─── Data types — pure text/enum only, no JSX ─────────────────────────────────
@@ -24,10 +25,10 @@ const TOOLS: ToolDef[] = [
     id: "compat",
     iconKey: "compat",
     title: "两人合盘",
-    subtitle: "从双方出生结构观察吸引、沟通与相处节律",
+    subtitle: "看懂为什么互相吸引，又总在同一个地方误会",
     category: "关系",
     state: "available",
-    stateLabel: "可使用",
+    stateLabel: "现在就看",
     stateColor: "#6BBFA0",
     statusDesc: "",
   },
@@ -35,10 +36,10 @@ const TOOLS: ToolDef[] = [
     id: "natal",
     iconKey: "natal",
     title: "完整星盘",
-    subtitle: "太阳、月亮、上升及全部宫位解读",
+    subtitle: "看看别人眼里的你，和心里的自己有什么不同",
     category: "探索",
     state: "available",
-    stateLabel: "可使用",
+    stateLabel: "现在就看",
     stateColor: "#6BBFA0",
     statusDesc: "",
   },
@@ -46,23 +47,23 @@ const TOOLS: ToolDef[] = [
     id: "personality",
     iconKey: "personality",
     title: "性格测试",
-    subtitle: "从真实行为出发，观察你的性格结构",
+    subtitle: "从真实选择里，看看你习惯怎样面对关系和压力",
     category: "性格",
     state: "coming",
-    stateLabel: "内容校准中",
+    stateLabel: "暂未开放",
     stateColor: "#7BBDE0",
-    statusDesc: "题目、计分规则与结果解释仍在校准。目前不会用通用模板冒充你的测试结果。",
+    statusDesc: "性格测试暂时还不能使用。想先了解自己的性格和相处方式，可以查看生辰或星盘报告。",
   },
   {
     id: "qa",
     iconKey: "qa",
     title: "玄枢问答",
-    subtitle: "用一个具体问题，解读命理结构里的答案",
+    subtitle: "有件事想不明白，就从最真实的困惑说起",
     category: "日常",
-    state: "coming",
-    stateLabel: "接入中",
-    stateColor: "#7BBDE0",
-    statusDesc: "我们正在接入真实的命理问答库，目前还没准备好。你可以先浏览已有报告，找到你想深入了解的部分。",
+    state: "available",
+    stateLabel: "在线问答",
+    stateColor: "#6BBFA0",
+    statusDesc: "",
   },
   {
     id: "tarot",
@@ -71,9 +72,9 @@ const TOOLS: ToolDef[] = [
     subtitle: "结合当日流年，给出一张参考牌面",
     category: "日常",
     state: "coming",
-    stateLabel: "规划中",
+    stateLabel: "暂未开放",
     stateColor: "#C0ACDE",
-    statusDesc: "塔罗模块还在规划阶段，目前没有排期。如果你需要今日参考，生辰报告里已经有当日能量的解读。",
+    statusDesc: "每日塔罗暂时还不能使用。想看看今天该注意什么，可以先读生辰报告里的今日提醒。",
   },
   {
     id: "numerology",
@@ -82,9 +83,9 @@ const TOOLS: ToolDef[] = [
     subtitle: "从生日数字解读命格倾向与当年节律",
     category: "日常",
     state: "coming",
-    stateLabel: "规划中",
+    stateLabel: "暂未开放",
     stateColor: "#C0ACDE",
-    statusDesc: "数字命理还在规划中。如果你想了解数字层面的解读，生辰八字报告已经包含了部分相关内容。",
+    statusDesc: "数字命理暂时还不能使用。想先了解自己的性格与近期节奏，可以查看生辰报告。",
   },
   {
     id: "archetype",
@@ -93,24 +94,24 @@ const TOOLS: ToolDef[] = [
     subtitle: "识别你的核心驱动模式和应激反应",
     category: "性格",
     state: "coming",
-    stateLabel: "规划中",
+    stateLabel: "暂未开放",
     stateColor: "#C0ACDE",
-    statusDesc: "人格原型的底层模型还在设计中。性格测试的题目与计分规则也仍在校准，目前不会提供模板化结果。",
+    statusDesc: "人格原型暂时还不能使用。想先了解自己的反应方式，可以查看生辰或星盘报告。",
   },
   {
     id: "soulmate",
     iconKey: "soulmate",
     title: "灵魂伴侣画像",
-    subtitle: "描绘与你能量共鸣的关系特质",
+    subtitle: "看看什么样的人，更容易让你真正放松下来",
     category: "关系",
     state: "example",
-    stateLabel: "仅示例",
+    stateLabel: "暂未开放",
     stateColor: "#E8816A",
-    statusDesc: "这个功能目前只有示例数据，不代表真实解读。真实的灵魂伴侣分析需要完整的双方档案，我们还没完成这个部分。",
+    statusDesc: "灵魂伴侣画像暂时还不能使用。想看两个人的相处方式，可以先使用两人合盘。",
   },
 ];
 
-const FILTER_TABS: FilterTab[] = ["全部", "关系", "性格", "日常", "探索"];
+const FILTER_TABS: FilterTab[] = ["全部", "关系", "日常", "探索"];
 
 // ─── SVG Icon Components ───────────────────────────────────────────────────────
 function CompatToolIcon() {
@@ -275,7 +276,8 @@ function WideToolCard({ tool, onClick }: { tool: ToolDef; onClick: () => void })
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
       style={{
-        flex: 1,
+        flex: "1 1 calc(50% - 5px)",
+        minWidth: 0,
         ...glassBase,
         borderRadius: 18,
         padding: "16px 14px",
@@ -381,14 +383,16 @@ interface Props {
   onGoToComp: () => void;
   onGoToNatal: () => void;
   onGoToPersonality: () => void;
+  onGoToChat: () => void;
   onOpenToolStatus: (data: ToolStatusData) => void;
   onGoToCombinedInsight: () => void;
+  onGoToRecords: () => void;
   profileName: string;
 }
 
 // ─── Main component ────────────────────────────────────────────────────────────
 export default function ToolsHubScreen({
-  onBack, onGoToComp, onGoToNatal, onGoToPersonality, onOpenToolStatus, onGoToCombinedInsight, profileName,
+  onBack, onGoToComp, onGoToNatal, onGoToPersonality, onGoToChat, onOpenToolStatus, onGoToCombinedInsight, onGoToRecords, profileName,
 }: Props) {
   const [activeTab, setActiveTab] = useState<FilterTab>("全部");
   const [searchQuery, setSearchQuery] = useState("");
@@ -398,6 +402,7 @@ export default function ToolsHubScreen({
       if (tool.id === "compat") onGoToComp();
       else if (tool.id === "natal") onGoToNatal();
       else if (tool.id === "personality") onGoToPersonality();
+      else if (tool.id === "qa") onGoToChat();
     } else {
       onOpenToolStatus({
         name: tool.title,
@@ -409,7 +414,7 @@ export default function ToolsHubScreen({
   }
 
   const q = searchQuery.trim().toLowerCase();
-  const filtered = TOOLS.filter(t => {
+  const filtered = TOOLS.filter(t => releasedToolIds.has(t.id)).filter(t => {
     const matchesTab = activeTab === "全部" || t.category === activeTab;
     const matchesSearch = q === "" || t.title.includes(q) || t.subtitle.includes(q);
     return matchesTab && matchesSearch;
@@ -451,12 +456,12 @@ export default function ToolsHubScreen({
           <div style={{
             fontSize: 22, fontFamily: "'Noto Serif SC', serif",
             fontWeight: 700, color: "#28253D", letterSpacing: "0.04em",
-          }}>发现工具</div>
+          }}>想先看哪件事？</div>
         </div>
         <div style={{
           fontSize: 12.5, fontFamily: "'Noto Sans SC', sans-serif",
           color: "#9088A8", marginLeft: 44,
-        }}>从一个具体问题开始，慢慢看懂自己</div>
+        }}>从感情、工作或最近的状态开始，选一个你最在意的</div>
       </div>
 
       {/* ── Search bar ── */}
@@ -520,7 +525,7 @@ export default function ToolsHubScreen({
       </div>
 
       {/* ── 高阶合参 featured card — always visible, above filters ── */}
-      {(activeTab === "全部" || activeTab === "探索") && q === "" && (
+      {releaseFeatures.combinedInsight && (activeTab === "全部" || activeTab === "探索") && q === "" && (
         <div style={{ padding: "0 18px 16px" }}>
           <button type="button" onClick={onGoToCombinedInsight} style={{
             borderRadius: 22, padding: "18px 20px",
@@ -693,7 +698,7 @@ export default function ToolsHubScreen({
               fontSize: 13.5, fontFamily: "'Noto Sans SC', sans-serif",
               color: "#4A4168", lineHeight: 1.65, marginBottom: 18,
             }}>
-              选择另一份真实档案后，再从吸引、沟通、情绪回应与生活节奏四个方向展开观察。
+              选择另一份真实档案后，先看你们为什么靠近，再看哪些误会总会反复出现。
             </div>
 
             {/* CTA */}
@@ -704,7 +709,7 @@ export default function ToolsHubScreen({
               <span style={{
                 fontSize: 12, fontFamily: "'Noto Sans SC', sans-serif",
                 color: "#8BBBA8",
-              }}>尚未创建合盘 · 不使用示例分数</span>
+              }}>还没有关系报告</span>
               <div style={{
                 padding: "7px 18px", borderRadius: 20,
                 background: "linear-gradient(135deg, #6BBFA0, #7BBDE0)",
@@ -724,8 +729,8 @@ export default function ToolsHubScreen({
             fontSize: 12, fontFamily: "'Noto Sans SC', sans-serif",
             fontWeight: 500, color: "#9088A8", letterSpacing: "0.06em",
             marginBottom: 10,
-          }}>可立即使用</div>
-          <div style={{ display: "flex", gap: 10 }}>
+          }}>现在可以看</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
             {availableTools
               .filter(t => t.id !== "compat" || !showBanner)
               .map(tool => (
@@ -758,10 +763,10 @@ export default function ToolsHubScreen({
         <div style={{
           fontSize: 13, fontFamily: "'Noto Serif SC', serif",
           fontWeight: 500, color: "#28253D", marginBottom: 10,
-        }}>当前可用</div>
+        }}>接着往下看</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {[
-            { iconKey: "natal" as ToolIconKey, label: `完整星盘 · ${profileName}`, time: "可查看" },
+            { iconKey: "natal" as ToolIconKey, label: `继续看 ${profileName} 的完整星盘`, time: "接着看" },
           ].map((item, i) => (
             <div key={i} style={{
               display: "flex", alignItems: "center", gap: 12,
@@ -792,7 +797,7 @@ export default function ToolsHubScreen({
 
       {/* ── My records entry ── */}
       <div style={{ padding: "14px 18px 28px" }}>
-        <PressCard style={{ padding: "14px 18px" }}>
+        <PressCard onClick={onGoToRecords} style={{ padding: "14px 18px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{
               width: 38, height: 38, borderRadius: 12, flexShrink: 0,
@@ -804,11 +809,11 @@ export default function ToolsHubScreen({
               <div style={{
                 fontSize: 14, fontFamily: "'Noto Serif SC', serif",
                 fontWeight: 500, color: "#28253D",
-              }}>我的记录</div>
+              }}>合盘记录</div>
               <div style={{
                 fontSize: 11.5, fontFamily: "'Noto Sans SC', sans-serif",
                 color: "#9088A8", marginTop: 2,
-              }}>历史记录接入中，当前不展示推测数量</div>
+              }}>查看已经保存的关系分析</div>
             </div>
             <span style={{ fontSize: 13, color: "#C0B4D8" }}>→</span>
           </div>

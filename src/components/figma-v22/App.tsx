@@ -10,23 +10,31 @@ import {
   useMobileProfileState,
 } from "@/lib/mobile/profile";
 import { getDailyInsight } from "@/lib/mobile/dailyInsightCatalog";
+import {
+  applyDailyReportNarrative,
+  applyFlowReportNarrative,
+  buildDailyReportNarrativeRequest,
+  buildFlowReportNarrativeRequest,
+} from "@/lib/mobile/reportNarratives";
 import { buildMobileQuestions } from "@/lib/mobile/buildMobileQuestions";
 import { buildMobileBaziReport } from "@/lib/mobile/buildMobileBaziReport";
-import { buildMobileZodiacReport } from "@/lib/mobile/buildMobileZodiacReport";
 import { mobileProfileToZiweiInput } from "@/lib/mobile/ziweiAdapter";
 import { calculateZiweiInsight } from "@/lib/ziwei/service";
 import type { ZiweiCalculationResult } from "@/lib/ziwei/contracts";
+import { useNarrativeResponse } from "@/lib/narrative/client";
+import type { NarrativeRequest } from "@/lib/narrative/contracts";
+import { useReportNarrative } from "@/lib/narrative/reportClient";
+import type { ReportNarrativeRequest } from "@/lib/narrative/reportContracts";
 import BaziScreen from "./BaziScreen";
-import CompatibilityScreen from "./CompatibilityScreen";
 import PersonalityScreen from "./PersonalityScreen";
 import NatalChartScreen from "./NatalChartScreen";
-import ZiweiScreen from "./ZiweiScreen";
+import ZiweiScreen, { getZiweiPalaceFallback } from "./ZiweiScreen";
 import WelcomeScreen from "./WelcomeScreen";
 import CreateProfileScreen, { type ProfileFormData } from "./CreateProfileScreen";
 import GeneratingScreen from "./GeneratingScreen";
 import ProfileScreen from "./ProfileScreen";
 import ProfileSwitcherSheet, { type ProfileEntry } from "./ProfileSwitcherSheet";
-import LoginInfoSheet from "./LoginInfoSheet";
+import LoginInfoSheet, { type MobileAccount } from "./LoginInfoSheet";
 import SharePosterSheet, { type PosterContent, type PosterContentType } from "./SharePosterSheet";
 import UIStatesScreen from "./UIStatesScreen";
 import ReportHubScreen from "./ReportHubScreen";
@@ -34,10 +42,12 @@ import ToolsHubScreen from "./ToolsHubScreen";
 import CombinedInsightScreen from "./CombinedInsightScreen";
 import ToolStatusSheet, { type ToolStatusData } from "./ToolStatusSheet";
 import QuestionInsightSheet, { type Question } from "./QuestionInsightSheet";
-import { buildFigmaBaziViewModel, buildFigmaNatalViewModel, buildFigmaZiweiViewModel } from "./viewModels";
+import { buildFigmaBaziViewModel, buildFigmaNatalViewModel, buildFigmaZiweiViewModel, toFigmaQuestion } from "./viewModels";
+import { svgNumber } from "./svgMath";
+import { applyEditorialNarrative, buildEditorialNarrativeRequest } from "./reportNarratives";
 
 export type FigmaV22Screen =
-  | "home" | "bazi" | "comp" | "personality" | "natal" | "ziwei"
+  | "home" | "bazi" | "personality" | "natal" | "ziwei"
   | "welcome" | "create-profile" | "generating" | "profile" | "ui-states"
   | "report-hub" | "tools-hub" | "combined-insight";
 
@@ -98,11 +108,11 @@ function OrbitInstrument({ size = 170 }: { size?: number }) {
             return (
               <g key={b}>
                 <circle
-                  cx={cx + dotR * Math.cos(a)} cy={cy + dotR * Math.sin(a)}
+                  cx={svgNumber(cx + dotR * Math.cos(a))} cy={svgNumber(cy + dotR * Math.sin(a))}
                   r={1.8 * scale}
                   fill={highlight ? "#E8816A" : "rgba(192,172,222,0.55)"} />
                 <text
-                  x={cx + txtR * Math.cos(a)} y={cy + txtR * Math.sin(a)}
+                  x={svgNumber(cx + txtR * Math.cos(a))} y={svgNumber(cy + txtR * Math.sin(a))}
                   textAnchor="middle" dominantBaseline="middle"
                   fontSize={8.5 * scale} fontFamily="'Noto Serif SC', serif"
                   fill={highlight ? "#E8816A" : "rgba(107,96,136,0.65)"}>
@@ -122,7 +132,7 @@ function OrbitInstrument({ size = 170 }: { size?: number }) {
             const isFirst = i === 0;
             return (
               <text key={s}
-                x={cx + R_MID * Math.cos(a)} y={cy + R_MID * Math.sin(a)}
+                x={svgNumber(cx + R_MID * Math.cos(a))} y={svgNumber(cy + R_MID * Math.sin(a))}
                 textAnchor="middle" dominantBaseline="middle"
                 fontSize={8 * scale} fontFamily="'Noto Serif SC', serif"
                 fontWeight={isFirst ? "700" : "400"}
@@ -142,8 +152,8 @@ function OrbitInstrument({ size = 170 }: { size?: number }) {
           const r2 = R_INNER - (i % 6 === 0 ? 9 : 5) * scale;
           return (
             <line key={i}
-              x1={cx + r1 * Math.cos(a)} y1={cy + r1 * Math.sin(a)}
-              x2={cx + r2 * Math.cos(a)} y2={cy + r2 * Math.sin(a)}
+              x1={svgNumber(cx + r1 * Math.cos(a))} y1={svgNumber(cy + r1 * Math.sin(a))}
+              x2={svgNumber(cx + r2 * Math.cos(a))} y2={svgNumber(cy + r2 * Math.sin(a))}
               stroke={i % 6 === 0 ? "rgba(232,129,106,0.50)" : "rgba(192,172,222,0.28)"}
               strokeWidth={i % 6 === 0 ? 1.4 * scale : 0.7 * scale} />
           );
@@ -172,7 +182,7 @@ function OrbitInstrument({ size = 170 }: { size?: number }) {
           const a = (i / 3) * Math.PI * 2 - Math.PI / 6;
           return (
             <circle key={i}
-              cx={cx + R_INNER * Math.cos(a)} cy={cy + R_INNER * Math.sin(a)}
+              cx={svgNumber(cx + R_INNER * Math.cos(a))} cy={svgNumber(cy + R_INNER * Math.sin(a))}
               r={2.2 * scale}
               fill={["#E8816A","#6BBFA0","#E9C97E"][i]} opacity="0.72" />
           );
@@ -399,6 +409,59 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
   // ── Profile switcher sheet state ──
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [loginInfoOpen, setLoginInfoOpen] = useState(false);
+  const [account, setAccount] = useState<MobileAccount | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/me", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (active) setAccount(data?.user ? { name: data.user.name, email: data.user.email } : null);
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+
+  async function syncCurrentProfile() {
+    if (!hasProfile || profile.isDemo || !profile.id) {
+      return "登录成功。创建自己的档案后，就可以保存到云端。";
+    }
+    saveMobileProfile({ ...profile, syncStatus: "pending" });
+    try {
+      const response = await fetch("/api/sync/profiles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile }),
+      });
+      const result = await response.json();
+      if (response.status === 409) {
+        saveMobileProfile({ ...profile, syncStatus: "error" });
+        return "登录成功。本机与云端档案存在差异，玄枢没有自动覆盖；你可以继续使用本机档案。";
+      }
+      if (!response.ok) throw new Error(result.error || "档案暂时没有同步成功，请稍后再试。");
+      saveMobileProfile({
+        ...profile,
+        isLocalOnly: false,
+        syncStatus: "synced",
+        cloudProfileId: result.profile.id,
+      });
+      return result.reused ? "已与云端档案建立关联，本机内容仍然保留。" : "当前档案已经保存到云端，本机内容仍然保留。";
+    } catch (error) {
+      saveMobileProfile({ ...profile, syncStatus: "error" });
+      throw error;
+    }
+  }
+
+  async function handleAuthenticated(nextAccount: MobileAccount) {
+    setAccount(nextAccount);
+    return syncCurrentProfile();
+  }
+
+  async function logoutAccount() {
+    const response = await fetch("/api/auth/logout", { method: "POST" });
+    if (!response.ok) throw new Error("退出失败");
+    setAccount(null);
+  }
 
   const profileChips = useMemo<ProfileChip[]>(() => storedProfiles.map((item, index) => ({
     id: item.id || `profile-${index}`,
@@ -420,11 +483,6 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
   const baziViewModel = useMemo(() => {
     if (!hasProfile || !profile.birthDate) return null;
     try { return buildFigmaBaziViewModel(profile); } catch { return null; }
-  }, [hasProfile, profile]);
-
-  const zodiacOverview = useMemo(() => {
-    if (!hasProfile || !profile.birthDate) return null;
-    try { return buildMobileZodiacReport(profile); } catch { return null; }
   }, [hasProfile, profile]);
 
   const natalViewModel = useMemo(() => {
@@ -449,12 +507,236 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
     ziweiCalculation?.key === ziweiProfileKey ? ziweiCalculation.result : undefined,
   ), [profile, ziweiCalculation, ziweiProfileKey]);
 
-  // Formal report pages use the Figma-authored editorial model directly.
-  // AI narrative generation remains available for experiments, but must not
-  // silently rewrite approved product copy.
-  const presentedBaziViewModel = baziViewModel;
-  const presentedNatalViewModel = natalViewModel;
-  const presentedZiweiViewModel = ziweiViewModel;
+  const baziNarrativeInput = useMemo<NarrativeRequest | null>(() => screen === "bazi" && baziViewModel && baziOverview ? ({
+    context: "bazi",
+    slot: "hero",
+    signals: [
+      `dominant:${baziOverview.evidence.dayMaster.element}`,
+      `strongest:${baziOverview.identity.strongestLabel}`,
+    ],
+    facts: [
+      { label: "日主", value: baziOverview.identity.dayLabel },
+      { label: "主要表现", value: baziViewModel.story.summary },
+      { label: "稳定条件", value: baziViewModel.stableZone.join("；") },
+      { label: "容易消耗", value: baziViewModel.drainZone.join("；") },
+    ],
+    fallback: {
+      hook: baziViewModel.identityTitle,
+      scene: baziViewModel.identitySummary,
+      misunderstanding: baziViewModel.story.misunderstandingBody,
+      evidenceSummary: baziViewModel.basis[0]?.value || baziOverview.identity.basis,
+      action: baziViewModel.action.title,
+      nextQuestion: baziViewModel.questions[0]?.title || "什么样的环境更容易让我发挥？",
+    },
+  }) : null, [baziOverview, baziViewModel, screen]);
+
+  const natalNarrativeInput = useMemo<NarrativeRequest | null>(() => screen === "natal" && natalViewModel ? ({
+    context: "zodiac",
+    slot: "hero",
+    signals: natalViewModel.core.map((item, index) => `core${index + 1}:${item.value}`).slice(0, 3),
+    facts: [
+      { label: "人格组合", value: natalViewModel.identitySummary },
+      { label: "突出表现", value: natalViewModel.highlight.note },
+      ...natalViewModel.traits.slice(0, 3).map((item) => ({ label: item.title, value: item.note })),
+    ],
+    fallback: {
+      hook: natalViewModel.identityTitle,
+      scene: natalViewModel.identitySummary,
+      misunderstanding: natalViewModel.story.misunderstandingBody,
+      evidenceSummary: natalViewModel.warning || "依据当前档案中可确认的本命星体配置",
+      action: natalViewModel.story.actionTitle,
+      nextQuestion: natalViewModel.questions[0]?.title || "什么样的人会让我真正放松？",
+    },
+  }) : null, [natalViewModel, screen]);
+
+  const ziweiNarrativeInput = useMemo<NarrativeRequest | null>(() => screen === "ziwei" && ziweiViewModel.status === "ready" && ziweiViewModel.insight && ziweiViewModel.story ? ({
+    context: "ziwei",
+    slot: "hero",
+    signals: [
+      `ming:${ziweiViewModel.insight.evidence.mingGong || "unknown"}`,
+      ...ziweiViewModel.insight.evidence.majorStars.slice(0, 3).map((star) => `star:${star}`),
+    ],
+    facts: [
+      { label: "命宫", value: ziweiViewModel.insight.evidence.mingGong || "待确认" },
+      { label: "主要星曜", value: ziweiViewModel.insight.evidence.majorStars.join("、") || "空宫结合对宫" },
+      { label: "当前表现", value: ziweiViewModel.insight.identity.summary },
+      { label: "关系表现", value: ziweiViewModel.insight.relationship.summary },
+    ],
+    fallback: {
+      hook: ziweiViewModel.story.title,
+      scene: ziweiViewModel.story.summary,
+      misunderstanding: ziweiViewModel.story.misunderstandingBody,
+      evidenceSummary: `${ziweiViewModel.insight.evidence.mingGong || "命宫待确认"} · ${ziweiViewModel.insight.evidence.majorStars.slice(0, 3).join("、") || "宫位关系"}`,
+      action: ziweiViewModel.story.actionTitle,
+      nextQuestion: ziweiViewModel.questions?.[0]?.title || "最近，我最该把力气放在哪里？",
+    },
+  }) : null, [screen, ziweiViewModel]);
+
+  const dailyReportInput = useMemo(() => dailyInsight && hasProfile
+    ? buildDailyReportNarrativeRequest(dailyInsight, profile)
+    : null, [dailyInsight, hasProfile, profile]);
+
+  const flowReportInput = useMemo(() => screen === "bazi" && baziViewModel
+    ? buildFlowReportNarrativeRequest(baziViewModel.flow, profile)
+    : null, [baziViewModel, profile, screen]);
+
+  const ziweiReportInput = useMemo<ReportNarrativeRequest | null>(() => {
+    if (screen !== "ziwei" || ziweiViewModel.status !== "ready" || !ziweiViewModel.insight || !ziweiViewModel.story) return null;
+    const palaces = ziweiViewModel.insight.evidence.palaces;
+    return {
+      context: "ziwei",
+      reportKey: `${ziweiProfileKey}:${ziweiViewModel.insight.evidence.mingGong || "unknown"}`,
+      facts: [
+        { label: "命宫", value: ziweiViewModel.insight.evidence.mingGong || "待确认" },
+        { label: "主要星曜", value: ziweiViewModel.insight.evidence.majorStars.join("、") || "空宫结合对宫" },
+        { label: "人格结论", value: ziweiViewModel.insight.identity.summary },
+        { label: "关系结论", value: ziweiViewModel.insight.relationship.summary },
+        { label: "近期结论", value: ziweiViewModel.insight.stage.summary },
+        ...palaces.map((palace) => ({
+          label: palace.name,
+          value: `${palace.earthlyBranch}宫；${palace.majorStars.join("、") || "空宫，结合对宫观察"}${palace.isBodyPalace ? "；身宫" : ""}${palace.isOriginalPalace ? "；来因宫" : ""}`,
+        })),
+      ],
+      fallback: {
+        title: ziweiViewModel.story.title,
+        summary: ziweiViewModel.story.summary,
+        action: ziweiViewModel.story.actionTitle,
+        shareLine: ziweiViewModel.story.title,
+        questions: ziweiViewModel.questions?.slice(0, 3).map((item) => item.title) || ["最近，我最该把力气放在哪里？"],
+        sections: [
+          { id: "identity", title: "你给人的感觉", body: ziweiViewModel.insight.identity.summary },
+          { id: "relationship", title: "关系里的你", body: ziweiViewModel.insight.relationship.summary },
+          { id: "stage", title: "最近更值得留意", body: ziweiViewModel.insight.stage.summary },
+          ...palaces.map((palace, index) => ({
+            id: `palace-${index}`,
+            title: palace.name,
+            body: getZiweiPalaceFallback(palace.name, palace.majorStars),
+          })),
+        ],
+      },
+    };
+  }, [screen, ziweiProfileKey, ziweiViewModel]);
+
+  const baziEditorialInput = useMemo(() => screen === "bazi" && baziViewModel && baziOverview
+    ? buildEditorialNarrativeRequest({
+      context: "bazi",
+      reportKey: `${profile.id || profile.birthDate}:bazi:${baziOverview.evidence.dayMaster.element}`,
+      story: baziViewModel.story,
+      facts: [
+        { label: "日主", value: baziOverview.identity.dayLabel },
+        { label: "主要表现", value: baziOverview.identity.subtitle },
+        { label: "稳定条件", value: baziViewModel.stableZone.join("；") },
+        { label: "容易消耗", value: baziViewModel.drainZone.join("；") },
+      ],
+    })
+    : null, [baziOverview, baziViewModel, profile.birthDate, profile.id, screen]);
+
+  const natalEditorialInput = useMemo(() => screen === "natal" && natalViewModel
+    ? buildEditorialNarrativeRequest({
+      context: "zodiac",
+      reportKey: `${profile.id || profile.birthDate}:zodiac:${natalViewModel.core.map((item) => item.value).join("-")}`,
+      story: natalViewModel.story,
+      facts: [
+        { label: "人格组合", value: natalViewModel.identitySummary },
+        { label: "突出表现", value: natalViewModel.highlight.note },
+        ...natalViewModel.traits.slice(0, 5).map((item) => ({ label: item.title, value: item.note })),
+      ],
+    })
+    : null, [natalViewModel, profile.birthDate, profile.id, screen]);
+
+  const baziNarrative = useNarrativeResponse(baziNarrativeInput);
+  const natalNarrative = useNarrativeResponse(natalNarrativeInput);
+  const ziweiNarrative = useNarrativeResponse(ziweiNarrativeInput);
+  const dailyReportNarrative = useReportNarrative(dailyReportInput);
+  const flowReportNarrative = useReportNarrative(flowReportInput);
+  const ziweiReportNarrative = useReportNarrative(ziweiReportInput);
+  const baziEditorialNarrative = useReportNarrative(baziEditorialInput);
+  const natalEditorialNarrative = useReportNarrative(natalEditorialInput);
+
+  const presentedDailyInsight = useMemo(() => {
+    if (!dailyInsight || dailyReportNarrative?.source !== "api") return dailyInsight;
+    return applyDailyReportNarrative(dailyInsight, dailyReportNarrative);
+  }, [dailyInsight, dailyReportNarrative]);
+
+  const presentedBaziViewModel = useMemo(() => {
+    if (!baziViewModel) return baziViewModel;
+    const card = baziNarrative?.source === "api" ? baziNarrative.card : null;
+    const presented = card ? {
+      ...baziViewModel,
+      identityTitle: card.hook,
+      identitySummary: card.scene,
+      story: {
+        ...baziViewModel.story,
+        title: card.hook,
+        summary: card.scene,
+        misunderstandingBody: card.misunderstanding || baziViewModel.story.misunderstandingBody,
+        actionTitle: card.action,
+      },
+      action: { ...baziViewModel.action, title: card.action },
+    } : baziViewModel;
+    const generatedStory = baziEditorialNarrative?.source === "api"
+      ? applyEditorialNarrative(presented.story, baziEditorialNarrative)
+      : null;
+    const withEditorial = generatedStory
+      ? {
+        ...presented,
+        story: generatedStory,
+        identityTitle: baziEditorialNarrative?.bundle.title || presented.identityTitle,
+        identitySummary: baziEditorialNarrative?.bundle.summary || presented.identitySummary,
+        action: { ...presented.action, title: generatedStory.actionTitle, note: generatedStory.actionNote },
+      }
+      : presented;
+    return flowReportNarrative?.source === "api"
+      ? { ...withEditorial, flow: applyFlowReportNarrative(withEditorial.flow, flowReportNarrative) }
+      : withEditorial;
+  }, [baziEditorialNarrative, baziNarrative, baziViewModel, flowReportNarrative]);
+
+  const presentedNatalViewModel = useMemo(() => {
+    if (!natalViewModel) return natalViewModel;
+    const card = natalNarrative?.source === "api" ? natalNarrative.card : null;
+    const presented = card ? {
+      ...natalViewModel,
+      identityTitle: card.hook,
+      identitySummary: card.scene,
+      story: {
+        ...natalViewModel.story,
+        title: card.hook,
+        summary: card.scene,
+        misunderstandingBody: card.misunderstanding || natalViewModel.story.misunderstandingBody,
+        actionTitle: card.action,
+      },
+    } : natalViewModel;
+    if (natalEditorialNarrative?.source !== "api") return presented;
+    return {
+      ...presented,
+      story: applyEditorialNarrative(presented.story, natalEditorialNarrative),
+      identityTitle: natalEditorialNarrative?.bundle.title || presented.identityTitle,
+      identitySummary: natalEditorialNarrative?.bundle.summary || presented.identitySummary,
+    };
+  }, [natalEditorialNarrative, natalNarrative, natalViewModel]);
+
+  const presentedZiweiViewModel = useMemo(() => {
+    if (ziweiViewModel.status !== "ready" || !ziweiViewModel.story) return ziweiViewModel;
+    const card = ziweiNarrative?.source === "api" ? ziweiNarrative.card : null;
+    const reportBundle = ziweiReportNarrative?.source === "api" ? ziweiReportNarrative.bundle : null;
+    const palaceNarratives = reportBundle && ziweiViewModel.insight
+      ? Object.fromEntries(ziweiViewModel.insight.evidence.palaces.map((palace, index) => [
+        palace.name,
+        reportBundle.sections.find((item) => item.id === `palace-${index}`)?.body || "",
+      ]).filter((item) => Boolean(item[1])))
+      : undefined;
+    return {
+      ...ziweiViewModel,
+      palaceNarratives,
+      story: {
+        ...ziweiViewModel.story,
+        title: reportBundle?.title || card?.hook || ziweiViewModel.story.title,
+        summary: reportBundle?.summary || card?.scene || ziweiViewModel.story.summary,
+        misunderstandingBody: card?.misunderstanding || ziweiViewModel.story.misunderstandingBody,
+        actionTitle: reportBundle?.action || card?.action || ziweiViewModel.story.actionTitle,
+      },
+    };
+  }, [ziweiNarrative, ziweiReportNarrative, ziweiViewModel]);
 
   // ── Tool status sheet state ──
   const [toolStatusOpen, setToolStatusOpen] = useState(false);
@@ -480,7 +762,7 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
   const fallbackHomeQuestions: Question[] = [
     {
       id: "home-main",
-      source: "来自生辰结构 · 仅供自我观察",
+      source: "来自你的生辰信息",
       title: "你最近总觉得自己想多了，但那个直觉其实是对的",
       answer: "你不是想得太多，而是习惯先把关系里的细节接住。真正让你累的，通常不是敏感本身，而是迟迟没有确认边界。",
       observations: [
@@ -489,7 +771,7 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
         "注意你每次说「没关系」的时候，内心是否真的觉得没关系",
       ],
       action: "找一件你一直「差不多接受」的事，用一句话写下你真正的感受。不需要给别人看，只是说清楚给自己。",
-      boundary: "以上内容来自命理结构的参考解读，用于辅助自我观察，不代表任何预测或判断。",
+      boundary: "这是一种理解自己的角度，不预测具体事件，也不替你作决定。",
     },
   ];
 
@@ -507,56 +789,50 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
     else if (navActive === 2) setScreen("tools-hub");
     else setScreen("home");
   }
-  const homeQuestions: Question[] = !hasProfile ? fallbackHomeQuestions : buildMobileQuestions("home", profile).map((item) => ({
-      id: item.id,
-      source: item.source,
-      title: item.prompt,
-      answer: item.interpretation,
-      observations: [item.observation],
-      action: item.action,
-      boundary: "以上内容用于结构化自我观察，不代表事件预测，也不替代现实判断。",
-    }));
+  const homeQuestions: Question[] = !hasProfile
+    ? fallbackHomeQuestions
+    : buildMobileQuestions("home", profile).map(toFigmaQuestion);
   const activePosterQuestion = sheetQuestions[sheetIndex] || homeQuestions[0];
   const posterContent: Partial<Record<PosterContentType, PosterContent>> = {
     "今日提醒": {
-      title: dailyInsight?.title || "先建立档案，再看今天的行动节奏",
-      body: dailyInsight?.summary || "玄枢只展示能够从当前资料中得到的结构观察，不补写未知信息。",
-      tags: dailyInsight ? [dailyInsight.keyword, dailyInsight.suitable, dailyInsight.avoid].filter(Boolean).slice(0, 3) : ["结构化观察", "行动建议"],
+      title: presentedDailyInsight?.shareLine || presentedDailyInsight?.title || "先建立档案，再看看今天的你",
+      body: presentedDailyInsight ? `${presentedDailyInsight.summary} ${presentedDailyInsight.oneAction}` : "资料完整后，这里会留下一句真正和你今天有关的话。",
+      tags: presentedDailyInsight ? [presentedDailyInsight.keyword, presentedDailyInsight.suitable, presentedDailyInsight.avoid].filter(Boolean).slice(0, 3) : ["今天的重点", "可以做的一步"],
       accent: "#6BBFA0",
       accentLight: "rgba(107,191,160,0.15)",
     },
     "人格结论": {
-      title: presentedBaziViewModel?.identityTitle || "当前生辰结构尚未生成",
-      body: presentedBaziViewModel?.identitySummary || "完成出生档案后，这里会展示可以回到生活里验证的行为倾向。",
-      tags: presentedBaziViewModel?.tags.slice(0, 3) || ["生辰结构", "自我观察"],
+      title: presentedBaziViewModel?.identityTitle || "先认识那个不常说出口的自己",
+      body: presentedBaziViewModel?.identitySummary || "完成出生档案后，看看你在关系、工作和决定里最常出现的样子。",
+      tags: presentedBaziViewModel?.tags.slice(0, 3) || ["关于你", "真实需要"],
       accent: "#C0ACDE",
       accentLight: "rgba(192,172,222,0.15)",
     },
     "流盘观察": {
-      title: baziViewModel?.flow.poster.title || "当前流盘尚未生成",
-      body: baziViewModel?.flow.poster.body || "完成出生档案后，再查看时间结构与本命方式的关系。",
+      title: baziViewModel?.flow.poster.title || "最近这段时间，什么更值得你用力",
+      body: baziViewModel?.flow.poster.body || "完成出生档案后，看看当下更适合推进、等待，还是先把一件事收尾。",
       tags: baziViewModel?.flow.poster.tags.slice(0, 3) || ["流年", "流月", "行动节奏"],
       accent: "#E8816A",
       accentLight: "rgba(232,129,106,0.15)",
     },
     "星座能量": {
-      title: presentedNatalViewModel?.identityTitle || "当前星盘结构尚未生成",
+      title: presentedNatalViewModel?.identityTitle || "你在别人眼里，和心里的自己不太一样",
       body: presentedNatalViewModel?.identitySummary || "补充出生日期后，可以查看星体位置与人格组合。",
-      tags: presentedNatalViewModel?.core.map((item) => item.title).slice(0, 3) || ["本命星盘", "结构观察"],
+      tags: presentedNatalViewModel?.core.map((item) => item.title).slice(0, 3) || ["太阳", "月亮", "上升"],
       accent: "#7BBDE0",
       accentLight: "rgba(123,189,224,0.15)",
     },
     "紫微观察": {
-      title: presentedZiweiViewModel.insight?.identity.title || "紫微结构尚未生成",
+      title: presentedZiweiViewModel.story?.title || presentedZiweiViewModel.insight?.identity.title || "你最近的力气，都花到哪里去了？",
       body: presentedZiweiViewModel.insight?.identity.summary || "紫微需要准确出生时辰与明确性别；资料不足时不会使用默认时辰补盘。",
       tags: presentedZiweiViewModel.insight?.identity.tags.slice(0, 3) || ["紫微斗数", "资料边界"],
       accent: "#D4A054",
       accentLight: "rgba(212,160,84,0.15)",
     },
     "问题解读": {
-      title: activePosterQuestion?.title || "从一个具体问题开始观察",
-      body: activePosterQuestion?.answer || "问题解读会同时保留结构来源、可观察表现与行动建议。",
-      tags: ["自我观察", "问题解读", profile.name || "当前档案"],
+      title: activePosterQuestion?.title || "有件事想不明白，就从这里说起",
+      body: activePosterQuestion?.answer || "先回应你真正卡住的地方，再给一件现在就能做的小事。",
+      tags: ["换个角度", "说清楚", profile.name || "当前档案"],
       accent: "#E8816A",
       accentLight: "rgba(232,129,106,0.15)",
     },
@@ -567,26 +843,26 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
   function goToPersonality() {
     openToolStatus({
       name: "性格测试",
-      statusLabel: "内容校准中",
+      statusLabel: "暂未开放",
       statusColor: "#7BBDE0",
-      description: "页面结构已经完成，题目、计分规则和结果解释还在校准。现在不会用示例人物或通用结论冒充你的测试结果。",
+      description: "性格测试暂时还不能使用。想先了解自己的性格和相处方式，可以查看生辰或星盘报告。",
     });
   }
   function goToNatalReport() { router.push("/m/report/zodiac"); }
   function goToNatalTool()   { router.push("/m/chart"); }
   function goToFlow()        { router.push("/m/report/flow"); }
   function goToZiwei()       { router.push("/m/report/ziwei"); }
+  function goToChat()        { router.push("/m/chat"); }
   function goToReportHub()      { router.push("/m/report"); }
   function goToCombinedInsight() {
     openToolStatus({
       name: "高阶合参",
-      statusLabel: "证据引擎接入中",
+      statusLabel: "暂未开放",
       statusColor: "#8060C0",
-      description: "八字与紫微的真实证据已经具备，奇门引擎、结论权重和体系冲突处理尚未接通。完整链路可追溯前，不展示模拟的高阶结论。",
+      description: "高阶合参暂时还不能使用。你可以先分别查看生辰、紫微和近期节奏，再把具体问题交给玄枢问答。",
     });
   }
   function goHome()          { navigateTo(0); }
-  function goToUIStates()    { setScreen("ui-states"); }
   function goToWelcome()     { setScreen("welcome"); }
   function goToCreateProfile() { setScreen("create-profile"); }
   function goToGenerating(data: ProfileFormData) {
@@ -645,9 +921,9 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
           <div style={{ position: "absolute", inset: 0, zIndex: 10 }}>
             <ReportHubScreen
               profileName={profile.name || "当前档案"}
-              baziSummary={baziViewModel ? `${baziViewModel.headerMeta} · ${baziViewModel.strongestLabel}相对突出` : "生辰资料待生成"}
-              natalSummary={natalViewModel ? natalViewModel.core.map((item) => item.title).join(" · ") : "星盘资料待生成"}
-              ziweiSummary={profile.birthTimeKnown && profile.gender !== "other" ? "出生资料完整，可查看十二宫结构" : "需要准确时辰与性别才能排盘"}
+              baziSummary={baziViewModel?.identityTitle || "完成档案后，看看你最常出现的决定和相处方式"}
+              natalSummary={natalViewModel?.identityTitle || "看看别人眼里的你，和心里的自己有什么不同"}
+              ziweiSummary={ziweiViewModel.story?.title || (profile.birthTimeKnown && profile.gender !== "other" ? "看看最近的力气都花到了哪里" : "还差准确时辰与性别，才能继续看十二宫")}
               hasExactTime={profile.birthTimeKnown && profile.gender !== "other"}
               onBack={goHome}
               onOpenSwitcher={() => setSwitcherOpen(true)}
@@ -671,8 +947,10 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
               onGoToComp={goToComp}
               onGoToNatal={goToNatalTool}
               onGoToPersonality={goToPersonality}
+              onGoToChat={goToChat}
               onOpenToolStatus={openToolStatus}
               onGoToCombinedInsight={goToCombinedInsight}
+              onGoToRecords={() => router.push("/m/compatibility/history")}
             />
             <BottomNav active={navActive} onChange={navigateTo} />
           </div>
@@ -692,15 +970,6 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
             <BaziScreen viewModel={presentedBaziViewModel} initialTab={initialBaziTab} onBack={goBackFromDetail} onOpenSheet={openSheet}
               onSharePoster={() => openPoster("人格结论")}
               onShareFlowPoster={() => openPoster("流盘观察")} />
-            <BottomNav active={navActive} onChange={navigateTo} />
-          </div>
-        )}
-
-        {/* Compatibility screen */}
-        {activeScreen === "comp" && (
-          <div style={{ position: "absolute", inset: 0, zIndex: 10 }}>
-            <CompatibilityScreen onBack={goBackFromDetail} onOpenSheet={openSheet}
-              onSharePoster={() => openPoster("问题解读")} />
             <BottomNav active={navActive} onChange={navigateTo} />
           </div>
         )}
@@ -740,7 +1009,12 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
               onOpenSwitcher={() => setSwitcherOpen(true)}
               onOpenLoginInfo={() => setLoginInfoOpen(true)}
               onWelcome={goToWelcome}
-              onUIStates={goToUIStates}
+              onGoToReports={goToReportHub}
+              onGoToCompatibilityHistory={() => router.push("/m/compatibility/history")}
+              onGoToPrivacy={() => router.push("/privacy")}
+              onGoToTerms={() => router.push("/terms")}
+              onGoToAbout={() => router.push("/about")}
+              accountName={account?.name}
             />
             <BottomNav active={navActive} onChange={navigateTo} />
           </div>
@@ -846,7 +1120,7 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
                   background: "rgba(232,129,106,0.11)", border: "1px solid rgba(232,129,106,0.22)",
                   fontSize: 10.5, color: "#D06A56", fontFamily: "'Noto Sans SC', sans-serif",
                 }}>
-                  {baziOverview?.identity.basis.replace("依据：", "").split(" · ").slice(0, 2).join(" · ") || "资料准备中"}
+                  {baziOverview ? `${baziOverview.identity.dayLabel}日主 · ${baziOverview.identity.strongestLabel}相对突出` : "资料准备中"}
                 </div>
               </div>
 
@@ -855,7 +1129,7 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
                 fontSize: 21, fontFamily: "'Noto Serif SC', serif", fontWeight: 700,
                 color: "#28253D", lineHeight: 1.50, marginBottom: 10,
               }}>
-                {dailyInsight?.title || "先建立一份档案，再看今天更适合怎么安排"}
+                {presentedDailyInsight?.title || "先建立一份档案，再看今天更适合怎么安排"}
               </div>
 
               {/* Supporting paragraph — 2 lines */}
@@ -863,7 +1137,7 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
                 fontSize: 13.5, fontFamily: "'Noto Sans SC', sans-serif",
                 color: "#4A4168", lineHeight: 1.65, marginBottom: 20,
               }}>
-                {dailyInsight?.summary || "出生资料只保存在当前设备。完成后，玄枢会把结构翻译成可观察的生活线索。"}
+                {presentedDailyInsight?.summary || "出生资料会先保存在这台设备。填写完成后，从一件与你今天有关的事开始看。"}
               </div>
 
               {/* Orbit + element chips side by side */}
@@ -957,13 +1231,13 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
           {/* ── Secondary observation chips ── */}
           <div style={{ padding: "0 18px 22px", display: "flex", gap: 11 }}>
             <ObservationChip
-              label="关系观察"
-              text={dailyInsight ? `今天适合：${dailyInsight.suitable}` : "完成档案后，这里会显示与你当前节奏有关的观察。"}
+              label="工作上"
+              text={presentedDailyInsight?.workNote || "完成档案后，看看今天更适合推进、收尾，还是先缓一缓。"}
               accent="#6BBFA0"
             />
             <ObservationChip
-              label="节律提示"
-              text={dailyInsight ? `暂时少做：${dailyInsight.avoid}` : "不做事件预测，只给可以回到生活里验证的提示。"}
+              label="关系里"
+              text={presentedDailyInsight?.relationshipNote || "完成档案后，看看关系里哪句话更值得说清楚。"}
               accent="#7BBDE0"
             />
           </div>
@@ -980,7 +1254,7 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
               <ReportEntry
                 icon="🏮"
                 title="生辰八字"
-                subtitle={baziOverview ? `${baziOverview.identity.dayPillar}日柱 · ${baziOverview.identity.strongestLabel}为结构重心` : "完成档案后生成真实结构"}
+                subtitle={presentedBaziViewModel?.tags.slice(0, 2).join(" · ") || "看看你做决定和进入关系时最常出现的样子"}
                 tag="已解读"
                 gradient="linear-gradient(135deg, #F5C4B8, #FFEDEA)"
                 onClick={goToBazi}
@@ -988,7 +1262,7 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
               <ReportEntry
                 icon="✦"
                 title="本命星盘"
-                subtitle={zodiacOverview?.identity.title || "完成时间与地点后生成完整星盘"}
+                subtitle={presentedNatalViewModel?.story.tags.slice(0, 2).join(" · ") || "看看别人眼里的你，和心里的自己有什么不同"}
                 tag="新内容"
                 gradient="linear-gradient(135deg, #C6E2F5, #E6F3FC)"
                 onClick={goToNatalReport}
@@ -1093,7 +1367,11 @@ export default function App({ initialScreen = "home", initialBaziTab = 0 }: { in
         {/* ── Login info sheet ── */}
         <LoginInfoSheet
           open={loginInfoOpen}
+          account={account}
           onClose={() => setLoginInfoOpen(false)}
+          onAuthenticated={handleAuthenticated}
+          onSync={syncCurrentProfile}
+          onLogout={logoutAccount}
         />
 
         {/* ── Question Insight Sheet (renders over all screens) ── */}

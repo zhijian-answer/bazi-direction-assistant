@@ -29,6 +29,11 @@ export type MobileChatAnswer = {
   limitations: string[];
   suggestions: string[];
   poster: SharePosterData;
+  delivery: {
+    source: "api" | "local" | "fallback";
+    provider?: string;
+    model?: string;
+  };
 };
 
 export const mobileChatStarters = [
@@ -143,7 +148,7 @@ export async function buildMobileChatAnswer(profile: MobileProfile, question: st
       system: "紫微",
       label: `${ziwei.evidence.mingGong || "命宫待确认"} · ${ziwei.evidence.shenGong || "身宫待确认"}`,
       value: ziwei.identity.tags.join(" · "),
-      detail: `${ziwei.evidence.majorStars.join("、") || "空宫结合对宫观察"}；当前阶段为${ziwei.stage.rangeLabel}。`,
+      detail: `${ziwei.evidence.majorStars.join("、") || "空宫结合对宫观察"}；近期运限为${ziwei.stage.rangeLabel}。`,
       engine: `${ziwei.evidence.engine}@${ziwei.evidence.engineVersion}`,
     });
   }
@@ -188,11 +193,11 @@ export async function buildMobileChatAnswer(profile: MobileProfile, question: st
   const poster: SharePosterData = {
     id,
     category: "question",
-    eyebrow: "玄枢 · 结构化问题解读",
+    eyebrow: "玄枢 · 这件事怎么看",
     title,
     body: `${summary} ${action}`,
-    tags: [evidence[0].system, evidence[1].system, category === "relationship" ? "关系观察" : category === "career" ? "工作节奏" : "行动建议"],
-    footer: "来自当前档案的可追溯依据，仅供自我观察",
+    tags: [evidence[0].system, evidence[1].system, category === "relationship" ? "关系里" : category === "career" ? "工作上" : "今天的一步"],
+    footer: "来自当前档案的可追溯依据，只提供一个观察角度",
     tone: category === "relationship" ? "coral" : category === "emotion" ? "sage" : "ink",
   };
   const evidenceTrace = adaptMobileChatEvidence(evidence, category, limitations);
@@ -210,5 +215,6 @@ export async function buildMobileChatAnswer(profile: MobileProfile, question: st
     limitations,
     suggestions: suggestionMap[category],
     poster,
+    delivery: { source: "local" },
   };
 }

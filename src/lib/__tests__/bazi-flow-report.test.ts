@@ -97,7 +97,11 @@ describe("daily structural observation", () => {
     expect(repeated).toEqual(first);
     expect(nextDay.id).not.toBe(first.id);
     expect(nextDay.tags[0]).not.toBe(first.tags[0]);
-    expect(first.summary).toContain("不是事件预测");
+    expect(first.workNote.length).toBeGreaterThan(8);
+    expect(first.relationshipNote.length).toBeGreaterThan(8);
+    expect(first.oneAction.length).toBeGreaterThan(8);
+    expect(first.evidenceLabel).toContain("日");
+    expect(first.shareLine.length).toBeGreaterThan(8);
   });
 
   it("includes the selected profile's calculated day pillar", () => {

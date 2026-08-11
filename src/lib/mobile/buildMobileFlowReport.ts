@@ -23,11 +23,11 @@ type FlowStyle = {
 
 function styleFor(dayElement: ElementKey, flowStem: string): FlowStyle {
   const flowElement = stemElement[flowStem] || dayElement;
-  if (flowElement === dayElement) return { key: "same", theme: "同频 · 守主线", title: "同频力量变强，更适合把主线做完整", note: "熟悉的做事方式更容易被调用，关键是把力量集中到一个能完成的结果。", suitable: "推进主线、复盘方法、完成承诺", caution: "同时开启太多相似任务" };
-  if (generates[flowElement] === dayElement) return { key: "support", theme: "承接 · 用支持", title: "外部支持更明显，先接住已有资源", note: "当前结构更容易获得信息、协作或恢复空间，适合把已有支持转成实际进展。", suitable: "学习、协作、整理资源", caution: "只准备而迟迟不行动" };
-  if (generates[dayElement] === flowElement) return { key: "output", theme: "表达 · 看结果", title: "表达与输出增加，也要守住完成边界", note: "想推进、沟通和展示的事情会变多。先定义完成标准，能减少只开头不收尾。", suitable: "沟通、展示、交付阶段成果", caution: "把精力平均分给所有机会" };
-  if (controls[dayElement] === flowElement) return { key: "manage", theme: "取舍 · 定边界", title: "取舍任务比继续加码更重要", note: "当前更适合管理资源、确认优先级，把时间留给真正能形成回报的事情。", suitable: "预算、排期、谈清责任", caution: "因为短期热度追加投入" };
-  return { key: "pressure", theme: "减压 · 留余地", title: "外部要求变多，先降低并行任务", note: "压力并不等于结果不好，但更需要留出确认、恢复和复盘空间。", suitable: "守住底线、减少并行、补足信息", caution: "在信息不足时仓促承诺" };
+  if (flowElement === dayElement) return { key: "same", theme: "同频 · 收拢", title: "熟悉的节奏回来了，适合把一件事做完整", note: "今天不是没有力气，而是容易同时照顾太多方向。把注意力收回来，完成一个结果，比继续开新头更重要。", suitable: "收尾、复盘、兑现承诺", caution: "同时开启太多相似任务" };
+  if (generates[flowElement] === dayElement) return { key: "support", theme: "承接 · 借力", title: "有人愿意搭把手，别急着什么都自己扛", note: "信息、协作或一句及时的提醒，都可能补上你卡住的地方。接住帮助以后，再决定怎么走，会比一个人反复琢磨更省力。", suitable: "请教、协作、整理资源", caution: "只准备却迟迟不行动" };
+  if (generates[dayElement] === flowElement) return { key: "output", theme: "表达 · 落地", title: "想说的话变多了，先说最重要的那一句", note: "沟通和行动的冲动会更明显。先把最想表达的内容说清楚，再做出一个看得见的结果，别让热情散在太多开头里。", suitable: "沟通、展示、交付结果", caution: "把精力平均分给所有机会" };
+  if (controls[dayElement] === flowElement) return { key: "manage", theme: "取舍 · 留白", title: "今天更重要的是取舍，不是继续加码", note: "时间、钱和注意力都有限。先看什么值得留下，再决定要不要投入更多，会比跟着短期热度走更稳。", suitable: "排期、预算、说清责任", caution: "因为舍不得投入而继续加码" };
+  return { key: "pressure", theme: "减压 · 缓一缓", title: "外面的要求有点多，先别把每件事都接住", note: "压力不代表事情会变坏，但人在绷紧的时候更容易仓促答应。先减掉一件不必今天处理的事，答案会清楚很多。", suitable: "守住底线、减少并行、补齐信息", caution: "信息不够时仓促承诺" };
 }
 
 function flowGanZhi(at: Date) {
@@ -37,6 +37,14 @@ function flowGanZhi(at: Date) {
 
 function shiftedMonth(at: Date, offset: number) {
   return new Date(at.getFullYear(), at.getMonth() + offset, Math.min(at.getDate(), 28), 12, 0, 0);
+}
+
+function noteForMonth(style: FlowStyle, offset: number) {
+  const firstStep = style.suitable.split("、")[0];
+  if (offset < 0) return `回看上个月，重点是把已经开始的事情收住。如果仍有没处理完的部分，可以先从${firstStep}开始补齐。`;
+  if (offset === 0) return style.note;
+  if (offset === 1) return `下个月更适合把注意力放在${firstStep}。先做出一个看得见的结果，再决定要不要扩大投入。`;
+  return `再往后看，节奏会从准备转向落实。保留必要的余地，也别让“${style.caution}”拖慢真正重要的事。`;
 }
 
 export function buildMobileFlowReport(profile: MobileProfile, at = new Date()) {
@@ -66,13 +74,13 @@ export function buildMobileFlowReport(profile: MobileProfile, at = new Date()) {
       month: monthNames[date.getMonth()],
       stem: ganZhi,
       theme: style.theme,
-      note: style.note,
+      note: noteForMonth(style, offset),
       isCurrent: offset === 0,
     };
   });
   const dateLabel = `${at.getMonth() + 1}月${at.getDate()}日 ${weekdays[at.getDay()]} · 今日流盘`;
   const title = currentStyle.title;
-  const summary = `当前流月为${current.month}，${currentStyle.note}流盘描述的是时间结构与本命方式的关系，不保证具体事件。`;
+  const summary = `这个月进入${current.month}，更适合围绕“${currentStyle.theme.replace(" · ", "和")}”安排轻重缓急。先看哪些事值得推进，哪些可以暂缓；这不是对具体事件的预测。`;
   const poster: SharePosterData = {
     id: `flow-${at.getFullYear()}-${at.getMonth() + 1}`,
     category: "daily",
@@ -80,7 +88,7 @@ export function buildMobileFlowReport(profile: MobileProfile, at = new Date()) {
     title,
     body: `${currentStyle.note}今天先完成一件能产生反馈的关键任务。`,
     tags: [current.month, currentStyle.theme, `本命${chart.pillars.day}`],
-    footer: "玄枢 · 流盘结构观察",
+    footer: "玄枢 · 近期节奏",
     tone: "warm",
   };
   const question: QuestionInsightData = {
@@ -114,6 +122,7 @@ export function buildMobileFlowReport(profile: MobileProfile, at = new Date()) {
       caution: currentStyle.caution,
     },
     daily: {
+      key: dailyStyle.key,
       ganZhi: current.day,
       theme: dailyStyle.theme,
       title: dailyStyle.title,

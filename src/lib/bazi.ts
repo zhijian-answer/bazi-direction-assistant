@@ -271,7 +271,7 @@ export function buildBaziChart(input: BaziChartInput): BaziChart {
     ...(!birthTimeKnown ? ["出生时辰未知：仅计算年、月、日三柱，不生成时柱与大运结论。"] : []),
     ...(!hasDirectionGender ? ["排盘所需性别未明确：不生成大运顺逆与相关阶段结论。"] : []),
     ...(!input.timezone ? ["未提供出生地时区：当前按输入的当地日期和时间直接排盘。"] : []),
-    ...(Number.isFinite(input.longitude) ? ["当前八字主引擎尚未应用真太阳时修正。"] : []),
+    ...(Number.isFinite(input.longitude) ? ["出生地已记录；本次时柱仍按填写的北京时间计算，尚未按出生地换算当地太阳时。"] : []),
   ];
 
   return {

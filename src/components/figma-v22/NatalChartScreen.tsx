@@ -30,7 +30,7 @@ function sectorPath(cx: number, cy: number, ri: number, ro: number, a1: number, 
 }
 
 // ─── NatalChartWheel ──────────────────────────────────────────────────────────
-function NatalChartWheel({ planets, aspects }: { planets: FigmaNatalPlanet[]; aspects: FigmaNatalViewModel["aspects"] }) {
+export function NatalChartWheel({ planets, aspects }: { planets: FigmaNatalPlanet[]; aspects: FigmaNatalViewModel["aspects"] }) {
   const W = 340, H = 290;
   const cx = 170, cy = 147;
 
@@ -220,9 +220,9 @@ function NatalChartWheel({ planets, aspects }: { planets: FigmaNatalPlanet[]; as
 }
 
 // ─── Glass card wrapper ────────────────────────────────────────────────────────
-function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+export function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <div role="tablist" aria-label="星盘报告视图" style={{
+    <div style={{
       borderRadius: 22,
       background: "rgba(255,255,255,0.72)",
       backdropFilter: "blur(22px) saturate(180%)",
@@ -237,13 +237,13 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
 }
 
 // ─── Segmented control ────────────────────────────────────────────────────────
-function Segment({ tabs, active, onChange }: {
+export function Segment({ tabs, active, onChange }: {
   tabs: string[];
   active: number;
   onChange: (i: number) => void;
 }) {
   return (
-    <div style={{
+    <div role="tablist" aria-label="星盘报告视图" style={{
       display: "flex", gap: 4,
       padding: "4px",
       borderRadius: 16,
@@ -252,7 +252,7 @@ function Segment({ tabs, active, onChange }: {
     }}>
       {tabs.map((tab, i) => (
         <button type="button" role="tab" aria-selected={active === i} key={tab} onClick={() => onChange(i)} style={{
-          flex: 1, padding: "7px 4px",
+          flex: 1, minHeight: 44, padding: "7px 4px",
           borderRadius: 12,
           border: "none",
           background: active === i
@@ -395,7 +395,7 @@ function OverviewTab({ onOpenSheet, onSharePoster, viewModel }: {
       <Card style={{ padding: "20px 20px 18px", marginBottom: 14,
         background: "linear-gradient(145deg, rgba(123,189,224,0.12), rgba(255,255,255,0.78))" }}>
         <div style={{ fontSize: 10, color: "#7BBDE0", fontFamily: "'Noto Sans SC', sans-serif", fontWeight: 500, marginBottom: 10, letterSpacing: "0.08em" }}>
-          你是谁
+          熟悉以后才会发现
         </div>
         <div style={{ fontSize: 17, fontFamily: "'Noto Serif SC', serif", fontWeight: 700, color: "#28253D", lineHeight: 1.55 }}>
           {viewModel.identityTitle}<br />
@@ -457,7 +457,7 @@ function OverviewTab({ onOpenSheet, onSharePoster, viewModel }: {
       {/* Four energy dimensions */}
       <Card style={{ padding: "18px 18px 18px", marginBottom: 14 }}>
         <div style={{ fontSize: 12, fontFamily: "'Noto Serif SC', serif", fontWeight: 500, color: "#28253D", marginBottom: 16 }}>
-          能量分布
+          四种性格倾向
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {viewModel.peaks.map((peak, index) => (
@@ -625,6 +625,29 @@ function HousesTab({ houses, isPartial, warning }: { houses: FigmaNatalViewModel
   );
 }
 
+const aspectCopy: Record<string, { label: string; description: string }> = {
+  conjunction: {
+    label: "合相",
+    description: "这两部分常会一起出现，感受和行动容易互相放大。用得顺时很集中，紧绷时也容易只看见一种答案。",
+  },
+  sextile: {
+    label: "六合相",
+    description: "这两部分容易互相提供机会，但通常需要你主动迈出一步，优势才会真正发挥出来。",
+  },
+  square: {
+    label: "刑相",
+    description: "这两部分容易互相拉扯。它不代表一定不好，而是在提醒你：遇到压力时，内心可能会同时出现两种不同需要。",
+  },
+  trine: {
+    label: "拱相",
+    description: "这两部分配合得比较自然，很多反应几乎不需要刻意练习。也因此，优势有时会被你当成理所当然。",
+  },
+  opposition: {
+    label: "冲相",
+    description: "这两部分像站在同一条线的两端。真正的课题不是选一边，而是学会在不同情境里找到平衡。",
+  },
+};
+
 // ─── 相位 Tab ─────────────────────────────────────────────────────────────────
 function AspectsTab({ aspects, planets }: { aspects: FigmaNatalViewModel["aspects"]; planets: FigmaNatalPlanet[] }) {
   return (
@@ -635,6 +658,10 @@ function AspectsTab({ aspects, planets }: { aspects: FigmaNatalViewModel["aspect
       {aspects.map((a, i) => {
         const p1 = planets.find(p => p.key === a.point1)!;
         const p2 = planets.find(p => p.key === a.point2)!;
+        const copy = aspectCopy[a.type] || {
+          label: "相位",
+          description: "这两部分会互相影响。它提供的是一种观察线索，需要结合你的真实经历一起理解。",
+        };
         return (
           <Card key={i} style={{ padding: "16px 16px 14px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
@@ -655,7 +682,7 @@ function AspectsTab({ aspects, planets }: { aspects: FigmaNatalViewModel["aspect
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontFamily: "'Noto Serif SC', serif", fontWeight: 600, color: "#28253D" }}>
-                  {p1.name} {a.type} {p2.name}
+                  {p1.name}与{p2.name} · {copy.label}
                 </div>
                 <div style={{ fontSize: 10.5, color: "#9088A8", fontFamily: "'Noto Sans SC', sans-serif", marginTop: 2 }}>
                   容许度 {a.orb}
@@ -667,11 +694,11 @@ function AspectsTab({ aspects, planets }: { aspects: FigmaNatalViewModel["aspect
                 border: "1px solid rgba(123,189,224,0.42)",
                 fontSize: 10.5, fontFamily: "'Noto Sans SC', sans-serif", color: "#5A5272",
               }}>
-                {a.type}
+                {copy.label}
               </div>
             </div>
             <div style={{ fontSize: 12.5, fontFamily: "'Noto Sans SC', sans-serif", color: "#4A4168", lineHeight: 1.68 }}>
-              这个相位描述两种心理功能之间的连接方式。它提供观察线索，不直接等于具体事件或固定性格。
+              {copy.description}
             </div>
           </Card>
         );
@@ -709,7 +736,7 @@ export default function NatalChartScreen({ onBack, onOpenSheet, onSharePoster, v
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
           <button onClick={onBack} style={{
-            width: 34, height: 34, borderRadius: "50%",
+            width: 44, height: 44, borderRadius: "50%",
             background: "rgba(255,255,255,0.80)",
             backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
             border: "1px solid rgba(123,189,224,0.28)",

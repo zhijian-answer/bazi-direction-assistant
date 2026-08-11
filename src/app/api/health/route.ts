@@ -10,14 +10,15 @@ export async function GET() {
     time: new Date().toISOString(),
     ai_mode: getAiMode(),
     ai: {
+      provider: aiConfig.provider,
       model: aiConfig.model,
-      has_openai_key: aiConfig.hasOpenAIKey,
+      has_api_key: aiConfig.hasApiKey,
       force_local: aiConfig.forceLocal,
       fallback_on_error: aiConfig.fallbackOnError,
-      openai_timeout_ms: aiConfig.openaiTimeoutMs,
+      timeout_ms: aiConfig.timeoutMs,
     },
     data_store: process.env.APP_DATA_DIR || "./data",
     limits: appLimits,
-    version: process.env.APP_VERSION || "0.1.0",
+    version: process.env.APP_VERSION || "1.0.0",
   });
 }
